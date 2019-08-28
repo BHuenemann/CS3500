@@ -8,14 +8,12 @@ namespace Lab2
 {
     class Program
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="args"></param>
         static void Main(string[] args)
         {
-            
-            Console.WriteLine("Why not");
+            if (true)
+            {
+                Console.WriteLine("Why not");
+            }
         }
     }
 }
