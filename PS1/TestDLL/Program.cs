@@ -53,7 +53,7 @@ namespace TestDLL
                 return 7;
             if (s == "A1A")
                 return 5;
-            return 0;
+            throw new ArgumentException("Can't recognize the variable");
         }
     }
 }
