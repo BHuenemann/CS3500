@@ -4,6 +4,24 @@ using System.Text.RegularExpressions;
 
 namespace FormulaEvaluator
 {
+    //Class for new stack commands
+    public static class StackExtensions
+    {
+        /// <summary>
+        /// Takes in a value and checks to see if it's on top of the stack. It returns false if the stack is empty.
+        /// </summary>
+        /// <typeparam name="E">Generic for the stack type</typeparam>
+        /// <param name="s">Stack being used</param>
+        /// <param name="n">Variable to look for on top of stack</param>
+        /// <returns></returns>
+        public static Boolean isOnTop<E>(this Stack<E> s, E n)
+        {
+            if (s.Count == 0)
+                return false;
+            else return s.Peek().Equals(n);
+        }
+    }
+
     public static class Evaluator
     {
         /// <summary>
@@ -23,24 +41,16 @@ namespace FormulaEvaluator
         public static int CalculateExpression(int num1, int num2, string op)
         {
             if (op == "+")
-            {
                 return num1 + num2;
-            }
             else if (op == "-")
-            {
                 return num1 - num2;
-            }
             else if (op == "*")
-            {
                 return num1 * num2;
-            }
             else if (op == "/")
             {
                 //Uses this if statement to avoid dividing by 0
                 if(num2 == 0)
-                {
                     throw new ArgumentException("Error dividing by 0");
-                }
                 return num1 / num2;
             }
             
@@ -92,20 +102,14 @@ namespace FormulaEvaluator
 
                     //If it's a number, convert the string into an integer. Otherwise convert the variable into an integer using the inputted function.
                     if(Regex.IsMatch(substrings[i], @"^\d+$"))
-                    {
                         num1 = Convert.ToInt32(substrings[i]);
-                    }
                     else
-                    {
                         num1 = variableEvaluator(substrings[i]);
-                    }
 
                     /* If it's empty or the stack doesn't have * or / on the top it just pushes the number to the value stack. Otherwise it uses the
                      * number and the top values of each stack to form an expression, evaluate it, and push it to the value stack. */
-                    if (operatorStack.Count == 0 || (operatorStack.Peek() != "*" && operatorStack.Peek() != "/"))
-                    {
+                    if (!operatorStack.isOnTop("*") && !operatorStack.isOnTop("/"))
                         valueStack.Push(num1);
-                    }
                     else
                     {
                         int num2 = valueStack.Pop();
@@ -117,19 +121,15 @@ namespace FormulaEvaluator
 
                 //It just adds the operator to the stack if it's a *, /, or (
                 else if (substrings[i] == "*" || substrings[i] == "/" || substrings[i] == "(")
-                {
                     operatorStack.Push(substrings[i]);
-                }
 
                 //This is the case that the token is a + or -
                 else if (substrings[i] == "+" || substrings[i] == "-")
                 {
                     /* In either case it pushes the operator to the operator stack but if + or - is next on the stack it also uses the top values
                      * from each stack to form an expression, evaluate it, and push it to the value stack. */
-                    if (operatorStack.Count == 0 || (operatorStack.Peek() != "+" && operatorStack.Peek() != "-"))
-                    {
+                    if (!operatorStack.isOnTop("+") && !operatorStack.isOnTop("-"))
                         operatorStack.Push(substrings[i]);
-                    }
                     else
                     {
                         valueStack.Push(CalcFromStacks(valueStack, operatorStack));
@@ -140,38 +140,25 @@ namespace FormulaEvaluator
                 //This is the case that the token is a )
                 else if (substrings[i] == ")")
                 {
-                    //Throws an exception if the operator stack is empty
-                    if (operatorStack.Count == 0)
-                    {
-                        throw new ArgumentException("Invalid expression");
-                    }
-
                     //If the top value is a + or - it uses the top values from both stacks to form an expression and push it
-                    else if (operatorStack.Peek() == "+" || operatorStack.Peek() == "-")
-                    {
+                    if (operatorStack.isOnTop("+") || operatorStack.isOnTop("-"))
                         valueStack.Push(CalcFromStacks(valueStack, operatorStack));
-                    }
 
                     /* It throws an exception if the operator stack is empty or if ( isn't next on the stack. Assuming there's no error it pops (
                      * off the stack. */
-                    if (operatorStack.Count == 0 || operatorStack.Peek() != "(")
-                    {
+                    if (!operatorStack.isOnTop("("))
                         throw new ArgumentException("Unmatched parentheses");
-                    }
                     operatorStack.Pop();
 
                     /* If it's not empty and the operator stack has * or / on the top, it uses the values of each stack to form an expression, evaluate it,
                      * and push it to the value stack. */
-                    if (operatorStack.Count != 0 && (operatorStack.Peek() == "*" || operatorStack.Peek() == "/"))
-                    {
+                    if (operatorStack.isOnTop("*") || operatorStack.isOnTop("/"))
                         valueStack.Push(CalcFromStacks(valueStack, operatorStack));
-                    }
+
                 }
                 //It throws an exeption for any other cases as long as they aren't an empty string
                 else if (substrings[i] != "")
-                {
                     throw new ArgumentException("Invalid token");
-                }
             }
 
             //If there's just a number remaining it returns that
@@ -179,9 +166,7 @@ namespace FormulaEvaluator
             {
                 //It throws an exception if there's an incorrect amount of remaining values on the stack
                 if(valueStack.Count != 1)
-                {
                     throw new ArgumentException("Invalid expression");
-                }
                 return valueStack.Pop();
             }
             //Otherwise it does one final calculation and returns that number
@@ -189,9 +174,7 @@ namespace FormulaEvaluator
             {
                 //It throws an exception if there's an incorrect amount of remaining values on the stack or an incorrect amount of operators on the other stack
                 if(operatorStack.Count != 1 || valueStack.Count != 2)
-                {
                     throw new ArgumentException("Invalid expression");
-                }
                 return CalcFromStacks(valueStack, operatorStack);
             }
         }
