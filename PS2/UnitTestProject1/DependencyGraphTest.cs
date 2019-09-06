@@ -322,5 +322,136 @@ namespace DevelopmentTests
             t.RemoveDependency("c", "a");
             Assert.AreEqual(1, t.Size);
         }
+
+
+
+        /// <summary>
+        /// Size shouldn't increments when adding repeats
+        /// </summary>
+        [TestMethod]
+        public void SizeRepeats()
+        {
+            DependencyGraph t = new DependencyGraph();
+
+            t.AddDependency("a", "b");
+            Assert.AreEqual(1, t.Size);
+            t.AddDependency("a", "b");
+            Assert.AreEqual(1, t.Size);
+        }
+
+
+
+        /// <summary>
+        /// Repeats should be ignored when adding
+        /// </summary>
+        [TestMethod]
+        public void AddAndRemoveRepeats()
+        {
+            DependencyGraph t = new DependencyGraph();
+
+            t.AddDependency("a", "b");
+            Assert.AreEqual(1, t.Size);
+            Assert.AreEqual(1, t["b"]);
+
+            t.AddDependency("a", "b");
+            Assert.AreEqual(1, t.Size);
+            Assert.AreEqual(1, t["b"]);
+
+            t.RemoveDependency("a", "b");
+            Assert.AreEqual(0, t.Size);
+            Assert.AreEqual(0, t["b"]);
+
+        }
+
+
+
+        /// <summary>
+        /// Repeats should be ignored when replacing
+        /// </summary>
+        [TestMethod]
+        public void ReplaceUsingRepeats()
+        {
+            DependencyGraph t = new DependencyGraph();
+
+            t.AddDependency("x", "y");
+            t.AddDependency("x", "z");
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "b");
+
+            HashSet<string> replaceList = new HashSet<string>();
+            replaceList.Add("w");
+            replaceList.Add("w");
+            replaceList.Add("w");
+
+            t.ReplaceDependents("x", replaceList);
+            t.ReplaceDependees("b", replaceList);
+
+            Assert.AreEqual(t.Size, 2);
+        }
+
+
+
+        /// <summary>
+        /// Repeats should be ignored when looking for dependencies
+        /// </summary>
+        [TestMethod]
+        public void HasDependenciesRepeats()
+        {
+            DependencyGraph t = new DependencyGraph();
+
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "b");
+            Assert.IsTrue(t.HasDependents("a"));
+            Assert.IsTrue(t.HasDependees("b"));
+
+            t.RemoveDependency("a", "b");
+            Assert.IsFalse(t.HasDependents("a"));
+            Assert.IsFalse(t.HasDependees("b"));
+        }
+
+
+
+        /// <summary>
+        /// Repeats should be ignored when getting the dependencies
+        /// </summary>
+        [TestMethod]
+        public void GetDependenciesRepeats()
+        {
+            DependencyGraph t = new DependencyGraph();
+
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "b");
+
+            IEnumerator<string> e1 = t.GetDependees("b").GetEnumerator();
+            Assert.IsTrue(e1.MoveNext());
+            Assert.AreEqual("a", e1.Current);
+            Assert.IsFalse(e1.MoveNext());
+
+            IEnumerator<string> e2 = t.GetDependents("a").GetEnumerator();
+            Assert.IsTrue(e2.MoveNext());
+            Assert.AreEqual("b", e2.Current);
+            Assert.IsFalse(e2.MoveNext());
+        }
+
+
+
+        /// <summary>
+        /// Repeats should be ignored by the indexer
+        /// </summary>
+        [TestMethod]
+        public void IndexerRepeats()
+        {
+            DependencyGraph t = new DependencyGraph();
+
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "b");
+            Assert.AreEqual(2, t["b"]);
+
+            t.AddDependency("c", "b");
+            Assert.AreEqual(2, t["b"]);
+
+            t.RemoveDependency("c", "b");
+            Assert.AreEqual(1, t["b"]);
+        }
     }
 }

@@ -141,13 +141,16 @@ namespace SpreadsheetUtilities
             //Makes sure there's a key and then adds the second string to the hash set
             if (!dependents.ContainsKey(s))
                 dependents.Add(s, new HashSet<string>());
+            
+            //Only increments the size if the string isn't already in the hash set
+            if (!dependents[s].Contains(t))
+                Size++;
+
             dependents[s].Add(t);
 
             if (!dependees.ContainsKey(t))
                 dependees.Add(t, new HashSet<string>());
             dependees[t].Add(s);
-
-            Size++;
         }
 
 
@@ -165,13 +168,13 @@ namespace SpreadsheetUtilities
             dependents[s].Remove(t);
             dependees[t].Remove(s);
 
+            Size--;
+
             //Removes the key if it's empty
             if (dependents[s].Count == 0)
                 dependents.Remove(s);
             if (dependees[t].Count == 0)
                 dependents.Remove(t);
-
-            Size--;
         }
 
 
