@@ -59,7 +59,8 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int Size
         {
-            get { return dependents.Count(); }
+            get;
+            private set;
         }
 
 
@@ -149,6 +150,8 @@ namespace SpreadsheetUtilities
             if (!dependees.ContainsKey(t))
                 dependees.Add(t, new HashSet<string>());
             dependees[t].Add(s);
+
+            Size++;
         }
 
 
@@ -165,6 +168,8 @@ namespace SpreadsheetUtilities
 
             dependents[s].Remove(t);
             dependees[t].Remove(s);
+
+            Size--;
         }
 
 
@@ -175,14 +180,19 @@ namespace SpreadsheetUtilities
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
             //Adds a key if there isn't one but otherwise just clears the key
-            if (!dependents.ContainsKey(s))
-                dependents.Add(s, new HashSet<string>());
-            else
-                dependents[s].Clear();
+            if (dependents.ContainsKey(s))
+            {
+                //Uses toList to make a clone so it doesn't edit the iterator
+                foreach (string d in dependents[s].ToList<string>())
+                    RemoveDependency(s, d);
+            }
 
             //Adds each element of the collection to the hash set
             foreach (string t in newDependents)
-                dependents[s].Add(t);
+            {
+                AddDependency(s, t);
+            }
+
         }
 
 
@@ -192,13 +202,16 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
-            if (!dependees.ContainsKey(s))
-                dependees.Add(s, new HashSet<string>());
-            else
-                dependees[s].Clear();
+            if (dependees.ContainsKey(s))
+            {
+                foreach (string d in dependees[s].ToList<string>())
+                    RemoveDependency(d, s);
+            }
 
             foreach (string t in newDependees)
-                dependees[s].Add(t);
+            {
+                AddDependency(t, s);
+            }
         }
 
     }
