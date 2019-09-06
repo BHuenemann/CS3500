@@ -154,6 +154,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            if (!dependents.ContainsKey(s))
+                dependents.Add(s, new HashSet<string>());
+            else
+                dependents[s].Clear();
+
+            foreach (string t in newDependents)
+                dependents[s].Add(t);
         }
 
 
@@ -163,6 +170,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
+            if (!dependees.ContainsKey(s))
+                dependees.Add(s, new HashSet<string>());
+            else
+                dependees[s].Clear();
+
+            foreach (string t in newDependees)
+                dependees[s].Add(t);
         }
 
     }
