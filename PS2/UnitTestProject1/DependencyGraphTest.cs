@@ -262,5 +262,53 @@ namespace DevelopmentTests
         }
 
 
+
+        [TestMethod]
+        public void DependeesIndexerTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+
+            t.AddDependency("a", "b");
+            Assert.AreEqual(0, t["a"]);
+            Assert.AreEqual(1, t["b"]);
+
+            t.RemoveDependency("a", "b");
+            t.AddDependency("b", "b");
+            t.AddDependency("c", "b");
+            t.AddDependency("d", "b");
+            Assert.AreEqual(3, t["b"]);
+        }
+
+
+
+        [TestMethod]
+        public void HasDependenciesTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+
+            t.AddDependency("z", "t");
+            t.AddDependency("n", "t");
+            t.AddDependency("z", "a");
+            Assert.IsTrue(t.HasDependents("z"));
+            Assert.IsTrue(t.HasDependents("n"));
+            Assert.IsFalse(t.HasDependents("t"));
+            Assert.IsFalse(t.HasDependents("a"));
+            Assert.IsTrue(t.HasDependees("t"));
+            Assert.IsTrue(t.HasDependees("a"));
+            Assert.IsFalse(t.HasDependees("z"));
+            Assert.IsFalse(t.HasDependees("n"));
+        }
+
+
+
+        [TestMethod]
+        public void RemoveEmptyDependency()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.RemoveDependency("a", "c");
+            t.RemoveDependency("c", "a");
+            Assert.AreEqual(1, t.Size);
+        }
     }
 }
