@@ -1,3 +1,5 @@
+// Author: Ben Huenemann
+
 using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -263,6 +265,9 @@ namespace DevelopmentTests
 
 
 
+        /// <summary>
+        /// Indexer should return number of dependees
+        /// </summary>
         [TestMethod]
         public void DependeesIndexerTest()
         {
@@ -281,6 +286,9 @@ namespace DevelopmentTests
 
 
 
+        /// <summary>
+        /// HasDependents and HasDependees should return the right values
+        /// </summary>
         [TestMethod]
         public void HasDependenciesTest()
         {
@@ -301,11 +309,15 @@ namespace DevelopmentTests
 
 
 
+        /// <summary>
+        /// Removing a dependency that doesn't exist should do nothing
+        /// </summary>
         [TestMethod]
         public void RemoveEmptyDependency()
         {
             DependencyGraph t = new DependencyGraph();
             t.AddDependency("a", "b");
+            Assert.AreEqual(1, t.Size);
             t.RemoveDependency("a", "c");
             t.RemoveDependency("c", "a");
             Assert.AreEqual(1, t.Size);

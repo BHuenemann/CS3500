@@ -1,8 +1,4 @@
-﻿// Skeleton implementation written by Joe Zachary for CS 3500, September 2013.
-// Version 1.1 (Fixed error in comment for RemoveDependency.)
-// Version 1.2 - Daniel Kopta 
-//               (Clarified meaning of dependent and dependee.)
-//               (Clarified names in solution/project structure.)
+﻿// Author: Ben Huenemann
 
 using System;
 using System.Collections.Generic;
@@ -112,8 +108,8 @@ namespace SpreadsheetUtilities
         public IEnumerable<string> GetDependents(string s)
         {
             //Creates a new hash set if the key doesn't exist so it can return that hash set
-            if(!dependents.ContainsKey(s))
-                dependents.Add(s, new HashSet<string>());
+            if (!dependents.ContainsKey(s))
+                return new HashSet<string>();
 
             return dependents[s];
         }
@@ -124,7 +120,7 @@ namespace SpreadsheetUtilities
         public IEnumerable<string> GetDependees(string s)
         {
             if (!dependees.ContainsKey(s))
-                dependees.Add(s, new HashSet<string>());
+                return new HashSet<string>();
 
             return dependees[s];
         }
@@ -169,6 +165,12 @@ namespace SpreadsheetUtilities
             dependents[s].Remove(t);
             dependees[t].Remove(s);
 
+            //Removes the key if it's empty
+            if (dependents[s].Count == 0)
+                dependents.Remove(s);
+            if (dependees[t].Count == 0)
+                dependents.Remove(t);
+
             Size--;
         }
 
@@ -189,9 +191,7 @@ namespace SpreadsheetUtilities
 
             //Adds each element of the collection to the hash set
             foreach (string t in newDependents)
-            {
                 AddDependency(s, t);
-            }
 
         }
 
@@ -209,9 +209,7 @@ namespace SpreadsheetUtilities
             }
 
             foreach (string t in newDependees)
-            {
                 AddDependency(t, s);
-            }
         }
 
     }
