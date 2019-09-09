@@ -288,7 +288,14 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<String> GetVariables()
         {
-            return null;
+            HashSet<string> variables = new HashSet<string>();
+
+            foreach(string token in tokens)
+            {
+                if (isVariable(token))
+                    variables.Add(token);
+            }
+            return variables;
         }
 
         /// <summary>
@@ -303,7 +310,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override string ToString()
         {
-            return null;
+            return string.Join("", tokens);
         }
 
         /// <summary>
