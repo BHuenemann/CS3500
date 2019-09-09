@@ -1,21 +1,4 @@
-﻿// Skeleton written by Joe Zachary for CS 3500, September 2013
-// Read the entire skeleton carefully and completely before you
-// do anything else!
-
-// Version 1.1 (9/22/13 11:45 a.m.)
-
-// Change log:
-//  (Version 1.1) Repaired mistake in GetTokens
-//  (Version 1.1) Changed specification of second constructor to
-//                clarify description of how validation works
-
-// (Daniel Kopta) 
-// Version 1.2 (9/10/17) 
-
-// Change log:
-//  (Version 1.2) Changed the definition of equality with regards
-//                to numeric tokens
-
+﻿//Author: Ben Huenemann
 
 using System;
 using System.Collections.Generic;
@@ -114,13 +97,13 @@ namespace SpreadsheetUtilities
 
             for (int i = 0; i < tokens.Length; i++)
             {
-                if(i != 0)
+                if (i != 0)
                 {
                     if ((tokens[i] == ")" || isOperator(tokens[i])) &&
                        (tokens[i - 1] == "(" || isOperator(tokens[i - 1])))
                         throw new FormulaFormatException("Operator/closing_parenthesis follows an operator/opening_parenthesis");
-                    if ((tokens[i] == ")" || isVariable(normalize(tokens[i])) || isDouble(tokens[i])) &&
-                        (isVariable(normalize(tokens[i - 1])) || isDouble(tokens[i - 1])))
+                    if ((tokens[i] == ")" || isVariable(normalize(tokens[i])) || isDoubleOrScientific(tokens[i])) &&
+                        (isVariable(normalize(tokens[i - 1])) || isDoubleOrScientific(tokens[i - 1])))
                         throw new FormulaFormatException("Number/variable/closing_parenthesis follows a number/variable");
                 }
 
@@ -137,7 +120,7 @@ namespace SpreadsheetUtilities
                 }
                 else if (isVariable(tokens[i]))
                     throw new FormulaFormatException("Variable name doesn't fit specifications after normalization");
-                else if (!isOperator(tokens[i]) && !isDouble(tokens[i]))
+                else if (!isOperator(tokens[i]) && !isDoubleOrScientific(tokens[i]))
                     throw new FormulaFormatException("Invalid token");
 
                 if (rightParenCount > leftParenCount)
@@ -147,9 +130,9 @@ namespace SpreadsheetUtilities
             string startToken = tokens[0];
             string endToken = tokens[tokens.Length - 1];
 
-            if (startToken != "(" && !isVariable(startToken) && !isDouble(startToken))
+            if (startToken != "(" && !isVariable(startToken) && !isDoubleOrScientific(startToken))
                 throw new FormulaFormatException("Starting token isn't a number/variable/opening_parenthesis");
-            else if (endToken != ")" && !isVariable(endToken) && !isDouble(endToken))
+            else if (endToken != ")" && !isVariable(endToken) && !isDoubleOrScientific(endToken))
                 throw new FormulaFormatException("Ending token isn't a number/variable/closing_parenthesis");
 
             if (leftParenCount != rightParenCount)
@@ -187,14 +170,14 @@ namespace SpreadsheetUtilities
 
             for (int i = 0; i < tokens.Length; i++)
             {
-                if(isDouble(tokens[i]) || isVariable(tokens[i]))
+                if (isDoubleOrScientific(tokens[i]) || isVariable(tokens[i]))
                 {
                     double num1;
 
                     /*If it fits the format of a double, convert the string into an double. Otherwise convert the variable into an double using
                      * the inputted function. */
-                    if (isDouble(tokens[i]))
-                        num1 = Convert.ToDouble(tokens[i]);
+                    if (isDoubleOrScientific(tokens[i]))
+                        Double.TryParse(tokens[i], out num1);
                     else
                         num1 = lookup(tokens[i]);
 
@@ -207,7 +190,7 @@ namespace SpreadsheetUtilities
                         double num2 = valueStack.Pop();
                         string op = operatorStack.Pop();
 
-                        if(!TryCalculateExpression(num2, num1, op, ref returnVal))
+                        if (!TryCalculateExpression(num2, num1, op, ref returnVal))
                             return new FormulaError("Error dividing by 0");
 
                         valueStack.Push(returnVal);
@@ -227,7 +210,7 @@ namespace SpreadsheetUtilities
                         operatorStack.Push(tokens[i]);
                     else
                     {
-                        if(!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
+                        if (!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
                             return new FormulaError("Error dividing by 0");
 
                         valueStack.Push(returnVal);
@@ -241,7 +224,7 @@ namespace SpreadsheetUtilities
                     //If the top value is a + or - it uses the top values from both stacks to form an expression and push it
                     if (operatorStack.isOnTop("+") || operatorStack.isOnTop("-"))
                     {
-                        if(!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
+                        if (!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
                             return new FormulaError("Error dividing by 0");
 
                         valueStack.Push(returnVal);
@@ -253,7 +236,7 @@ namespace SpreadsheetUtilities
                      * and push it to the value stack. */
                     if (operatorStack.isOnTop("*") || operatorStack.isOnTop("/"))
                     {
-                        if(!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
+                        if (!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
                             return new FormulaError("Error dividing by 0");
 
                         valueStack.Push(returnVal);
@@ -269,7 +252,7 @@ namespace SpreadsheetUtilities
             //Otherwise it does one final calculation and returns that number
             else
             {
-                if(!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
+                if (!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
                     return new FormulaError("Error dividing by 0");
                 return returnVal;
             }
@@ -290,7 +273,7 @@ namespace SpreadsheetUtilities
         {
             HashSet<string> variables = new HashSet<string>();
 
-            foreach(string token in tokens)
+            foreach (string token in tokens)
             {
                 if (isVariable(token))
                     variables.Add(token);
@@ -335,7 +318,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override bool Equals(object obj)
         {
-            if(obj == null || obj.GetType() != typeof(Formula))
+            if (obj == null || obj.GetType() != typeof(Formula))
                 return false;
             else
             {
@@ -349,9 +332,9 @@ namespace SpreadsheetUtilities
 
                     for (int i = 0; i < tokens.Length; i++)
                     {
-                        if (isDouble(tokens[i]) && isDouble(otherTokens[i]))
+                        if (isDoubleOrScientific(tokens[i]) && isDoubleOrScientific(otherTokens[i]))
                             returnBool = returnBool && (Double.Parse(tokens[i]).ToString() == Double.Parse(otherTokens[i]).ToString());
-                        else if (!isDouble(tokens[i]) && !isDouble(otherTokens[i]))
+                        else if (!isDoubleOrScientific(tokens[i]) && !isDoubleOrScientific(otherTokens[i]))
                             returnBool = returnBool && (tokens[i] == otherTokens[i]);
                         else
                             return false;
@@ -375,7 +358,7 @@ namespace SpreadsheetUtilities
                 return true;
             else if (ReferenceEquals(f1, null) || ReferenceEquals(f2, null))
                 return false;
-                
+
             return f1.Equals(f2);
         }
 
@@ -449,12 +432,18 @@ namespace SpreadsheetUtilities
 
         bool isVariable(string s)
         {
-            return Regex.IsMatch(tokens[0], @"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
+            return Regex.IsMatch(s, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
         }
 
-        bool isDouble(string s)
+        bool isDoubleOrScientific(string s)
         {
-            return Regex.IsMatch(tokens[0], @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?");
+            bool returnVal = false;
+
+            returnVal = returnVal || Regex.IsMatch(s, @"\d+\.\d*");
+            returnVal = returnVal || Regex.IsMatch(s, @"\d*\.\d+");
+            returnVal = returnVal || Regex.IsMatch(s, @"\d+");
+            returnVal = returnVal || Regex.IsMatch(s, @"[eE][\+-]?\d+");
+            return returnVal;
         }
 
         /// <summary>
