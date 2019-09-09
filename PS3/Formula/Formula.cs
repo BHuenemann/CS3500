@@ -26,6 +26,26 @@ using System.Text.RegularExpressions;
 namespace SpreadsheetUtilities
 {
     /// <summary>
+    /// Class for added stack commands
+    /// </summary>
+    public static class StackExtensions
+    {
+        /// <summary>
+        /// Takes in a value and checks to see if it's on top of the stack. It returns false if the stack is empty.
+        /// </summary>
+        /// <typeparam name="E">Generic for the stack type</typeparam>
+        /// <param name="s">Stack being used</param>
+        /// <param name="n">Variable to look for on top of stack</param>
+        /// <returns></returns>
+        public static Boolean isOnTop<E>(this Stack<E> s, E n)
+        {
+            if (s.Count == 0)
+                return false;
+            else return s.Peek().Equals(n);
+        }
+    }
+
+    /// <summary>
     /// Represents formulas written in standard infix notation using standard precedence
     /// rules.  The allowed symbols are non-negative numbers written using double-precision 
     /// floating-point syntax (without unary preceeding '-' or '+'); 
@@ -159,7 +179,100 @@ namespace SpreadsheetUtilities
         /// </summary>
         public object Evaluate(Func<string, double> lookup)
         {
-            return null;
+            //Temporary double used to pop numbers to the value stack
+            double returnVal = 0;
+
+            Stack<double> valueStack = new Stack<double>();
+            Stack<string> operatorStack = new Stack<string>();
+
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                if(isDouble(tokens[i]) || isVariable(tokens[i]))
+                {
+                    double num1;
+
+                    /*If it fits the format of a double, convert the string into an double. Otherwise convert the variable into an double using
+                     * the inputted function. */
+                    if (isDouble(tokens[i]))
+                        num1 = Convert.ToDouble(tokens[i]);
+                    else
+                        num1 = lookup(tokens[i]);
+
+                    /* If it's empty or the stack doesn't have * or / on the top it just pushes the number to the value stack. Otherwise it uses
+                     * the number and the top values of each stack to form an expression, evaluate it, and push it to the value stack. */
+                    if (!operatorStack.isOnTop("*") && !operatorStack.isOnTop("/"))
+                        valueStack.Push(num1);
+                    else
+                    {
+                        double num2 = valueStack.Pop();
+                        string op = operatorStack.Pop();
+
+                        if(!TryCalculateExpression(num2, num1, op, ref returnVal))
+                            return new FormulaError("Error dividing by 0");
+
+                        valueStack.Push(returnVal);
+                    }
+                }
+
+                //It just adds the operator to the stack if it's a *, /, or (
+                else if (tokens[i] == "*" || tokens[i] == "/" || tokens[i] == "(")
+                    operatorStack.Push(tokens[i]);
+
+                //This is the case that the token is a + or -
+                else if (tokens[i] == "+" || tokens[i] == "-")
+                {
+                    /* In either case it pushes the operator to the operator stack but if + or - is next on the stack it also uses the top values
+                     * from each stack to form an expression, evaluate it, and push it to the value stack. */
+                    if (!operatorStack.isOnTop("+") && !operatorStack.isOnTop("-"))
+                        operatorStack.Push(tokens[i]);
+                    else
+                    {
+                        if(!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
+                            return new FormulaError("Error dividing by 0");
+
+                        valueStack.Push(returnVal);
+                        operatorStack.Push(tokens[i]);
+                    }
+                }
+
+                //This is the case that the token is a )
+                else if (tokens[i] == ")")
+                {
+                    //If the top value is a + or - it uses the top values from both stacks to form an expression and push it
+                    if (operatorStack.isOnTop("+") || operatorStack.isOnTop("-"))
+                    {
+                        if(!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
+                            return new FormulaError("Error dividing by 0");
+
+                        valueStack.Push(returnVal);
+                    }
+
+                    operatorStack.Pop();
+
+                    /* If it's not empty and the operator stack has * or / on the top, it uses the values of each stack to form an expression, evaluate it,
+                     * and push it to the value stack. */
+                    if (operatorStack.isOnTop("*") || operatorStack.isOnTop("/"))
+                    {
+                        if(!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
+                            return new FormulaError("Error dividing by 0");
+
+                        valueStack.Push(returnVal);
+                    }
+
+                }
+            }
+
+            //If there's just a number remaining it returns that
+            if (operatorStack.Count == 0)
+                return valueStack.Pop();
+
+            //Otherwise it does one final calculation and returns that number
+            else
+            {
+                if(!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
+                    return new FormulaError("Error dividing by 0");
+                return returnVal;
+            }
         }
 
         /// <summary>
@@ -246,6 +359,49 @@ namespace SpreadsheetUtilities
         public override int GetHashCode()
         {
             return 0;
+        }
+
+        /// <summary>
+        /// Method that calculates an expression using two numbers from the first stack and one operation from the second stack. If the
+        /// calculation fails, it returns false.
+        /// </summary>
+        /// <param name="stack1">Stack of values</param>
+        /// <param name="stack2">Stack of operators</param>
+        /// <param name="output">Variable where the output of the operation will be saved</param>
+        /// <returns>Whether the calculation succeeds or fails</returns>
+        public static bool TryCalcFromStacks(Stack<double> stack1, Stack<string> stack2, ref double output)
+        {
+            double num1 = stack1.Pop();
+            double num2 = stack1.Pop();
+            string op = stack2.Pop();
+
+            return TryCalculateExpression(num2, num1, op, ref output);
+        }
+
+        /// <summary>
+        /// Method used to do simple calculations with +-* and /. It returns false if passed an invalid operator or when dividing by zero.
+        /// </summary>
+        /// <param name="num1">First number input</param>
+        /// <param name="num2">Second number input</param>
+        /// <param name="op">Operation to be performed between the two numbers (+-* or /)</param>
+        /// <param name="output">Variable where the output of the operation will be saved</param>
+        /// <returns>Whether or not it performs the operation</returns>
+        public static bool TryCalculateExpression(double num1, double num2, string op, ref double output)
+        {
+            if (op == "+")
+                output = num1 + num2;
+            else if (op == "-")
+                output = num1 - num2;
+            else if (op == "*")
+                output = num1 * num2;
+            else if (op == "/") {
+                if (num2 == 0)
+                    return false;
+                output = num1 / num2;
+            }
+            else return false;
+
+            return true;
         }
 
         bool isOperator(string s)
