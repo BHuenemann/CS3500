@@ -84,7 +84,73 @@ namespace SpreadsheetUtilities
         /// </summary>
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
+            tokens = GetTokens(formula).ToArray();
 
+            if (tokens.Length == 0)
+                throw new FormulaFormatException("No tokens found");
+
+            string startToken = tokens[0];
+            string endToken = tokens[tokens.Length - 1];
+
+            if (startToken != "(" && !isVariable(normalize(startToken)) && !isDouble(startToken))
+                throw new FormulaFormatException("Starting token isn't a number/variable/opening_parenthesis");
+            else if (endToken != ")" && !isVariable(normalize(endToken)) && !isDouble(endToken))
+                throw new FormulaFormatException("Ending token isn't a number/variable/closing_parenthesis");
+
+            int leftParenCount = 0;
+            int rightParenCount = 0;
+
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                if (tokens[i] == "(")
+                {
+                    leftParenCount++;
+
+                    if (i != 0 && (tokens[i - 1] != "(" || !isOperator(tokens[i - 1])))
+                        throw new FormulaFormatException("Opening parenthesis follows a number/variable/closing_parenthesis");
+                }
+
+                else if (tokens[i] == ")")
+                {
+                    rightParenCount++;
+
+                    if (rightParenCount > leftParenCount)
+                        throw new FormulaFormatException("Unmatched right parenthesis");
+
+                    if (tokens[i - 1] == "(" || isOperator(tokens[i - 1]))
+                        throw new FormulaFormatException("Closing parenthesis follows an operator/opening_parenthesis");
+                }
+
+                else if (isVariable(tokens[i]))
+                {
+                    if (!isVariable(normalize(tokens[i])) || !isValid(normalize(tokens[i])))
+                        throw new FormulaFormatException("Invalid Variable");
+
+                    if (i != 0 && (tokens[i - 1] != "(" || !isOperator(tokens[i - 1])))
+                        throw new FormulaFormatException("Opening parenthesis follows a number/variable/closing_parenthesis");
+
+                    tokens[i] = normalize(tokens[i]);
+                }
+
+                else if (isOperator(tokens[i]))
+                {
+                    if (tokens[i - 1] == "(" || isOperator(tokens[i - 1]))
+                        throw new FormulaFormatException("Operator follows an operator/opening_parenthesis");
+                }
+
+                else if (isDouble(tokens[i]))
+                {
+                    if (i != 0 && (tokens[i - 1] != "(" || !isOperator(tokens[i - 1])))
+                        throw new FormulaFormatException("Opening parenthesis follows a number/variable/closing_parenthesis");
+                }
+
+                else
+                    throw new FormulaFormatException("Invalid token");
+
+            }
+
+            if (leftParenCount != rightParenCount)
+                throw new FormulaFormatException("Unbalanced parentheses");
         }
 
         /// <summary>
