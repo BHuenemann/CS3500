@@ -335,7 +335,33 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override bool Equals(object obj)
         {
-            return false;
+            if(obj == null || obj.GetType() != typeof(Formula))
+                return false;
+            else
+            {
+                string[] otherTokens = GetTokens(obj.ToString()).ToArray();
+
+                if (otherTokens.Length != tokens.Length || tokens.Length == 0)
+                    return false;
+                else
+                {
+                    bool returnBool = true;
+
+                    for (int i = 0; i < tokens.Length; i++)
+                    {
+                        if (isDouble(tokens[i]) && isDouble(otherTokens[i]))
+                            returnBool = returnBool && (Double.Parse(tokens[i]).ToString() == Double.Parse(otherTokens[i]).ToString());
+                        else if (!isDouble(tokens[i]) && !isDouble(otherTokens[i]))
+                            returnBool = returnBool && (tokens[i] == otherTokens[i]);
+                        else
+                            return false;
+
+                        if (!returnBool)
+                            return false;
+                    }
+                    return true;
+                }
+            }
         }
 
         /// <summary>
@@ -345,7 +371,12 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator ==(Formula f1, Formula f2)
         {
-            return false;
+            if (ReferenceEquals(f1, null) && ReferenceEquals(f2, null))
+                return true;
+            else if (ReferenceEquals(f1, null) || ReferenceEquals(f2, null))
+                return false;
+                
+            return f1.Equals(f2);
         }
 
         /// <summary>
@@ -355,7 +386,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator !=(Formula f1, Formula f2)
         {
-            return false;
+            return !(f1 == f2);
         }
 
         /// <summary>
