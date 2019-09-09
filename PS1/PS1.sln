@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29209.62
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormulaEvaluator", "FormulaEvaluator\FormulaEvaluator.csproj", "{3C00BE3D-3157-45A4-BA15-6538348BF6A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FormulaEvaluator", "FormulaEvaluator\FormulaEvaluator.csproj", "{3C00BE3D-3157-45A4-BA15-6538348BF6A9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDLL", "TestDLL\TestDLL.csproj", "{32125CB3-C47F-43C1-86ED-1CEBF25A93D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS1GradingTests", "GradingTests\PS1GradingTests.csproj", "{8C3BAF31-4334-40D5-8562-62F386864325}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{32125CB3-C47F-43C1-86ED-1CEBF25A93D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32125CB3-C47F-43C1-86ED-1CEBF25A93D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32125CB3-C47F-43C1-86ED-1CEBF25A93D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C3BAF31-4334-40D5-8562-62F386864325}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C3BAF31-4334-40D5-8562-62F386864325}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C3BAF31-4334-40D5-8562-62F386864325}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C3BAF31-4334-40D5-8562-62F386864325}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
