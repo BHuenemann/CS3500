@@ -191,7 +191,7 @@ namespace FormulaTest
         public void IntegerDivision()
         {
             Formula f = new Formula("4 / 3");
-            Assert.AreEqual(1.33333333333333, f.Evaluate(TestLookup), "1e-9");
+            Assert.AreEqual(4.0 / 3.0, (double)f.Evaluate(TestLookup), 1e-9);
         }
 
 
@@ -200,7 +200,7 @@ namespace FormulaTest
         public void FloatDivision()
         {
             Formula f = new Formula("4.0 / 3.0");
-            Assert.AreEqual(1.33333333333333, f.Evaluate(TestLookup), "1e-9");
+            Assert.AreEqual(4.0 / 3.0, (double)f.Evaluate(TestLookup), 1e-9);
         }
 
 
@@ -209,7 +209,7 @@ namespace FormulaTest
         public void FloatAndIntegerDivision()
         {
             Formula f = new Formula("4 / 3.0");
-            Assert.AreEqual(1.33333333333333, f.Evaluate(TestLookup), "1e-9");
+            Assert.AreEqual(4.0 / 3.0, (double)f.Evaluate(TestLookup), 1e-9);
         }
 
 
@@ -224,11 +224,10 @@ namespace FormulaTest
 
 
         [TestMethod]
-        [ExpectedException(typeof(FormulaError))]
         public void DividingByZero()
         {
-            Formula f = new Formula("9E+10 / 1E+2");
-            f.Evaluate(TestLookup);
+            Formula f = new Formula("1 / 0");
+            Assert.IsTrue(f.Evaluate(TestLookup) is FormulaError);
         }
     }
 }
