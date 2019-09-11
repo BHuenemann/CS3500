@@ -354,9 +354,9 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator ==(Formula f1, Formula f2)
         {
-            if (ReferenceEquals(f1, null) && ReferenceEquals(f2, null))
+            if (f1 is null && f2 is null)
                 return true;
-            else if (ReferenceEquals(f1, null) || ReferenceEquals(f2, null))
+            else if (f1 is null || f2 is null)
                 return false;
 
             return f1.Equals(f2);
