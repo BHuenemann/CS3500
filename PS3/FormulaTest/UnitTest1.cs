@@ -145,6 +145,7 @@ namespace FormulaTest
 
 
 
+        [TestMethod]
         public void SubtractionNegativeResult()
         {
             Formula f = new Formula("5 - 7");
@@ -256,7 +257,7 @@ namespace FormulaTest
         public void UnknownVariable()
         {
             Formula f = new Formula("1 + X1");
-            Assert.IsTrue(f.Evaluate(s => { throw new Exception(); }) is FormulaError);
+            Assert.IsTrue(f.Evaluate(TestLookup) is FormulaError);
         }
 
 
@@ -264,8 +265,8 @@ namespace FormulaTest
         [TestMethod]
         public void KnownVariable()
         {
-            Formula f = new Formula("1 + X1");
-            Assert.AreEqual(3.0, f.Evaluate(s => (s == "X1") ? 2 : 1));
+            Formula f = new Formula("1 + a1");
+            Assert.AreEqual(2.0, f.Evaluate(TestLookup));
         }
 
 
@@ -365,7 +366,6 @@ namespace FormulaTest
         public void SingleOperator()
         {
             Formula f = new Formula("+");
-            f.Evaluate(s => 0);
         }
 
 
@@ -375,7 +375,6 @@ namespace FormulaTest
         public void ExtraOperator()
         {
             Formula f = new Formula("2+5+");
-            f.Evaluate(s => 0);
         }
 
 
@@ -385,7 +384,6 @@ namespace FormulaTest
         public void ExtraRightParentheses()
         {
             Formula f = new Formula("2+5*7)");
-            f.Evaluate(s => 0);
         }
 
 
@@ -395,7 +393,6 @@ namespace FormulaTest
         public void ExtraLeftParentheses()
         {
             Formula f = new Formula("(2+5*7");
-            f.Evaluate(s => 0);
         }
 
 
@@ -405,7 +402,6 @@ namespace FormulaTest
         public void ParensNoOperator()
         {
             Formula f = new Formula("5+7+(5)8");
-            f.Evaluate(s => 0);
         }
 
 
@@ -415,7 +411,6 @@ namespace FormulaTest
         public void Empty()
         {
             Formula f = new Formula("");
-            f.Evaluate(s => 0);
         }
 
 
@@ -473,7 +468,6 @@ namespace FormulaTest
         public void OperatorThenClosingParen()
         {
             Formula f = new Formula("(1+)");
-            f.Evaluate(s => 0);
         }
 
 
@@ -483,7 +477,6 @@ namespace FormulaTest
         public void OpeningAndClosingParen()
         {
             Formula f = new Formula("1 + ()");
-            f.Evaluate(s => 0);
         }
 
 
@@ -493,7 +486,6 @@ namespace FormulaTest
         public void OpeningParenThenOperator()
         {
             Formula f = new Formula("5 (+6)");
-            f.Evaluate(s => 0);
         }
 
 
@@ -510,6 +502,9 @@ namespace FormulaTest
 
 
 
+        /// <summary>
+        /// This makes sure that it checks for validity after normalization
+        /// </summary>
         [TestMethod]
         public void IsValidAndNormalizerTest()
         {
@@ -521,6 +516,18 @@ namespace FormulaTest
 
         [TestMethod]
         [ExpectedException(typeof(FormulaFormatException))]
+        public void InvalidVariable()
+        {
+            Formula f = new Formula("1a_ + 6");
+        }
+
+
+
+        /// <summary>
+        /// Tests the IsValid delegate to make sure it throws an error if that delegate returns false.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
         public void IsValidTest()
         {
             Formula f = new Formula("a1 + 6", s => s, s => (s == "A3"));
@@ -528,11 +535,14 @@ namespace FormulaTest
 
 
 
+        /// <summary>
+        /// This is for when the normalized doesn't fit the specifications of a variable
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(FormulaFormatException))]
         public void NormalizedNotVariable()
         {
-            Formula f = new Formula("a1 + 6", s => "1AB2", s => true);
+            Formula f = new Formula("a1 + 6", s => "!A_2", s => true);
         }
 
 
@@ -541,7 +551,7 @@ namespace FormulaTest
         [ExpectedException(typeof(FormulaFormatException))]
         public void InvalidToken()
         {
-            Formula f = new Formula("/? + 6");
+            Formula f = new Formula("/?\" + 6");
         }
 
 

@@ -7,10 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+/// <summary>
+/// Namespace for classes relating to the spreadsheet that contains an evaluator class for some inputted string expression and a stack
+/// extensions class for more convenient stack operations.
+/// </summary>
 namespace SpreadsheetUtilities
 {
     /// <summary>
-    /// Class for added stack commands
+    /// Class for added stack operations
     /// </summary>
     public static class StackExtensions
     {
@@ -49,6 +53,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class Formula
     {
+        //Private string array for containing the tokens that are inputted into a formula.
         private string[] tokens;
 
         /// <summary>
@@ -88,8 +93,10 @@ namespace SpreadsheetUtilities
         /// </summary>
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
+            //Converts all of the tokens into an array
             tokens = GetTokens(formula).ToArray();
 
+            //Error for empty formulas
             if (tokens.Length == 0)
                 throw new FormulaFormatException("No tokens found");
 
@@ -98,46 +105,59 @@ namespace SpreadsheetUtilities
 
             for (int i = 0; i < tokens.Length; i++)
             {
+                //It only checks for precedence errors if it isn't the last element of the array in order to avoid going out of bounds
                 if (i != tokens.Length - 1)
                 {
+                    /*This is the case for voilating the parenthesis/operator following rule (any token that immediately follows an opening
+                     * parenthesis or an operator must be either a number, a variable, or an opening parenthesis). */
                     if ((tokens[i] == "(" || IsOperator(tokens[i])) &&
                        !(tokens[i + 1] == "(" || IsVariable(normalize(tokens[i + 1])) || IsDoubleOrScientific(tokens[i + 1])))
                         throw new FormulaFormatException("Operator/closing_parenthesis follows an operator/opening_parenthesis");
+                    /*This is the case for voilating the extra following rule (any token that immediately follows a number, a variable, or
+                     * a closing parenthesis must be either an operator or a closing parenthesis.). */
                     if ((tokens[i] == ")" || IsVariable(normalize(tokens[i])) || IsDoubleOrScientific(tokens[i])) &&
                         !(tokens[i + 1] == ")" || IsOperator(tokens[i + 1])))
                         throw new FormulaFormatException("Number/variable/closing_parenthesis follows a number/variable");
                 }
 
+                //Increments the parentheses count variables
                 if (tokens[i] == "(")
                     leftParenCount++;
                 else if (tokens[i] == ")")
                     rightParenCount++;
-                else if (IsVariable(normalize(tokens[i])))
-                {
-                    if (!isValid(normalize(tokens[i])))
-                        throw new FormulaFormatException("Variable name doesn't fit validity specifications");
 
-                    tokens[i] = normalize(tokens[i]);
-                }
+                /*If the variable is in the right form, it replaces it with the normalized version and then tests to see if it
+                 * fits the specifications of the IsValid delegate*/
                 else if (IsVariable(tokens[i]))
-                    throw new FormulaFormatException("Variable name doesn't fit specifications after normalization");
+                {
+                    tokens[i] = normalize(tokens[i]);
+
+                    if (!isValid(tokens[i]))
+                        throw new FormulaFormatException("Variable name doesn't fit validity specifications");
+                }
+                //If it's a double, it parses the double and replaces the token with the string version of that parsed double
                 else if (IsDoubleOrScientific(tokens[i]))
                     tokens[i] = Double.Parse(tokens[i]).ToString();
+                //If it isn't an operator, it must be an invalid token
                 else if (!IsOperator(tokens[i]))
                     throw new FormulaFormatException("Invalid token");
 
+                //Throws an exception if the right parentheses exceeds the left parentheses.
                 if (rightParenCount > leftParenCount)
                     throw new FormulaFormatException("Unmatched right parenthesis");
             }
 
+            //Stores start and end for simplicity
             string startToken = tokens[0];
             string endToken = tokens[tokens.Length - 1];
 
+            //Checks to see if it starts and ends with valid tokens
             if (startToken != "(" && !IsVariable(startToken) && !IsDoubleOrScientific(startToken))
                 throw new FormulaFormatException("Starting token isn't a number/variable/opening_parenthesis");
             else if (endToken != ")" && !IsVariable(endToken) && !IsDoubleOrScientific(endToken))
                 throw new FormulaFormatException("Ending token isn't a number/variable/closing_parenthesis");
 
+            //Throws an exception if it doesn't follow the balanced parentheses rule
             if (leftParenCount != rightParenCount)
                 throw new FormulaFormatException("Unbalanced parentheses");
         }
@@ -171,16 +191,16 @@ namespace SpreadsheetUtilities
             Stack<double> valueStack = new Stack<double>();
             Stack<string> operatorStack = new Stack<string>();
 
+            //Goes through each token and does different actions depending on the type
             for (int i = 0; i < tokens.Length; i++)
             {
+                //If it's a double or a variable
                 if (IsDoubleOrScientific(tokens[i]) || IsVariable(tokens[i]))
                 {
                     double num1;
 
                     /*If it fits the format of a double, convert the string into an double. Otherwise convert the variable into an double using
-                     * the inputted function. */
-
-
+                     * the inputted lookup delegate. */
                     if (IsDoubleOrScientific(tokens[i]))
                         Double.TryParse(tokens[i], out num1);
                     else
@@ -195,7 +215,7 @@ namespace SpreadsheetUtilities
                         }
                     }
 
-                    /* If it's empty or the stack doesn't have * or / on the top it just pushes the number to the value stack. Otherwise it uses
+                    /* If the stack doesn't have * or / on the top it just pushes the number to the value stack. Otherwise it uses
                      * the number and the top values of each stack to form an expression, evaluate it, and push it to the value stack. */
                     if (!operatorStack.IsOnTop("*") && !operatorStack.IsOnTop("/"))
                         valueStack.Push(num1);
@@ -204,6 +224,7 @@ namespace SpreadsheetUtilities
                         double num2 = valueStack.Pop();
                         string op = operatorStack.Pop();
 
+                        //If this expression fails, it means that it tried to divide by zero
                         if (!TryCalculateExpression(num2, num1, op, ref returnVal))
                             return new FormulaError("Error dividing by 0");
 
@@ -244,8 +265,8 @@ namespace SpreadsheetUtilities
 
                     operatorStack.Pop();
 
-                    /* If it's not empty and the operator stack has * or / on the top, it uses the values of each stack to form an expression, evaluate it,
-                     * and push it to the value stack. */
+                    /* If the operator stack has * or / on the top, it uses the values of each stack to form an
+                     * expression, evaluate it, and push it to the value stack. */
                     if (operatorStack.IsOnTop("*") || operatorStack.IsOnTop("/"))
                     {
                         TryCalcFromStacks(valueStack, operatorStack, ref returnVal);
@@ -279,10 +300,12 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<String> GetVariables()
         {
+            //Creates a hash set to return since then duplicates will be combined
             HashSet<string> variables = new HashSet<string>();
 
             foreach (string token in tokens)
             {
+                //Adds the tokens that are variables
                 if (IsVariable(token))
                     variables.Add(token);
             }
@@ -301,6 +324,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override string ToString()
         {
+            //Joins the token array and returns that
             return string.Join("", tokens);
         }
 
@@ -326,10 +350,12 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override bool Equals(object obj)
         {
+            //If the other object is null or it isn't a formula it returns false.
             if (obj is null || obj.GetType() != typeof(Formula))
                 return false;
             else
             {
+                //Otherwise it compares the string versions
                 string otherTokens = obj.ToString();
                 return otherTokens == this.ToString();
             }
@@ -342,11 +368,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator ==(Formula f1, Formula f2)
         {
+            //If they're both null it returns true but if one is null it returns false
             if (f1 is null && f2 is null)
                 return true;
             else if (f1 is null || f2 is null)
                 return false;
 
+            //Otherwise it just depends on the equals method
             return f1.Equals(f2);
         }
 
@@ -405,25 +433,43 @@ namespace SpreadsheetUtilities
                 output = num1 * num2;
             else if (op == "/")
             {
+                //Dividing by zero returns false
                 if (num2 == 0)
                     return false;
                 output = num1 / num2;
             }
+            //Incorrect operator returns false
             else return false;
 
             return true;
         }
 
+        /// <summary>
+        /// Tests if a string is an operator (+-*/)
+        /// </summary>
+        /// <param name="s">String to be tested</param>
+        /// <returns>Whether or not the string is an operator</returns>
         bool IsOperator(string s)
         {
             return (s == "+" || s == "-" || s == "*" || s == "/");
         }
 
+        /// <summary>
+        /// Tests if a string fits the format of a variable. This format is that it is a letter or underscore followed by a combination of 
+        /// letters, underscores, or digits.
+        /// </summary>
+        /// <param name="s">String to be tested</param>
+        /// <returns>Whether or not the string is a variable</returns>
         bool IsVariable(string s)
         {
             return Regex.IsMatch(s, @"[a-zA-Z_](?:[a-zA-Z_]|\d)*");
         }
 
+        /// <summary>
+        /// Tests if a string fits the format of a double or a number in scientific notation
+        /// </summary>
+        /// <param name="s">String to be tested</param>
+        /// <returns>Whether or not it is a double/scientific notation number</returns>
         bool IsDoubleOrScientific(string s)
         {
             if (Regex.IsMatch(s, @"^(\d+\.\d*|\d*\.\d+|\d+)?([eE][\+-]?\d+)?$"))
