@@ -22,6 +22,7 @@ namespace FormulaEvaluator
         }
     }
 
+
     public static class Evaluator
     {
         /// <summary>
@@ -49,11 +50,11 @@ namespace FormulaEvaluator
             else if (op == "/")
             {
                 //Uses this if statement to avoid dividing by 0
-                if(num2 == 0)
+                if (num2 == 0)
                     throw new ArgumentException("Error dividing by 0");
                 return num1 / num2;
             }
-            
+
             //Invalid operator was inputted (This error shouldn't ever happen but just in case)
             throw new ArgumentException("Invalid operator");
         }
@@ -64,7 +65,7 @@ namespace FormulaEvaluator
         /// <param name="stack1">Stack of values</param>
         /// <param name="stack2">Stack of operators</param>
         /// <returns>Calculated value of the expression between the stack values</returns>
-        public static int CalcFromStacks (Stack<int> stack1, Stack<string> stack2)
+        public static int CalcFromStacks(Stack<int> stack1, Stack<string> stack2)
         {
             int num1 = stack1.Pop();
             int num2 = stack1.Pop();
@@ -83,11 +84,11 @@ namespace FormulaEvaluator
         {
             //Splits the expression into parts and removes the whitespace leading and tailing each component
             string[] substrings = Regex.Split(exp, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
-            for(int i = 0; i < substrings.Length; i++)
+            for (int i = 0; i < substrings.Length; i++)
             {
                 substrings[i] = substrings[i].Trim();
             }
-            
+
             //Creates stacks to hold the values and operators
             Stack<int> valueStack = new Stack<int>();
             Stack<string> operatorStack = new Stack<string>();
@@ -101,7 +102,7 @@ namespace FormulaEvaluator
                     int num1;
 
                     //If it's a number, convert the string into an integer. Otherwise convert the variable into an integer using the inputted function.
-                    if(Regex.IsMatch(substrings[i], @"^\d+$"))
+                    if (Regex.IsMatch(substrings[i], @"^\d+$"))
                         num1 = Convert.ToInt32(substrings[i]);
                     else
                         num1 = variableEvaluator(substrings[i]);
@@ -165,7 +166,7 @@ namespace FormulaEvaluator
             if (operatorStack.Count == 0)
             {
                 //It throws an exception if there's an incorrect amount of remaining values on the stack
-                if(valueStack.Count != 1)
+                if (valueStack.Count != 1)
                     throw new ArgumentException("Invalid expression");
                 return valueStack.Pop();
             }
@@ -173,7 +174,7 @@ namespace FormulaEvaluator
             else
             {
                 //It throws an exception if there's an incorrect amount of remaining values on the stack or an incorrect amount of operators on the other stack
-                if(operatorStack.Count != 1 || valueStack.Count != 2)
+                if (operatorStack.Count != 1 || valueStack.Count != 2)
                     throw new ArgumentException("Invalid expression");
                 return CalcFromStacks(valueStack, operatorStack);
             }
