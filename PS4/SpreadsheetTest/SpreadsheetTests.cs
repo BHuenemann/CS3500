@@ -66,6 +66,50 @@ namespace SpreadsheetTests
         }
 
 
+        [ExpectedException(typeof(InvalidNameException))]
+        [TestMethod]
+        public void GetContentsInvalidName()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+
+            s.GetCellContents("1Aaj_S1");
+        }
+
+
+        [TestMethod]
+        public void GetContentsEmptyCell()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+
+            Assert.AreEqual("", s.GetCellContents("z1"));
+        }
+
+
+        /// <summary>
+        /// This test makes sure that cells can have an _, upper case, or lower case at the beginning.
+        /// </summary>
+        [TestMethod]
+        public void PossibleCellNames()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            Formula f = new Formula("1 + A1");
+
+            String[] names = { "_1A2", "A4", "g8" };
+
+            s.SetCellContents(names[0], 2.0);
+            s.SetCellContents(names[1], "text");
+            s.SetCellContents(names[2], f);
+
+            HashSet<string> nameSet = new HashSet<string>(names);
+            HashSet<string> cellNames = new HashSet<string>(s.GetNamesOfAllNonemptyCells());
+
+            Assert.AreEqual(2.0, s.GetCellContents("_1A2"));
+            Assert.AreEqual("text", s.GetCellContents("A4"));
+            Assert.AreEqual(f, s.GetCellContents("g8"));
+            Assert.IsTrue(nameSet.SetEquals(cellNames));
+        }
+
+
         [TestMethod]
         public void GetNonemptyCellNames()
         {
