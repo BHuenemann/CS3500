@@ -45,14 +45,67 @@ namespace SpreadsheetTests
         }
 
 
+        [ExpectedException(typeof(InvalidNameException))]
+        [TestMethod]
+        public void GetContentsEmptyName()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+
+            s.GetCellContents("");
+        }
+
+
+        [ExpectedException(typeof(InvalidNameException))]
+        [TestMethod]
+        public void GetContentsNullName()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            String st = null;
+
+            s.GetCellContents(st);
+        }
+
+
+        [TestMethod]
+        public void GetNonemptyCellNames()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            Formula f = new Formula("1 + A1");
+
+            String[] names = { "A1", "z1", "bSj", "Bbn44a3", "A2", "z22", "bS4j", "Bbn54a3", "Aa1", "zy1", "b2Sj", "Bbn445a3" };
+
+            for(int i = 0; i < 4; i++)
+            {
+                s.SetCellContents(names[i], 5.0);
+                s.SetCellContents(names[4+i], "Why Not");
+                s.SetCellContents(names[8+i], f);
+            }
+
+            HashSet<string> namesSet = new HashSet<string>(names);
+            HashSet<string> cellNames = new HashSet<string>(s.GetNamesOfAllNonemptyCells());
+
+            Assert.IsTrue(namesSet.SetEquals(cellNames));
+        }
+
+
         [TestMethod]
         public void ReplaceContents()
         {
             AbstractSpreadsheet s = new Spreadsheet();
+            Formula f1 = new Formula("1 + A1");
+            Formula f2 = new Formula("2 + A1");
 
             s.SetCellContents("a1", 2.0);
+            s.SetCellContents("b5", "Why");
+            s.SetCellContents("a20", f1);
+
             s.SetCellContents("a1", 5.0);
+            s.SetCellContents("b5", "Why not");
+            s.SetCellContents("a20", f2);
+
             Assert.AreEqual(5.0, s.GetCellContents("a1"));
+            Assert.AreEqual("Why not", s.GetCellContents("b5"));
+            Assert.AreEqual(f2, s.GetCellContents("a20"));
         }
 
 
@@ -119,11 +172,22 @@ namespace SpreadsheetTests
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void SetCellStringTextError()
+        public void SetCellStringEmptyTextError()
         {
             AbstractSpreadsheet s = new Spreadsheet();
 
             s.SetCellContents("A2", "");
+        }
+
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void SetCellStringNullTextError()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            string st = null;
+
+            s.SetCellContents("A2", st);
         }
 
 
@@ -183,7 +247,7 @@ namespace SpreadsheetTests
         /// Tests if the list of dependents is returned when setting a cell to a double
         /// </summary>
         [TestMethod]
-        public void ListOfDependentsReturnedSetDouble()
+        public void DependentsReturnedWithNumber()
         {
             AbstractSpreadsheet s = new Spreadsheet();
             Formula f1 = new Formula("a1 + 2");
@@ -211,7 +275,7 @@ namespace SpreadsheetTests
         /// Tests if the list of dependents is returned when setting a cell to a string
         /// </summary>
         [TestMethod]
-        public void ListOfDependentsReturnedSetString()
+        public void DependentsReturnedWithString()
         {
             AbstractSpreadsheet s = new Spreadsheet();
             Formula f1 = new Formula("a1");
@@ -235,7 +299,7 @@ namespace SpreadsheetTests
         /// Tests if the list of dependents is returned when setting a cell to a formula
         /// </summary>
         [TestMethod]
-        public void ListOfDependentsReturnedSetFormula()
+        public void DependentsReturnedWithFormula()
         {
             AbstractSpreadsheet s = new Spreadsheet();
             Formula f1 = new Formula("a1 + 2");
@@ -253,6 +317,39 @@ namespace SpreadsheetTests
             Assert.AreEqual("d1", list.Current);
             Assert.IsTrue(list.MoveNext());
             Assert.AreEqual("c1", list.Current);
+            Assert.IsFalse(list.MoveNext());
+        }
+
+
+        /// <summary>
+        /// A more complicated dependency test
+        /// </summary>
+        [TestMethod]
+        public void ComplexDependency()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            Formula f1 = new Formula("a1 + 2");
+            Formula f2 = new Formula("a1 - b1");
+            Formula f3 = new Formula("c1 - e1");
+            Formula f4 = new Formula("b1");
+
+            s.SetCellContents("b1", f1);
+            s.SetCellContents("c1", f2);
+            s.SetCellContents("d1", f3);
+            s.SetCellContents("e1", f4);
+
+            IEnumerator<String> list = s.SetCellContents("a1", 2.0).GetEnumerator();
+
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("a1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("b1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("e1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("c1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("d1", list.Current);
             Assert.IsFalse(list.MoveNext());
         }
 

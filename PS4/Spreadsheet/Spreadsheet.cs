@@ -22,7 +22,7 @@ namespace SS
         public override IEnumerable<String> GetNamesOfAllNonemptyCells()
         {
             foreach (KeyValuePair<string, Cell> CellPair in Cells)
-                yield return CellPair.Key;
+                yield return CellPair.Key.ToString();
         }
 
         public override object GetCellContents(String name)
