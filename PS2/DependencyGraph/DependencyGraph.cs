@@ -176,7 +176,7 @@ namespace SpreadsheetUtilities
             if (dependents[s].Count == 0)
                 dependents.Remove(s);
             if (dependees[t].Count == 0)
-                dependents.Remove(t);
+                dependees.Remove(t);
         }
 
 
@@ -187,12 +187,11 @@ namespace SpreadsheetUtilities
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
             //Adds a key if there isn't one but otherwise just clears the key
-            if (dependents.ContainsKey(s))
-            {
-                //Uses toList to make a clone so it doesn't edit the iterator
-                foreach (string d in dependents[s].ToList<string>())
-                    RemoveDependency(s, d);
-            }
+            List<string> DependentsList = new List<string>(GetDependents(s));
+
+            //Uses toList to make a clone so it doesn't edit the iterator
+            foreach (string d in DependentsList)
+                RemoveDependency(s, d);
 
             //Adds each element of the collection to the hash set
             foreach (string t in newDependents)
@@ -206,11 +205,10 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
-            if (dependees.ContainsKey(s))
-            {
-                foreach (string d in dependees[s].ToList<string>())
+            List<string> DependeesList = new List<string>(GetDependees(s));
+
+            foreach (string d in DependeesList)
                     RemoveDependency(d, s);
-            }
 
             foreach (string t in newDependees)
                 AddDependency(t, s);
