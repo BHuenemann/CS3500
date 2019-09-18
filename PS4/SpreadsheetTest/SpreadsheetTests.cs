@@ -190,13 +190,20 @@ namespace SpreadsheetTests
             Formula f2 = new Formula("a1 - b1");
             Formula f3 = new Formula("b1");
 
-            List<String> testList = new List<string> { "a1", "b1", "c1", "d1" };
-
-            IList<String> list = s.SetCellContents("a1", 2.0);
             s.SetCellContents("b1", f1);
             s.SetCellContents("c1", f2);
             s.SetCellContents("d1", f3);
-            Assert.IsTrue(testList == list);
+            IEnumerator<String> list = s.SetCellContents("a1", 2.0).GetEnumerator();
+
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("a1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("b1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("d1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("c1", list.Current);
+            Assert.IsFalse(list.MoveNext());
         }
 
 
@@ -210,12 +217,17 @@ namespace SpreadsheetTests
             Formula f1 = new Formula("a1");
             Formula f2 = new Formula("b1");
 
-            List<String> testList = new List<string> { "a1", "b1", "c1"};
-
-            IList<String> list = s.SetCellContents("a1", "Cat");
             s.SetCellContents("b1", f1);
             s.SetCellContents("c1", f2);
-            Assert.AreEqual(testList, list);
+            IEnumerator<String> list = s.SetCellContents("a1", "Cat").GetEnumerator();
+
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("a1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("b1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("c1", list.Current);
+            Assert.IsFalse(list.MoveNext());
         }
 
 
@@ -230,18 +242,18 @@ namespace SpreadsheetTests
             Formula f2 = new Formula("a1 - b1");
             Formula f3 = new Formula("b1");
 
-            List<String> testList = new List<string> { "b1", "c1", "d1" };
-
             s.SetCellContents("a1", 2.0);
-
             s.SetCellContents("c1", f2);
             s.SetCellContents("d1", f3);
-            IList<String> list = s.SetCellContents("b1", f1);
+            IEnumerator<String> list = s.SetCellContents("b1", f1).GetEnumerator();
 
-            //foreach (string st in list)
-            //    Trace.WriteLine(st);
-
-            Assert.AreEqual(testList, list);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("b1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("d1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("c1", list.Current);
+            Assert.IsFalse(list.MoveNext());
         }
 
 

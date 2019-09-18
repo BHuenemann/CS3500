@@ -83,7 +83,6 @@ namespace SS
 
         protected override IEnumerable<String> GetDirectDependents(String name)
         {
-            List<string> dependents = new List<string>();
             foreach (string dependent in Dependencies.GetDependents(name))
                 yield return dependent;
         }
