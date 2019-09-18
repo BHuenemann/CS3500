@@ -138,19 +138,21 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
-            //Makes sure there's a key and then adds the second string to the hash set
-            if (!dependents.ContainsKey(s))
-                dependents.Add(s, new HashSet<string>());
-            
-            //Only increments the size if the string isn't already in the hash set
-            if (!dependents[s].Contains(t))
+            //If it doesn't already have the key or doesn't have the connection, it increments the size
+            if (!dependents.ContainsKey(s) || !dependents[s].Contains(t))
                 Size++;
 
-            dependents[s].Add(t);
+            //It creates creates a new key with the right hash set if that key doesn't exist. Otherwise it just adds the value to the hashset.
+            if (!dependents.ContainsKey(s))
+                dependents.Add(s, new HashSet<string> { t });
+            else if (!dependents[s].Contains(t))
+                dependents[s].Add(t);
 
+            //Same thing for dependees
             if (!dependees.ContainsKey(t))
-                dependees.Add(t, new HashSet<string>());
-            dependees[t].Add(s);
+                dependees.Add(t, new HashSet<string> { s });
+            else if (!dependees[t].Contains(s))
+                dependees[t].Add(s);
         }
 
 
@@ -195,7 +197,6 @@ namespace SpreadsheetUtilities
             //Adds each element of the collection to the hash set
             foreach (string t in newDependents)
                 AddDependency(s, t);
-
         }
 
 

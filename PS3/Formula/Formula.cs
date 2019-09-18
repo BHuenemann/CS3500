@@ -125,7 +125,6 @@ namespace SpreadsheetUtilities
                     leftParenCount++;
                 else if (tokens[i] == ")")
                     rightParenCount++;
-
                 /*If the variable is in the right form, it replaces it with the normalized version and then tests to see if it
                  * fits the specifications of the IsValid delegate*/
                 else if (IsVariable(tokens[i]))
@@ -269,7 +268,8 @@ namespace SpreadsheetUtilities
                      * expression, evaluate it, and push it to the value stack. */
                     if (operatorStack.IsOnTop("*") || operatorStack.IsOnTop("/"))
                     {
-                        TryCalcFromStacks(valueStack, operatorStack, ref returnVal);
+                        if (!TryCalcFromStacks(valueStack, operatorStack, ref returnVal))
+                            return new FormulaError("Error dividing by 0");
 
                         valueStack.Push(returnVal);
                     }
@@ -462,7 +462,7 @@ namespace SpreadsheetUtilities
         /// <returns>Whether or not the string is a variable</returns>
         bool IsVariable(string s)
         {
-            return Regex.IsMatch(s, @"[a-zA-Z_](?:[a-zA-Z_]|\d)*");
+            return Regex.IsMatch(s, @"^[a-zA-Z_](?:[a-zA-Z_]|\d)*$");
         }
 
         /// <summary>

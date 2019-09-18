@@ -586,7 +586,7 @@ namespace FormulaTest
         public void ToStringWithScientific()
         {
             Formula f = new Formula("2 + 2e6");
-            Assert.AreEqual("2+2e6", f.ToString());
+            Assert.AreEqual("2+2000000", f.ToString());
         }
 
 
