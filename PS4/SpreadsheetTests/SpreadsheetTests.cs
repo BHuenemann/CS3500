@@ -119,11 +119,11 @@ namespace SpreadsheetTests
 
             String[] names = { "A1", "z1", "bSj", "Bbn44a3", "A2", "z22", "bS4j", "Bbn54a3", "Aa1", "zy1", "b2Sj", "Bbn445a3" };
 
-            for(int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
                 s.SetCellContents(names[i], 5.0);
-                s.SetCellContents(names[4+i], "Why Not");
-                s.SetCellContents(names[8+i], f);
+                s.SetCellContents(names[4 + i], "Why Not");
+                s.SetCellContents(names[8 + i], f);
             }
 
             HashSet<string> namesSet = new HashSet<string>(names);
@@ -223,7 +223,7 @@ namespace SpreadsheetTests
 
             s.SetCellContents("1Ab2", "Mantis Shrimp");
         }
-        
+
 
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
