@@ -1,4 +1,6 @@
-﻿using SpreadsheetUtilities;
+﻿//Author: Ben Huenemann
+
+using SpreadsheetUtilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,11 +8,18 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+/// <summary>
+/// Namespace that contains different kinds of spreadsheets. It contains an AbstractSpreadsheet
+/// class (for the skeleton of a spreadsheet) and a Spreadsheet class (which extends the
+/// spreadsheet class and specifies the implementation)
+/// </summary>
 namespace SS
 {
     /// <summary>
-    /// An AbstractSpreadsheet object represents the state of a simple spreadsheet.  A 
-    /// spreadsheet consists of an infinite number of named cells.
+    /// An Spreadsheet object represents the state of a simple spreadsheet.  It extends
+    /// the AbstractSpreadsheet class so it can define the abstract methods and inherit
+    /// the recalculating methods. 
+    /// A spreadsheet consists of an infinite number of named cells.
     /// 
     /// A string is a valid cell name if and only if:
     ///   (1) its first character is an underscore or a letter
@@ -53,9 +62,13 @@ namespace SS
     /// </summary>
     public class Spreadsheet : AbstractSpreadsheet
     {
+        //Private data fields to store the dependencies of the spreadsheet and the cells
         private DependencyGraph Dependencies;
         private IDictionary<string, Cell> Cells;
 
+        /// <summary>
+        /// Empty constructor that sets up the DependencyGraph and Dictionary
+        /// </summary>
         public Spreadsheet()
         {
             Dependencies = new DependencyGraph();
@@ -76,7 +89,11 @@ namespace SS
         /// 
         /// Otherwise, returns the contents (as opposed to the value) of the named cell.  The return
         /// value should be either a string, a double, or a Formula.
+        /// 
+        /// If the name is valid but not in the spreadsheet, it returns an empty string.
         /// </summary>
+        /// <param name="name">Name of the cell being accessed</param>
+        /// <returns>Contents of the cell being accessed</returns>
         public override object GetCellContents(String name)
         {
             if (name is null || !IsVariable(name))
@@ -97,16 +114,21 @@ namespace SS
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
         /// list {A1, B1, C1} is returned.
         /// </summary>
+        /// <param name="name">Name of the cell being set</param>
+        /// <param name="number">Value the cell should be set to</param>
+        /// <returns>List of cells that depend on the named cell</returns>
         public override IList<String> SetCellContents(String name, double number)
         {
-            if (!IsVariable(name))
+            if (name is null || !IsVariable(name))
                 throw new InvalidNameException();
 
             if (!Cells.ContainsKey(name))
-                Cells.Add(name, new Cell(number));
+                Cells.Add(name, new Cell(name, number));
+            //If the name already has a cell, replace the cell
             else
-                Cells[name] = new Cell(number);
+                Cells[name].CellContent = number;
 
+            //Recalculate at the end and return the dependents
             return GetCellsToRecalculate(name).ToList();
         }
 
@@ -115,6 +137,9 @@ namespace SS
         /// 
         /// Otherwise, if name is null or invalid, throws an InvalidNameException.
         /// 
+        /// Otherwise, if the text is empty it removes the dependencies and then removes
+        /// the cell.
+        /// 
         /// Otherwise, the contents of the named cell becomes text.  The method returns a
         /// list consisting of name plus the names of all other cells whose value depends, 
         /// directly or indirectly, on the named cell.
@@ -122,17 +147,36 @@ namespace SS
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
         /// list {A1, B1, C1} is returned.
         /// </summary>
+        /// <param name="name">Name of the cell being set</param>
+        /// <param name="text">Text the cell should be set to</param>
+        /// <returns>List of cells that depend on the named cell</returns>
         public override IList<String> SetCellContents(String name, String text)
         {
-            if (text is null || text == "")
-                throw new ArgumentNullException();
-            if (!IsVariable(name))
+            if (name is null || !IsVariable(name))
                 throw new InvalidNameException();
+            else if (text is null)
+                throw new ArgumentNullException();
+
+            else if (text == "")
+            {
+                if (Cells.ContainsKey(name))
+                {
+                    //It only removes the dependencies if it is a formula
+                    if (Cells[name].CellContent is Formula)
+                    {
+                        foreach (string variable in ((Formula)Cells[name].CellContent).GetVariables())
+                            Dependencies.RemoveDependency(variable, name);
+                    }
+                    Cells.Remove(name);
+                }
+                //Recalculate at the end and return the dependents
+                return GetCellsToRecalculate(name).ToList();
+            }
 
             if (!Cells.ContainsKey(name))
-                Cells.Add(name, new Cell(text));
+                Cells.Add(name, new Cell(name, text));
             else
-                Cells[name] = new Cell(text);
+                Cells[name].CellContent = text;
 
             return GetCellsToRecalculate(name).ToList();
         }
@@ -152,22 +196,30 @@ namespace SS
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
         /// list {A1, B1, C1} is returned.
         /// </summary>
+        /// <param name="name">Name of the cell being set</param>
+        /// <param name="formula">Formula the cell should be set to</param>
+        /// <returns>List of cells that depend on the named cell</returns>
         public override IList<String> SetCellContents(String name, Formula formula)
         {
-            if (!IsVariable(name))
+            if (name is null || !IsVariable(name))
                 throw new InvalidNameException();
             if (formula is null)
                 throw new ArgumentNullException();
 
             List<string> AllDependencies;
 
+            //Adds all of the dependencies from the formula
             foreach (string variable in formula.GetVariables())
                 Dependencies.AddDependency(variable, name);
+
+            //This is for the case of a circular exception
             try
             {
                 AllDependencies = GetCellsToRecalculate(name).ToList();
             }
-            catch(CircularException)
+            /* If it catches a circular exception, it undos the changes by removing
+             * dependencies and then throws the exception at the end.*/
+            catch (CircularException)
             {
                 foreach (string variable in formula.GetVariables())
                     Dependencies.RemoveDependency(variable, name);
@@ -176,9 +228,9 @@ namespace SS
             }
 
             if (!Cells.ContainsKey(name))
-                Cells.Add(name, new Cell(formula));
+                Cells.Add(name, new Cell(name, formula));
             else
-                Cells[name] = new Cell(formula);
+                Cells[name].CellContent = formula;
 
             return AllDependencies;
         }
@@ -200,8 +252,12 @@ namespace SS
         /// D1 contains the formula B1 - C1
         /// The direct dependents of A1 are B1 and C1
         /// </summary>
+        /// <param name="name">Name of the cell being accessed</param>
+        /// <returns>An IEnumerable consisting of cells that directly depend on the named cell</returns>
         protected override IEnumerable<String> GetDirectDependents(String name)
         {
+            if (name is null)
+                throw new ArgumentException();
             foreach (string dependent in Dependencies.GetDependents(name))
                 yield return dependent;
         }
@@ -217,25 +273,66 @@ namespace SS
             return Regex.IsMatch(s, @"^[a-zA-Z_](?:[a-zA-Z_]|\d)*$");
         }
 
+        /// <summary>
+        /// Private cell class for the elements of the dictionary. Each cell
+        /// stores it's name and it's value. The cell's value can only be a
+        /// double, string, or formula.
+        /// 
+        /// The name of a cell is immutable but it's value can be changed.
+        /// </summary>
         private class Cell
         {
-            public Cell(double n)
+            /// <summary>
+            /// Constructor for if the cell holds a double
+            /// </summary>
+            /// <param name="name">Name of the cell</param>
+            /// <param name="value">Double that should be stored in the cell</param>
+            public Cell(string name, double value)
             {
-                CellContent = n;
-            }
-            public Cell(string s)
-            {
-                CellContent = s;
-            }
-            public Cell(Formula f)
-            {
-                CellContent = f;
+                Name = name;
+                CellContent = value;
             }
 
-            public object CellContent
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="name">Name of the cell</param>
+            /// <param name="text">String that should be stored in the cell</param>
+            public Cell(string name, string text)
+            {
+                Name = name;
+                CellContent = text;
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="name">Name of the cell</param>
+            /// <param name="formula">Formula that should be stored in the cell</param>
+            public Cell(string name, Formula formula)
+            {
+                Name = name;
+                CellContent = formula;
+            }
+
+            /// <summary>
+            /// Immutable name property. Currently it isn't used but it's good to store
+            /// it just in case.
+            /// </summary>
+            public object Name
             {
                 get;
                 private set;
+            }
+
+            /// <summary>
+            /// Content the cell is storing. It's written as a property since future versions
+            /// may require different get and set methods.
+            /// </summary>
+            public object CellContent
+            {
+                get;
+                set;
             }
         }
     }

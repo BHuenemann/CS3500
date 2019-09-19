@@ -1,3 +1,5 @@
+//Author: Ben Huenemann
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SpreadsheetUtilities;
 using SS;
@@ -60,9 +62,8 @@ namespace SpreadsheetTests
         public void GetContentsNullName()
         {
             AbstractSpreadsheet s = new Spreadsheet();
-            String st = null;
 
-            s.GetCellContents(st);
+            s.GetCellContents(null);
         }
 
 
@@ -196,7 +197,7 @@ namespace SpreadsheetTests
 
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
-        public void SetCellDoubleNameError()
+        public void SetCellDoubleInvalidNameError()
         {
             AbstractSpreadsheet s = new Spreadsheet();
 
@@ -206,21 +207,31 @@ namespace SpreadsheetTests
 
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
-        public void SetCellStringNameError()
+        public void SetCellDoubleNullNameError()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+
+            s.SetCellContents(null, 2.0);
+        }
+
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void SetCellStringInvalidNameError()
         {
             AbstractSpreadsheet s = new Spreadsheet();
 
             s.SetCellContents("1Ab2", "Mantis Shrimp");
         }
-
+        
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void SetCellStringEmptyTextError()
+        [ExpectedException(typeof(InvalidNameException))]
+        public void SetCellStringNullNameError()
         {
             AbstractSpreadsheet s = new Spreadsheet();
 
-            s.SetCellContents("A2", "");
+            s.SetCellContents(null, "Mantis Shrimp");
         }
 
 
@@ -229,15 +240,73 @@ namespace SpreadsheetTests
         public void SetCellStringNullTextError()
         {
             AbstractSpreadsheet s = new Spreadsheet();
-            string st = null;
 
-            s.SetCellContents("A2", st);
+            s.SetCellContents("A2", (string)null);
+        }
+
+
+        /// <summary>
+        /// Setting a cell to an empty string should remove the cell and it's dependencies. This test adds some 
+        /// formulas, deletes one, and then measures the outcome of that deletion.
+        /// </summary>
+        [TestMethod]
+        public void SetCellStringEmptyText()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            Formula f1 = new Formula("a1 + 2");
+            Formula f2 = new Formula("a1 - b1");
+            Formula f3 = new Formula("b1");
+
+            s.SetCellContents("b1", f1);
+            s.SetCellContents("c1", f2);
+            s.SetCellContents("d1", f3);
+            IEnumerator<String> list = s.SetCellContents("a1", 2.0).GetEnumerator();
+
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("a1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("b1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("d1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("c1", list.Current);
+            Assert.IsFalse(list.MoveNext());
+
+            String[] names = { "a1", "b1", "c1", "d1" };
+            HashSet<string> namesSet = new HashSet<string>(names);
+            HashSet<string> cellNames = new HashSet<string>(s.GetNamesOfAllNonemptyCells());
+
+            Assert.IsTrue(namesSet.SetEquals(cellNames));
+
+            list = s.SetCellContents("b1", "").GetEnumerator();
+
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("b1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("d1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("c1", list.Current);
+            Assert.IsFalse(list.MoveNext());
+
+            list = s.SetCellContents("a1", 2.0).GetEnumerator();
+
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("a1", list.Current);
+            Assert.IsTrue(list.MoveNext());
+            Assert.AreEqual("c1", list.Current);
+            Assert.IsFalse(list.MoveNext());
+
+            String[] names2 = { "a1", "c1", "d1" };
+            namesSet = new HashSet<string>(names2);
+            cellNames = new HashSet<string>(s.GetNamesOfAllNonemptyCells());
+
+            Assert.IsTrue(namesSet.SetEquals(cellNames));
         }
 
 
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
-        public void SetCellFormulaNameError()
+        public void SetCellFormulaInvalidNameError()
         {
             AbstractSpreadsheet s = new Spreadsheet();
             Formula f = new Formula("a1 + 2 / 5");
@@ -247,13 +316,23 @@ namespace SpreadsheetTests
 
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void SetCellFormulaNullError()
+        [ExpectedException(typeof(InvalidNameException))]
+        public void SetCellFormulaNullNameError()
         {
             AbstractSpreadsheet s = new Spreadsheet();
-            Formula f = null;
+            Formula f = new Formula("a1 + 2 / 5");
 
-            s.SetCellContents("A2", f);
+            s.SetCellContents(null, f);
+        }
+
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void SetCellFormulaNullFormulaError()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+
+            s.SetCellContents("A2", (Formula)null);
         }
 
 

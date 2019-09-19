@@ -178,6 +178,7 @@ namespace SS
         {
             LinkedList<String> changed = new LinkedList<String>();
             HashSet<String> visited = new HashSet<String>();
+
             foreach (String name in names)
             {
                 if (!visited.Contains(name))
@@ -202,11 +203,23 @@ namespace SS
         /// <summary>
         /// A helper for the GetCellsToRecalculate method.
         /// 
-        ///   -- You should fully comment what is going on below --
+        /// First it marks the cell as visited so it doesn't revisit it later
+        /// 
+        /// Then it recursively travels through the direct dependents of each string. If a dependent
+        /// depends on the starting node, it must be a circular dependency so it throws a circular
+        /// exception.
+        /// 
+        /// At the end of each recursive call, it adds the dependent to the beginning of the changed
+        /// list in order to keep track of the dependent nodes. The fact that it's added to the
+        /// beginning is to make sure that the changed list will be depth first but still in an order
+        /// where each cell can be calculated from the previous cells.
+        /// 
+        /// In the end, it adds to the visited set and changed lists so those can be used later.
         /// </summary>
         private void Visit(String start, String name, ISet<String> visited, LinkedList<String> changed)
         {
             visited.Add(name);
+
             foreach (String n in GetDirectDependents(name))
             {
                 if (n.Equals(start))
