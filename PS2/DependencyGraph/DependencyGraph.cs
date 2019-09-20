@@ -111,7 +111,7 @@ namespace SpreadsheetUtilities
             if (!dependents.ContainsKey(s))
                 return new HashSet<string>();
 
-            return dependents[s];
+            return dependents[s].ToList();
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace SpreadsheetUtilities
             if (!dependees.ContainsKey(s))
                 return new HashSet<string>();
 
-            return dependees[s];
+            return dependees[s].ToList();
         }
 
 

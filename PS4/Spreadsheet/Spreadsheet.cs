@@ -62,8 +62,16 @@ namespace SS
     /// </summary>
     public class Spreadsheet : AbstractSpreadsheet
     {
-        //Private data fields to store the dependencies of the spreadsheet and the cells
+        /// <summary>
+        /// Private class to store the dependencies between the cells. It maps cell names
+        /// to the cell's dependents and dependees.
+        /// </summary>
         private DependencyGraph Dependencies;
+
+        /// <summary>
+        /// Private dictionary to map between the cell names (keys) and the actual cells. This
+        /// way the cells can be accessed easily and there can't be any repeats.
+        /// </summary>
         private IDictionary<string, Cell> Cells;
 
         /// <summary>
@@ -236,11 +244,7 @@ namespace SS
         }
 
         /// <summary>
-        /// If name is null, throws an ArgumentNullException.
-        /// 
-        /// Otherwise, if name isn't a valid cell name, throws an InvalidNameException.
-        /// 
-        /// Otherwise, returns an enumeration, without duplicates, of the names of all cells whose
+        /// Returns an enumeration, without duplicates, of the names of all cells whose
         /// values depend directly on the value of the named cell.  In other words, returns
         /// an enumeration, without duplicates, of the names of all cells that contain
         /// formulas containing name.
@@ -256,8 +260,6 @@ namespace SS
         /// <returns>An IEnumerable consisting of cells that directly depend on the named cell</returns>
         protected override IEnumerable<String> GetDirectDependents(String name)
         {
-            if (name is null)
-                throw new ArgumentException();
             foreach (string dependent in Dependencies.GetDependents(name))
                 yield return dependent;
         }
