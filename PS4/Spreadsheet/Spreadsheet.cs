@@ -130,11 +130,20 @@ namespace SS
             if (name is null || !IsVariable(name))
                 throw new InvalidNameException();
 
-            if (!Cells.ContainsKey(name))
-                Cells.Add(name, new Cell(name, number));
+            if (Cells.ContainsKey(name))
+            {
+                //It only removes the dependencies if it is a formula
+                if (Cells[name].CellContent is Formula)
+                {
+                    foreach (string variable in ((Formula)Cells[name].CellContent).GetVariables())
+                        Dependencies.RemoveDependency(variable, name);
+                }
+                Cells[name].CellContent = number;
+            }
+
             //If the name already has a cell, replace the cell
             else
-                Cells[name].CellContent = number;
+                Cells.Add(name, new Cell(name, number));
 
             //Recalculate at the end and return the dependents
             return GetCellsToRecalculate(name).ToList();
@@ -165,26 +174,23 @@ namespace SS
             else if (text is null)
                 throw new ArgumentNullException();
 
-            else if (text == "")
+            if (Cells.ContainsKey(name))
             {
-                if (Cells.ContainsKey(name))
+                //It only removes the dependencies if it is a formula
+                if (Cells[name].CellContent is Formula)
                 {
-                    //It only removes the dependencies if it is a formula
-                    if (Cells[name].CellContent is Formula)
-                    {
-                        foreach (string variable in ((Formula)Cells[name].CellContent).GetVariables())
-                            Dependencies.RemoveDependency(variable, name);
-                    }
-                    Cells.Remove(name);
+                    foreach (string variable in ((Formula)Cells[name].CellContent).GetVariables())
+                        Dependencies.RemoveDependency(variable, name);
                 }
-                //Recalculate at the end and return the dependents
-                return GetCellsToRecalculate(name).ToList();
-            }
 
-            if (!Cells.ContainsKey(name))
+                if (text == "")
+                    Cells.Remove(name);
+                else
+                    Cells[name].CellContent = text;
+            }
+            else if (text != "")
                 Cells.Add(name, new Cell(name, text));
-            else
-                Cells[name].CellContent = text;
+
 
             return GetCellsToRecalculate(name).ToList();
         }
