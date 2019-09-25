@@ -472,7 +472,7 @@ namespace SpreadsheetUtilities
         /// <returns>Whether or not it is a double/scientific notation number</returns>
         bool IsDoubleOrScientific(string s)
         {
-            if (Regex.IsMatch(s, @"^(\d+\.\d*|\d*\.\d+|\d+)?([eE][\+-]?\d+)?$"))
+
                 return true;
             return false;
         }
