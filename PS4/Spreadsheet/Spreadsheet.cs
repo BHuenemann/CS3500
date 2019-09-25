@@ -66,21 +66,113 @@ namespace SS
         /// Private class to store the dependencies between the cells. It maps cell names
         /// to the cell's dependents and dependees.
         /// </summary>
-        private DependencyGraph Dependencies;
+        private DependencyGraph Dependencies = new DependencyGraph();
 
         /// <summary>
         /// Private dictionary to map between the cell names (keys) and the actual cells. This
         /// way the cells can be accessed easily and there can't be any repeats.
         /// </summary>
-        private IDictionary<string, Cell> Cells;
+        private IDictionary<string, Cell> Cells = new Dictionary<string, Cell>();
+
+
+
+        private string FilePath = "default path idk CHANGE LATER";
+        /// <summary>
+        /// True if this spreadsheet has been modified since it was created or saved                  
+        /// (whichever happened most recently); false otherwise.
+        /// </summary>
+        public override bool Changed { get; protected set; }
+
+
 
         /// <summary>
-        /// Empty constructor that sets up the DependencyGraph and Dictionary
+        /// 
         /// </summary>
-        public Spreadsheet()
+        public Spreadsheet() : base(i => true, i => i, "default") { }
+
+        /// <summary>
+        /// Constructs an abstract spreadsheet by recording its variable validity test,
+        /// its normalization method, and its version information.  The variable validity
+        /// test is used throughout to determine whether a string that consists of one or
+        /// more letters followed by one or more digits is a valid cell name.  The variable
+        /// equality test should be used thoughout to determine whether two variables are
+        /// equal.
+        /// </summary>
+        /// <param name="isValid"></param>
+        /// <param name="normalize"></param>
+        /// <param name="version"></param>
+        public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) :
+            base(isValid, normalize, version) { }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="isValid"></param>
+        /// <param name="normalize"></param>
+        /// <param name="version"></param>
+        public Spreadsheet(string filePath, Func<string, bool> isValid, Func<string, string> normalize, string version) :
+            base(isValid, normalize, version)
         {
-            Dependencies = new DependencyGraph();
-            Cells = new Dictionary<string, Cell>();
+            FilePath = filePath;
+        }
+
+
+
+        /// <summary>
+        /// Returns the version information of the spreadsheet saved in the named file.
+        /// If there are any problems opening, reading, or closing the file, the method
+        /// should throw a SpreadsheetReadWriteException with an explanatory message.
+        /// </summary>
+        public override string GetSavedVersion(String filename)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Writes the contents of this spreadsheet to the named file using an XML format.
+        /// The XML elements should be structured as follows:
+        /// 
+        /// <spreadsheet version="version information goes here">
+        /// 
+        /// <cell>
+        /// <name>
+        /// cell name goes here
+        /// </name>
+        /// <contents>
+        /// cell contents goes here
+        /// </contents>    
+        /// </cell>
+        /// 
+        /// </spreadsheet>
+        /// 
+        /// There should be one cell element for each non-empty cell in the spreadsheet.  
+        /// If the cell contains a string, it should be written as the contents.  
+        /// If the cell contains a double d, d.ToString() should be written as the contents.  
+        /// If the cell contains a Formula f, f.ToString() with "=" prepended should be written as the contents.
+        /// 
+        /// If there are any problems opening, writing, or closing the file, the method should throw a
+        /// SpreadsheetReadWriteException with an explanatory message.
+        /// </summary>
+        public override void Save(String filename)
+        {
+        }
+
+        /// <summary>
+        /// If name is null or invalid, throws an InvalidNameException.
+        /// 
+        /// Otherwise, returns the value (as opposed to the contents) of the named cell.  The return
+        /// value should be either a string, a double, or a SpreadsheetUtilities.FormulaError.
+        /// </summary>
+        public override object GetCellValue(String name)
+        {
+            name = Normalize(name);
+            ExceptionHandling(name);
+
+            if (!Cells.ContainsKey(name))
+                return "";
+
+            return null;
         }
 
         /// <summary>
@@ -104,12 +196,75 @@ namespace SS
         /// <returns>Contents of the cell being accessed</returns>
         public override object GetCellContents(String name)
         {
-            if (name is null || !IsVariable(name))
-                throw new InvalidNameException();
+            name = Normalize(name);
+            ExceptionHandling(name);
 
             if (!Cells.ContainsKey(name))
                 return "";
             return Cells[name].CellContent;
+        }
+
+        /// <summary>
+        /// If content is null, throws an ArgumentNullException.
+        /// 
+        /// Otherwise, if name is null or invalid, throws an InvalidNameException.
+        /// 
+        /// Otherwise, if content parses as a double, the contents of the named
+        /// cell becomes that double.
+        /// 
+        /// Otherwise, if content begins with the character '=', an attempt is made
+        /// to parse the remainder of content into a Formula f using the Formula
+        /// constructor.  There are then three possibilities:
+        /// 
+        ///   (1) If the remainder of content cannot be parsed into a Formula, a 
+        ///       SpreadsheetUtilities.FormulaFormatException is thrown.
+        ///       
+        ///   (2) Otherwise, if changing the contents of the named cell to be f
+        ///       would cause a circular dependency, a CircularException is thrown,
+        ///       and no change is made to the spreadsheet.
+        ///       
+        ///   (3) Otherwise, the contents of the named cell becomes f.
+        /// 
+        /// Otherwise, the contents of the named cell becomes content.
+        /// 
+        /// If an exception is not thrown, the method returns a list consisting of
+        /// name plus the names of all other cells whose value depends, directly
+        /// or indirectly, on the named cell. The order of the list should be any
+        /// order such that if cells are re-evaluated in that order, their dependencies 
+        /// are satisfied by the time they are evaluated.
+        /// 
+        /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
+        /// list {A1, B1, C1} is returned.
+        /// </summary>
+        public override IList<String> SetContentsOfCell(String name, String content)
+        {
+            name = Normalize(name);
+            IList<string> cellDependents;
+
+            ExceptionHandling(name, content);
+
+            if (Regex.IsMatch(content, @"^(\d+\.\d*|\d*\.\d+|\d+)?$"))
+                cellDependents = SetCellContents(name, Double.Parse(content));
+            else if (content[0] == '=')
+            {
+                Formula cellFormula = new Formula(name.Substring(1), Normalize, IsValid);
+
+                cellDependents = SetCellContents(name, cellFormula);
+            }
+            else
+                cellDependents = SetCellContents(name, content);
+
+            foreach(string s in cellDependents)
+            {
+                if (Cells[s].CellContent is double)
+                    Cells[s].CellValue = Double.Parse(content);
+                else if (Cells[s].CellContent is string)
+                    Cells[s].CellValue = null;
+                else if (Cells[s].CellContent is Formula)
+                    Cells[s].CellValue = ((Formula)Cells[s].CellContent).Evaluate();
+            }
+
+            return cellDependents;
         }
 
         /// <summary>
@@ -125,10 +280,10 @@ namespace SS
         /// <param name="name">Name of the cell being set</param>
         /// <param name="number">Value the cell should be set to</param>
         /// <returns>List of cells that depend on the named cell</returns>
-        public override IList<String> SetCellContents(String name, double number)
+        protected override IList<String> SetCellContents(String name, double number)
         {
-            if (name is null || !IsVariable(name))
-                throw new InvalidNameException();
+            name = Normalize(name);
+            ExceptionHandling(name);
 
             if (Cells.ContainsKey(name))
             {
@@ -167,12 +322,10 @@ namespace SS
         /// <param name="name">Name of the cell being set</param>
         /// <param name="text">Text the cell should be set to</param>
         /// <returns>List of cells that depend on the named cell</returns>
-        public override IList<String> SetCellContents(String name, String text)
+        protected override IList<String> SetCellContents(String name, String text)
         {
-            if (name is null || !IsVariable(name))
-                throw new InvalidNameException();
-            else if (text is null)
-                throw new ArgumentNullException();
+            name = Normalize(name);
+            ExceptionHandling(name, text);
 
             if (Cells.ContainsKey(name))
             {
@@ -213,12 +366,10 @@ namespace SS
         /// <param name="name">Name of the cell being set</param>
         /// <param name="formula">Formula the cell should be set to</param>
         /// <returns>List of cells that depend on the named cell</returns>
-        public override IList<String> SetCellContents(String name, Formula formula)
+        protected override IList<String> SetCellContents(String name, Formula formula)
         {
-            if (name is null || !IsVariable(name))
-                throw new InvalidNameException();
-            if (formula is null)
-                throw new ArgumentNullException();
+            name = Normalize(name);
+            ExceptionHandling(name, formula);
 
             List<string> AllDependencies;
 
@@ -266,8 +417,25 @@ namespace SS
         /// <returns>An IEnumerable consisting of cells that directly depend on the named cell</returns>
         protected override IEnumerable<String> GetDirectDependents(String name)
         {
+            name = Normalize(name);
+            ExceptionHandling(name);
+
             foreach (string dependent in Dependencies.GetDependents(name))
                 yield return dependent;
+        }
+
+
+        private void ExceptionHandling(string s)
+        {
+            if (s is null || !isNameValid(s))
+                throw new InvalidNameException();
+        }
+        private void ExceptionHandling(string s1, object s2)
+        {
+            if (s1 is null || !isNameValid(s1))
+                throw new InvalidNameException();
+            else if (s2 is null)
+                throw new ArgumentNullException();
         }
 
         /// <summary>
@@ -276,9 +444,9 @@ namespace SS
         /// </summary>
         /// <param name="s">String to be tested</param>
         /// <returns>Whether or not the string is a variable</returns>
-        private bool IsVariable(string s)
+        private bool isNameValid(string s)
         {
-            return Regex.IsMatch(s, @"^[a-zA-Z_](?:[a-zA-Z_]|\d)*$");
+            return Regex.IsMatch(s, @"^[a-zA-Z]+\d+$") && IsValid(s);
         }
 
         /// <summary>
@@ -324,8 +492,7 @@ namespace SS
             }
 
             /// <summary>
-            /// Immutable name property. Currently it isn't used but it's good to store
-            /// it just in case.
+            /// Immutable name property of the cell. This way the only way to change the name is by creating a new cell.
             /// </summary>
             public object Name
             {
@@ -338,6 +505,14 @@ namespace SS
             /// may require different get and set methods.
             /// </summary>
             public object CellContent
+            {
+                get;
+                set;
+            }
+            /// <summary>
+            /// Value that the cell is storing.
+            /// </summary>
+            public double CellValue
             {
                 get;
                 set;
