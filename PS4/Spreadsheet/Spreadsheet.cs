@@ -75,9 +75,6 @@ namespace SS
         /// </summary>
         private IDictionary<string, Cell> Cells = new Dictionary<string, Cell>();
 
-
-
-        private string FilePath = "default path idk CHANGE LATER";
         /// <summary>
         /// True if this spreadsheet has been modified since it was created or saved                  
         /// (whichever happened most recently); false otherwise.
@@ -87,7 +84,9 @@ namespace SS
 
 
         /// <summary>
-        /// 
+        /// Constructs an abstract spreadsheet by setting it's variable validity test
+        /// to always return true, it's normalization to the identity method, and the
+        /// version to "default".
         /// </summary>
         public Spreadsheet() : base(i => true, i => i, "default") { }
 
@@ -95,27 +94,32 @@ namespace SS
         /// Constructs an abstract spreadsheet by recording its variable validity test,
         /// its normalization method, and its version information.  The variable validity
         /// test is used throughout to determine whether a string that consists of one or
-        /// more letters followed by one or more digits is a valid cell name.  The variable
-        /// equality test should be used thoughout to determine whether two variables are
-        /// equal.
+        /// more letters followed by one or more digits is a valid cell name.
         /// </summary>
-        /// <param name="isValid"></param>
-        /// <param name="normalize"></param>
-        /// <param name="version"></param>
+        /// <param name="isValid">Method to determine if a cell name is valid</param>
+        /// <param name="normalize">Method to define a standard form for all cell names</param>
+        /// <param name="version">Version of the spreadsheet being created</param>
         public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) :
             base(isValid, normalize, version) { }
 
         /// <summary>
-        /// 
+        /// Constructs an abstract spreadsheet by recording the file path that contains the
+        /// contents for the spreadsheet, its variable validity test, its normalization method,
+        /// and its version information. It reads a file and thows an accurate
+        /// SpreadsheetReadWriteException if any errors occur. It also throws an exception if
+        /// the version of file and version specified don't match. The values from the file are
+        /// inserted into the spreadsheet as cells. The variable validity test is used throughout
+        /// to determine whether a string that consists of one or more letters followed by one
+        /// or more digits is a valid cell name.
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="isValid"></param>
-        /// <param name="normalize"></param>
-        /// <param name="version"></param>
+        /// <param name="filePath">String path of the file being read and converted to a spreadsheet</param>
+        /// <param name="isValid">Method to determine if a cell name is valid</param>
+        /// <param name="normalize">Method to define a standard form for all cell names</param>
+        /// <param name="version">Version of the spreadsheet being created</param>
         public Spreadsheet(string filePath, Func<string, bool> isValid, Func<string, string> normalize, string version) :
             base(isValid, normalize, version)
         {
-            FilePath = filePath;
+            ReadFileAndCheckVersion(filePath, version);
         }
 
 
@@ -125,29 +129,73 @@ namespace SS
         /// If there are any problems opening, reading, or closing the file, the method
         /// should throw a SpreadsheetReadWriteException with an explanatory message.
         /// </summary>
+        /// <param name="filename">String name of the file being read</param>
+        /// <returns>Returns a string containing the version of the spreadsheet XML file</returns>
         public override string GetSavedVersion(String filename)
         {
-            using (XmlReader reader = XmlReader.Create(filename))
+            XmlReader reader;
+
+            //Creating the reader is put in a try catch block so it can handle any errors that come up
+            try
+            {
+                reader = XmlReader.Create(filename);
+            }
+
+
+
+            catch (System.IO.FileNotFoundException)
+            {
+                throw new SpreadsheetReadWriteException("Couldn't find specified file");
+            }
+            catch (ArgumentNullException)
+            {
+                throw new SpreadsheetReadWriteException("Couldn't read since filename was set to null");
+            }
+            catch (UriFormatException)
+            {
+                throw new SpreadsheetReadWriteException("Invalid URI was detected while reading the file");
+            }
+            //Catches any other exception and gives a generic error message
+            catch (Exception)
+            {
+                throw new SpreadsheetReadWriteException("Encountered an error while reading the file");
+            }
+
+
+
+            try
             {
                 while(reader.Read())
                 {
                     if (reader.IsStartElement())
                     {
-                        string currentCell;
-
                         switch (reader.Name)
                         {
-                            case "name":
-                                currentCell = reader.Value;
-                                break;
+                            case "spreadsheet":
+                                return reader["version"];
 
-                            case "content":
-
+                            //Throws an error if any other element is encountered
+                            default:
+                                throw new SpreadsheetReadWriteException("Invalid starting element (couldn't find version)");
                         }
                     }
+
                 }
             }
-            return null;
+            catch (SpreadsheetReadWriteException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw new SpreadsheetReadWriteException("Error occured while reading file");
+            }
+            finally
+            {
+                reader.Dispose();
+            }
+
+            throw new SpreadsheetReadWriteException("Error occured while reading file");
         }
 
         /// <summary>
@@ -175,15 +223,32 @@ namespace SS
         /// If there are any problems opening, writing, or closing the file, the method should throw a
         /// SpreadsheetReadWriteException with an explanatory message.
         /// </summary>
+        /// <param name="filename">String name of the file being written to</param>
         public override void Save(String filename)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
             settings.IndentChars = "\t";
 
-            using (XmlWriter writer = XmlWriter.Create(filename, settings))
+            XmlWriter writer;
+
+            try
+            {
+                writer = XmlWriter.Create(filename, settings);
+            }
+            catch (ArgumentNullException)
+            {
+                throw new SpreadsheetReadWriteException("Couldn't save since filename was set to null");
+            }
+            catch (Exception)
+            {
+                throw new SpreadsheetReadWriteException("Error occured while writing the file");
+            }
+
+            try
             {
                 writer.WriteStartDocument();
+                
 
                 writer.WriteStartElement("spreadsheet");
                 writer.WriteAttributeString("version", Version);
@@ -194,17 +259,204 @@ namespace SS
 
 
                     writer.WriteElementString("name", c.Name);
-                    writer.WriteElementString("content", c.CellContent.ToString());
-                    writer.WriteElementString("value", c.CellValue.ToString());
-
+                    if (c.CellContent is string)
+                        writer.WriteElementString("content", (string)c.CellContent);
+                    else if (c.CellContent is double)
+                        writer.WriteElementString("content", c.CellContent.ToString());
+                    else if (c.CellContent is Formula)
+                        writer.WriteElementString("content", "=" + c.CellContent.ToString());
 
                     writer.WriteEndElement();
                 }
 
                 writer.WriteEndElement();
 
+
                 writer.WriteEndDocument();
             }
+
+
+
+            catch (InvalidOperationException)
+            {
+                throw new SpreadsheetReadWriteException("Invalid operation while writing file");
+            }
+            catch (EncoderFallbackException)
+            {
+                throw new SpreadsheetReadWriteException("Encoder fallback while writing file");
+            }
+            catch (ArgumentException)
+            {
+                throw new SpreadsheetReadWriteException("Invalid argument while writing file");
+            }
+            catch (Exception)
+            {
+                throw new SpreadsheetReadWriteException("Error occured while writing file");
+            }
+
+
+
+            finally
+            {
+                writer.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// This method inputs a file name and a version. First it checks if the file has the same
+        /// version as the one specified and throws an error if it does. After this, it reads in the
+        /// 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="version"></param>
+        protected void ReadFileAndCheckVersion(string filePath, string version)
+        {
+            if (version != GetSavedVersion(filePath))
+                throw new SpreadsheetReadWriteException("File version doesn't match inputted version while reading file");
+
+            XmlReader reader;
+
+            /*This isn't in a try catch block since readfile is only used after GetSavedVersion. Any
+             *file errors will be thrown in GetSavedVersion.*/
+            reader = XmlReader.Create(filePath);
+
+            /*This stack is used to contain the names for each cell so it can create the cell when
+             *it gets to the cell content */
+            Stack<string> nameStack = new Stack<string>();
+
+            int previousElement = 0;
+
+            try
+            {
+                while (reader.Read())
+                {
+                    if (reader.IsStartElement())
+                    {
+                        switch (reader.Name)
+                        {
+                            //Each case checks the previous element and throws an error if the order is incorrect
+                            case "spreadsheet":
+                                CheckPreviousElement(previousElement, 0);
+                                previousElement = 1;
+                                break;
+
+                            case "cell":
+                                CheckPreviousElement(previousElement, 1, 4);
+                                previousElement = 2;
+                                break;
+
+                            case "name":
+                                CheckPreviousElement(previousElement, 2);
+                                previousElement = 3;
+                                reader.Read();
+
+                                //Pushes the name to the stack
+                                nameStack.Push(reader.Value);
+                                break;
+
+                            case "content":
+                                CheckPreviousElement(previousElement, 3);
+                                previousElement = 4;
+                                reader.Read();
+
+                                //Creates a cell with the specified name and value
+                                SetCellContents(nameStack.Pop(), reader.Value);
+                                break;
+
+                            //Thows an exception if the element is unknown
+                            default:
+                                throw new SpreadsheetReadWriteException("Unknown element while reading file");
+
+                        }
+                    }
+                    else
+                    {
+                        //It also checks the end elements to make sure those are in the right order.
+                        switch (reader.Name)
+                        {
+                            case "spreadsheet":
+                                CheckPreviousElement(previousElement, 2);
+                                previousElement = 1;
+                                break;
+
+                            case "cell":
+                                CheckPreviousElement(previousElement, 4);
+                                previousElement = 2;
+                                break;
+
+                            case "name":
+                                CheckPreviousElement(previousElement, 3);
+                                previousElement = 3;
+                                break;
+
+                            case "content":
+                                CheckPreviousElement(previousElement, 4);
+                                previousElement = 4;
+                                break;
+
+                            default:
+                                throw new SpreadsheetReadWriteException("Unknown element while reading file");
+                        }
+                    }
+                }
+                //If it doesn't end with an spreadsheet end element, it throws an error
+                if (previousElement != 1)
+                    throw new SpreadsheetReadWriteException("Invalid end element");
+            }
+
+
+
+            //Exception handling for reading in the file.
+            catch (SpreadsheetReadWriteException)
+            {
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                throw new SpreadsheetReadWriteException("Unmatched content while reading the file");
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                throw new SpreadsheetReadWriteException("Couldn't find the version of the spreadsheet while reading file");
+            }
+            catch (ArgumentNullException)
+            {
+                throw new SpreadsheetReadWriteException("Null argument while reading the file");
+            }
+            catch (InvalidNameException)
+            {
+                throw new SpreadsheetReadWriteException("Invalid cell name while reading file");
+            }
+            catch (CircularException)
+            {
+                throw new SpreadsheetReadWriteException("Encountered a circular dependency while reading the file");
+            }
+            catch (FormulaFormatException)
+            {
+                throw new SpreadsheetReadWriteException("Tried to insert an invalid formula while reading the file");
+            }
+            catch (Exception)
+            {
+                throw new SpreadsheetReadWriteException("Error occured while reading the file");
+            }
+
+
+
+            finally
+            {
+                reader.Dispose();
+            }
+        }
+
+        protected void CheckPreviousElement(int currentValue, int previousCondition)
+        {
+            if (currentValue != previousCondition)
+                throw new SpreadsheetReadWriteException("Invalid element order in XML file");
+        }
+        protected void CheckPreviousElement(int currentValue, int previousCondition1, int previousCondition2)
+        {
+            if (currentValue != previousCondition1 && currentValue != previousCondition2)
+                throw new SpreadsheetReadWriteException("Invalid element order in XML file");
         }
 
         /// <summary>
