@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 /// <summary>
 /// Namespace that contains different kinds of spreadsheets. It contains an AbstractSpreadsheet
@@ -81,7 +82,7 @@ namespace SS
         /// True if this spreadsheet has been modified since it was created or saved                  
         /// (whichever happened most recently); false otherwise.
         /// </summary>
-        public override bool Changed { get; protected set; }
+        public override bool Changed { get; protected set; } = false;
 
 
 
@@ -126,6 +127,26 @@ namespace SS
         /// </summary>
         public override string GetSavedVersion(String filename)
         {
+            using (XmlReader reader = XmlReader.Create(filename))
+            {
+                while(reader.Read())
+                {
+                    if (reader.IsStartElement())
+                    {
+                        string currentCell;
+
+                        switch (reader.Name)
+                        {
+                            case "name":
+                                currentCell = reader.Value;
+                                break;
+
+                            case "content":
+
+                        }
+                    }
+                }
+            }
             return null;
         }
 
@@ -156,6 +177,34 @@ namespace SS
         /// </summary>
         public override void Save(String filename)
         {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "\t";
+
+            using (XmlWriter writer = XmlWriter.Create(filename, settings))
+            {
+                writer.WriteStartDocument();
+
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", Version);
+
+                foreach (Cell c in Cells.Values)
+                {
+                    writer.WriteStartElement("cell");
+
+
+                    writer.WriteElementString("name", c.Name);
+                    writer.WriteElementString("content", c.CellContent.ToString());
+                    writer.WriteElementString("value", c.CellValue.ToString());
+
+
+                    writer.WriteEndElement();
+                }
+
+                writer.WriteEndElement();
+
+                writer.WriteEndDocument();
+            }
         }
 
         /// <summary>
@@ -172,7 +221,7 @@ namespace SS
             if (!Cells.ContainsKey(name))
                 return "";
 
-            return null;
+            return Cells[name].CellValue;
         }
 
         /// <summary>
@@ -243,25 +292,23 @@ namespace SS
 
             ExceptionHandling(name, content);
 
-            if (Regex.IsMatch(content, @"^(\d+\.\d*|\d*\.\d+|\d+)?$"))
+            if (Regex.IsMatch(content, @"^(\d+\.\d*|\d*\.\d+|\d+)+$"))
                 cellDependents = SetCellContents(name, Double.Parse(content));
-            else if (content[0] == '=')
+            else if (content != "" && content[0] == '=')
             {
-                Formula cellFormula = new Formula(name.Substring(1), Normalize, IsValid);
+                Formula cellFormula = new Formula(content.Substring(1), Normalize, IsValid);
 
                 cellDependents = SetCellContents(name, cellFormula);
             }
             else
                 cellDependents = SetCellContents(name, content);
 
+            Changed = true;
+
             foreach(string s in cellDependents)
             {
-                if (Cells[s].CellContent is double)
-                    Cells[s].CellValue = Double.Parse(content);
-                else if (Cells[s].CellContent is string)
-                    Cells[s].CellValue = null;
-                else if (Cells[s].CellContent is Formula)
-                    Cells[s].CellValue = ((Formula)Cells[s].CellContent).Evaluate();
+                if (Cells.ContainsKey(s) && Cells[s].CellContent is Formula)
+                    Cells[s].CellValue = ((Formula)Cells[s].CellContent).Evaluate(CellValueLookup);
             }
 
             return cellDependents;
@@ -283,7 +330,6 @@ namespace SS
         protected override IList<String> SetCellContents(String name, double number)
         {
             name = Normalize(name);
-            ExceptionHandling(name);
 
             if (Cells.ContainsKey(name))
             {
@@ -325,7 +371,6 @@ namespace SS
         protected override IList<String> SetCellContents(String name, String text)
         {
             name = Normalize(name);
-            ExceptionHandling(name, text);
 
             if (Cells.ContainsKey(name))
             {
@@ -369,7 +414,6 @@ namespace SS
         protected override IList<String> SetCellContents(String name, Formula formula)
         {
             name = Normalize(name);
-            ExceptionHandling(name, formula);
 
             List<string> AllDependencies;
 
@@ -424,6 +468,14 @@ namespace SS
                 yield return dependent;
         }
 
+        protected double CellValueLookup(string cell)
+        {
+            object value = GetCellValue(cell);
+            if (value is string || value is FormulaError)
+                throw new ArgumentException();
+
+            return (double) value;
+        }
 
         private void ExceptionHandling(string s)
         {
@@ -440,7 +492,7 @@ namespace SS
 
         /// <summary>
         /// Tests if a string fits the format of a variable. This format is that it is a letter or underscore followed by a combination of 
-        /// letters, underscores, or digits.
+        /// letters, underscores, or digits. FIX LATER
         /// </summary>
         /// <param name="s">String to be tested</param>
         /// <returns>Whether or not the string is a variable</returns>
@@ -467,6 +519,7 @@ namespace SS
             {
                 Name = name;
                 CellContent = value;
+                CellValue = value;
             }
 
             /// <summary>
@@ -478,6 +531,7 @@ namespace SS
             {
                 Name = name;
                 CellContent = text;
+                CellValue = text;
             }
 
             /// <summary>
@@ -494,7 +548,7 @@ namespace SS
             /// <summary>
             /// Immutable name property of the cell. This way the only way to change the name is by creating a new cell.
             /// </summary>
-            public object Name
+            public string Name
             {
                 get;
                 private set;
@@ -512,7 +566,7 @@ namespace SS
             /// <summary>
             /// Value that the cell is storing.
             /// </summary>
-            public double CellValue
+            public object CellValue
             {
                 get;
                 set;

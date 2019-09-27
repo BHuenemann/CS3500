@@ -6,490 +6,385 @@ using SS;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace SpreadsheetTests
 {
+
     [TestClass]
     public class SpreadsheetTests
     {
         [TestMethod]
-        public void CreateNewSpreadsheet()
+        public void TestValueDouble()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "1.5");
+            Assert.AreEqual(s.GetCellValue("A1"), 1.5);
         }
-
 
         [TestMethod]
-        public void IsNotStatic()
+        public void TestValueFormulaDouble()
         {
-            AbstractSpreadsheet s1 = new Spreadsheet();
-            AbstractSpreadsheet s2 = new Spreadsheet();
-
-            s1.SetCellContents("A1", 2.0);
-
-            Assert.AreEqual("", s2.GetCellContents("A1"));
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "=1.5");
+            Assert.AreEqual(s.GetCellValue("A1"), 1.5);
         }
-
 
         [TestMethod]
-        public void GetContentsFromCell()
+        public void TestValueComplexFormulaDouble()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f = new Formula("1 + A1");
-
-            s.SetCellContents("A1", 5.0);
-            s.SetCellContents("B5", "Why Not");
-            s.SetCellContents("A20", f);
-
-            Assert.AreEqual(5.0, s.GetCellContents("A1"));
-            Assert.AreEqual("Why Not", s.GetCellContents("B5"));
-            Assert.AreEqual(f, s.GetCellContents("A20"));
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("B1", "=1.5");
+            s.SetContentsOfCell("C1", "=5.5");
+            s.SetContentsOfCell("A1", "=C1 - B1");
+            Assert.AreEqual(s.GetCellValue("A1"), 4.0);
         }
 
+        [TestMethod]
+        public void TestValueString()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "why not");
+            Assert.AreEqual(s.GetCellValue("A1"), "why not");
+        }
 
+        [TestMethod]
+        public void TestValueFormulaError()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "=1/0");
+            Assert.IsTrue(s.GetCellValue("A1") is FormulaError);
+        }
+
+        // EMPTY SPREADSHEETS
+        [TestMethod(), Timeout(5000)]
         [ExpectedException(typeof(InvalidNameException))]
-        [TestMethod]
-        public void GetContentsEmptyName()
+        public void TestEmptyGetNull()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            s.GetCellContents("");
-        }
-
-
-        [ExpectedException(typeof(InvalidNameException))]
-        [TestMethod]
-        public void GetContentsNullName()
-        {
-            AbstractSpreadsheet s = new Spreadsheet();
-
+            Spreadsheet s = new Spreadsheet();
             s.GetCellContents(null);
         }
 
-
+        [TestMethod(), Timeout(5000)]
         [ExpectedException(typeof(InvalidNameException))]
-        [TestMethod]
-        public void GetContentsInvalidName()
+        public void TestEmptyGetContents()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            s.GetCellContents("1Aaj_S1");
+            Spreadsheet s = new Spreadsheet();
+            s.GetCellContents("1AA");
         }
 
-
-        [TestMethod]
-        public void GetContentsEmptyCell()
+        [TestMethod(), Timeout(5000)]
+        public void TestGetEmptyContents()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            Assert.AreEqual("", s.GetCellContents("z1"));
+            Spreadsheet s = new Spreadsheet();
+            Assert.AreEqual("", s.GetCellContents("A2"));
         }
 
-
-        /// <summary>
-        /// This test makes sure that cells can have an _, upper case, or lower case at the beginning.
-        /// </summary>
-        [TestMethod]
-        public void PossibleCellNames()
+        [TestMethod(), Timeout(5000)]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestSetInvalidName()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f = new Formula("1 + A1");
-
-            String[] names = { "_1A2", "A4", "g8" };
-
-            s.SetCellContents(names[0], 2.0);
-            s.SetCellContents(names[1], "text");
-            s.SetCellContents(names[2], f);
-
-            HashSet<string> nameSet = new HashSet<string>(names);
-            HashSet<string> cellNames = new HashSet<string>(s.GetNamesOfAllNonemptyCells());
-
-            Assert.AreEqual(2.0, s.GetCellContents("_1A2"));
-            Assert.AreEqual("text", s.GetCellContents("A4"));
-            Assert.AreEqual(f, s.GetCellContents("g8"));
-            Assert.IsTrue(nameSet.SetEquals(cellNames));
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("1A1A", "1.5");
         }
 
-
-        [TestMethod]
-        public void GetNonemptyCellNames()
+        [TestMethod(), Timeout(5000)]
+        public void TestSimpleSetDouble()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f = new Formula("1 + A1");
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("Z7", "1.5");
+            Assert.AreEqual(1.5, (double)s.GetCellContents("Z7"), 1e-9);
+        }
 
-            String[] names = { "A1", "z1", "bSj", "Bbn44a3", "A2", "z22", "bS4j", "Bbn54a3", "Aa1", "zy1", "b2Sj", "Bbn445a3" };
+        // SETTING CELL TO A STRING
+        [TestMethod(), Timeout(5000)]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestSetNullVal()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A8", null);
+        }
 
-            for (int i = 0; i < 4; i++)
+        [TestMethod(), Timeout(5000)]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestSetNullName()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell(null, "hello");
+        }
+
+        [TestMethod(), Timeout(5000)]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestSetSimpleString()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("1AZ", "hello");
+        }
+
+        [TestMethod(), Timeout(5000)]
+        public void TestSetGetSimpleString()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("Z7", "hello");
+            Assert.AreEqual("hello", s.GetCellContents("Z7"));
+        }
+
+        [TestMethod(), Timeout(5000)]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestSetSimpleForm()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("1AZ", "=2");
+        }
+
+        [TestMethod(), Timeout(5000)]
+        public void TestSetGetForm()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("Z7", "=3");
+            Formula f = (Formula)s.GetCellContents("Z7");
+            Assert.AreEqual(new Formula("3"), f);
+            Assert.AreNotEqual(new Formula("2"), f);
+        }
+
+        // CIRCULAR FORMULA DETECTION
+        [TestMethod(), Timeout(5000)]
+        [ExpectedException(typeof(CircularException))]
+        public void TestSimpleCircular()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "=A2");
+            s.SetContentsOfCell("A2", "=A1");
+        }
+
+        [TestMethod(), Timeout(5000)]
+        [ExpectedException(typeof(CircularException))]
+        public void TestComplexCircular()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "=A2+A3");
+            s.SetContentsOfCell("A3", "=A4+A5");
+            s.SetContentsOfCell("A5", "=A6+A7");
+            s.SetContentsOfCell("A7", "=A1+A1");
+        }
+
+        [TestMethod(), Timeout(5000)]
+        [ExpectedException(typeof(CircularException))]
+        public void TestUndoCircular()
+        {
+            Spreadsheet s = new Spreadsheet();
+            try
             {
-                s.SetCellContents(names[i], 5.0);
-                s.SetCellContents(names[4 + i], "Why Not");
-                s.SetCellContents(names[8 + i], f);
+                s.SetContentsOfCell("A1", "=A2+A3");
+                s.SetContentsOfCell("A2", "15");
+                s.SetContentsOfCell("A3", "30");
+                s.SetContentsOfCell("A2", "=A3*A1");
             }
-
-            HashSet<string> namesSet = new HashSet<string>(names);
-            HashSet<string> cellNames = new HashSet<string>(s.GetNamesOfAllNonemptyCells());
-
-            Assert.IsTrue(namesSet.SetEquals(cellNames));
+            catch (CircularException e)
+            {
+                Assert.AreEqual(15, (double)s.GetCellContents("A2"), 1e-9);
+                throw e;
+            }
         }
 
-
-        [TestMethod]
-        public void ReplaceContents()
+        // NONEMPTY CELLS
+        [TestMethod(), Timeout(5000)]
+        public void TestEmptyNames()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f1 = new Formula("1 + A1");
-            Formula f2 = new Formula("2 + A1");
-
-            s.SetCellContents("a1", 2.0);
-            s.SetCellContents("b5", "Why");
-            s.SetCellContents("a20", f1);
-
-            s.SetCellContents("a1", 5.0);
-            s.SetCellContents("b5", "Why not");
-            s.SetCellContents("a20", f2);
-
-            Assert.AreEqual(5.0, s.GetCellContents("a1"));
-            Assert.AreEqual("Why not", s.GetCellContents("b5"));
-            Assert.AreEqual(f2, s.GetCellContents("a20"));
+            Spreadsheet s = new Spreadsheet();
+            Assert.IsFalse(s.GetNamesOfAllNonemptyCells().GetEnumerator().MoveNext());
         }
 
-
-        [TestMethod]
-        public void SetCellToDouble()
+        [TestMethod(), Timeout(5000)]
+        public void TestExplicitEmptySet()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            IList<String> list = s.SetCellContents("a1", 2.0);
-            Assert.AreEqual("a1", list[0]);
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("B1", "");
+            Assert.IsFalse(s.GetNamesOfAllNonemptyCells().GetEnumerator().MoveNext());
         }
 
-
-        [TestMethod]
-        public void SetCellToInteger()
+        [TestMethod(), Timeout(5000)]
+        public void TestSimpleNamesString()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            IList<String> list = s.SetCellContents("a1", 2);
-            Assert.AreEqual("a1", list[0]);
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("B1", "hello");
+            Assert.IsTrue(new HashSet<string>(s.GetNamesOfAllNonemptyCells()).SetEquals(new HashSet<string>() { "B1" }));
         }
 
-
-        [TestMethod]
-        public void SetCellToString()
+        [TestMethod(), Timeout(5000)]
+        public void TestSimpleNamesDouble()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            IList<String> list = s.SetCellContents("a1", "Mantis Shrimp");
-            Assert.AreEqual("a1", list[0]);
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("B1", "52.25");
+            Assert.IsTrue(new HashSet<string>(s.GetNamesOfAllNonemptyCells()).SetEquals(new HashSet<string>() { "B1" }));
         }
 
-
-        [TestMethod]
-        public void SetCellToFormula()
+        [TestMethod(), Timeout(5000)]
+        public void TestSimpleNamesFormula()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f = new Formula("b1 + 2 / 5");
-
-            IList<String> list = s.SetCellContents("a1", f);
-            Assert.AreEqual("a1", list[0]);
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("B1", "=3.5");
+            Assert.IsTrue(new HashSet<string>(s.GetNamesOfAllNonemptyCells()).SetEquals(new HashSet<string>() { "B1" }));
         }
 
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidNameException))]
-        public void SetCellDoubleInvalidNameError()
+        [TestMethod(), Timeout(5000)]
+        public void TestMixedNames()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            s.SetCellContents("1Ab2", 2.0);
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "17.2");
+            s.SetContentsOfCell("C1", "hello");
+            s.SetContentsOfCell("B1", "=3.5");
+            Assert.IsTrue(new HashSet<string>(s.GetNamesOfAllNonemptyCells()).SetEquals(new HashSet<string>() { "A1", "B1", "C1" }));
         }
 
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidNameException))]
-        public void SetCellDoubleNullNameError()
+        // RETURN VALUE OF SET CELL CONTENTS
+        [TestMethod(), Timeout(5000)]
+        public void TestSetSingletonDouble()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            s.SetCellContents(null, 2.0);
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("B1", "hello");
+            s.SetContentsOfCell("C1", "=5");
+            Assert.IsTrue(s.SetContentsOfCell("A1", "=17.2").SequenceEqual(new List<string>() { "A1" }));
         }
 
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidNameException))]
-        public void SetCellStringInvalidNameError()
+        [TestMethod(), Timeout(5000)]
+        public void TestSetSingletonString()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            s.SetCellContents("1Ab2", "Mantis Shrimp");
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "17.2");
+            s.SetContentsOfCell("C1", "=5");
+            Assert.IsTrue(s.SetContentsOfCell("B1", "hello").SequenceEqual(new List<string>() { "B1" }));
         }
 
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidNameException))]
-        public void SetCellStringNullNameError()
+        [TestMethod(), Timeout(5000)]
+        public void TestSetSingletonFormula()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            s.SetCellContents(null, "Mantis Shrimp");
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "17.2");
+            s.SetContentsOfCell("B1", "hello");
+            Assert.IsTrue(s.SetContentsOfCell("C1", "=5").SequenceEqual(new List<string>() { "C1" }));
         }
 
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void SetCellStringNullTextError()
+        [TestMethod(), Timeout(5000)]
+        public void TestSetChain()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            s.SetCellContents("A2", (string)null);
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "=A2+A3");
+            s.SetContentsOfCell("A2", "6");
+            s.SetContentsOfCell("A3", "=A2+A4");
+            s.SetContentsOfCell("A4", "=A2+A5");
+            Assert.IsTrue(s.SetContentsOfCell("A5", "82.5").SequenceEqual(new List<string>() { "A5", "A4", "A3", "A1" }));
         }
 
+        // CHANGING CELLS
+        [TestMethod(), Timeout(5000)]
+        public void TestChangeFtoD()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "=A2+A3");
+            s.SetContentsOfCell("A1", "2.5");
+            Assert.AreEqual(2.5, (double)s.GetCellContents("A1"), 1e-9);
+        }
+
+        [TestMethod(), Timeout(5000)]
+        public void TestChangeFtoS()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "A2+A3");
+            s.SetContentsOfCell("A1", "Hello");
+            Assert.AreEqual("Hello", (string)s.GetCellContents("A1"));
+        }
+
+        [TestMethod(), Timeout(5000)]
+        public void TestChangeStoF()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "Hello");
+            s.SetContentsOfCell("A1", "=23");
+            Assert.AreEqual(new Formula("23"), (Formula)s.GetCellContents("A1"));
+            Assert.AreNotEqual(new Formula("24"), (Formula)s.GetCellContents("A1"));
+        }
 
         /// <summary>
-        /// Setting a cell to an empty string should remove the cell and it's dependencies. This test adds some 
-        /// formulas, deletes one, and then measures the outcome of that deletion.
+        /// Sets random contents for a random cell 10000 times
         /// </summary>
-        [TestMethod]
-        public void SetCellStringEmptyText()
+        /// <param name="seed">Random seed</param>
+        /// <param name="size">The known resulting spreadsheet size, given the seed</param>
+        public void RunRandomizedTest(int seed, int size)
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f1 = new Formula("a1 + 2");
-            Formula f2 = new Formula("a1 - b1");
-            Formula f3 = new Formula("b1");
-
-            s.SetCellContents("b1", f1);
-            s.SetCellContents("c1", f2);
-            s.SetCellContents("d1", f3);
-            IEnumerator<String> list = s.SetCellContents("a1", 2.0).GetEnumerator();
-
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("a1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("b1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("d1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("c1", list.Current);
-            Assert.IsFalse(list.MoveNext());
-
-            String[] names = { "a1", "b1", "c1", "d1" };
-            HashSet<string> namesSet = new HashSet<string>(names);
-            HashSet<string> cellNames = new HashSet<string>(s.GetNamesOfAllNonemptyCells());
-
-            Assert.IsTrue(namesSet.SetEquals(cellNames));
-
-            list = s.SetCellContents("b1", "").GetEnumerator();
-
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("b1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("d1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("c1", list.Current);
-            Assert.IsFalse(list.MoveNext());
-
-            list = s.SetCellContents("a1", 2.0).GetEnumerator();
-
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("a1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("c1", list.Current);
-            Assert.IsFalse(list.MoveNext());
-
-            String[] names2 = { "a1", "c1", "d1" };
-            namesSet = new HashSet<string>(names2);
-            cellNames = new HashSet<string>(s.GetNamesOfAllNonemptyCells());
-
-            Assert.IsTrue(namesSet.SetEquals(cellNames));
+            Spreadsheet s = new Spreadsheet();
+            Random rand = new Random(seed);
+            for (int i = 0; i < 10000; i++)
+            {
+                try
+                {
+                    switch (rand.Next(3))
+                    {
+                        case 0:
+                            s.SetContentsOfCell(randomName(rand), "3.14");
+                            break;
+                        case 1:
+                            s.SetContentsOfCell(randomName(rand), "hello");
+                            break;
+                        case 2:
+                            s.SetContentsOfCell(randomName(rand), randomFormula(rand));
+                            break;
+                    }
+                }
+                catch (CircularException)
+                {
+                }
+            }
+            ISet<string> set = new HashSet<string>(s.GetNamesOfAllNonemptyCells());
+            Assert.AreEqual(size, set.Count);
         }
-
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidNameException))]
-        public void SetCellFormulaInvalidNameError()
-        {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f = new Formula("a1 + 2 / 5");
-
-            s.SetCellContents("1Ab2", f);
-        }
-
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidNameException))]
-        public void SetCellFormulaNullNameError()
-        {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f = new Formula("a1 + 2 / 5");
-
-            s.SetCellContents(null, f);
-        }
-
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void SetCellFormulaNullFormulaError()
-        {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            s.SetCellContents("A2", (Formula)null);
-        }
-
-
-        [TestMethod]
-        [ExpectedException(typeof(CircularException))]
-        public void TwoStepCircular()
-        {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f1 = new Formula("B1");
-            Formula f2 = new Formula("A1");
-
-            s.SetCellContents("A1", f1);
-            s.SetCellContents("B1", f2);
-        }
-
-
-        [TestMethod]
-        [ExpectedException(typeof(CircularException))]
-        public void MultiStepCircular()
-        {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f1 = new Formula("B1");
-            Formula f2 = new Formula("C1");
-            Formula f3 = new Formula("D1");
-            Formula f4 = new Formula("A1");
-
-            s.SetCellContents("A1", f1);
-            s.SetCellContents("B1", f2);
-            s.SetCellContents("C1", f3);
-            s.SetCellContents("D1", f4);
-        }
-
 
         /// <summary>
-        /// Tests if the list of dependents is returned when setting a cell to a double
+        /// Generates a random cell name with a capital letter and number between 1 - 99
         /// </summary>
-        [TestMethod]
-        public void DependentsReturnedWithNumber()
+        /// <param name="rand"></param>
+        /// <returns></returns>
+        private String randomName(Random rand)
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f1 = new Formula("a1 + 2");
-            Formula f2 = new Formula("a1 - b1");
-            Formula f3 = new Formula("b1");
-
-            s.SetCellContents("b1", f1);
-            s.SetCellContents("c1", f2);
-            s.SetCellContents("d1", f3);
-            IEnumerator<String> list = s.SetCellContents("a1", 2.0).GetEnumerator();
-
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("a1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("b1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("d1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("c1", list.Current);
-            Assert.IsFalse(list.MoveNext());
+            return "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Substring(rand.Next(26), 1) + (rand.Next(99) + 1);
         }
 
-
         /// <summary>
-        /// Tests if the list of dependents is returned when setting a cell to a string
+        /// Generates a random Formula
         /// </summary>
-        [TestMethod]
-        public void DependentsReturnedWithString()
+        /// <param name="rand"></param>
+        /// <returns></returns>
+        private String randomFormula(Random rand)
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f1 = new Formula("a1");
-            Formula f2 = new Formula("b1");
-
-            s.SetCellContents("b1", f1);
-            s.SetCellContents("c1", f2);
-            IEnumerator<String> list = s.SetCellContents("a1", "Cat").GetEnumerator();
-
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("a1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("b1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("c1", list.Current);
-            Assert.IsFalse(list.MoveNext());
-        }
-
-
-        /// <summary>
-        /// Tests if the list of dependents is returned when setting a cell to a formula
-        /// </summary>
-        [TestMethod]
-        public void DependentsReturnedWithFormula()
-        {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f1 = new Formula("a1 + 2");
-            Formula f2 = new Formula("a1 - b1");
-            Formula f3 = new Formula("b1");
-
-            s.SetCellContents("a1", 2.0);
-            s.SetCellContents("c1", f2);
-            s.SetCellContents("d1", f3);
-            IEnumerator<String> list = s.SetCellContents("b1", f1).GetEnumerator();
-
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("b1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("d1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("c1", list.Current);
-            Assert.IsFalse(list.MoveNext());
-        }
-
-
-        /// <summary>
-        /// A more complicated dependency test
-        /// </summary>
-        [TestMethod]
-        public void ComplexDependency()
-        {
-            AbstractSpreadsheet s = new Spreadsheet();
-            Formula f1 = new Formula("a1 + 2");
-            Formula f2 = new Formula("a1 - b1");
-            Formula f3 = new Formula("c1 - e1");
-            Formula f4 = new Formula("b1");
-
-            s.SetCellContents("b1", f1);
-            s.SetCellContents("c1", f2);
-            s.SetCellContents("d1", f3);
-            s.SetCellContents("e1", f4);
-
-            IEnumerator<String> list = s.SetCellContents("a1", 2.0).GetEnumerator();
-
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("a1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("b1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("e1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("c1", list.Current);
-            Assert.IsTrue(list.MoveNext());
-            Assert.AreEqual("d1", list.Current);
-            Assert.IsFalse(list.MoveNext());
-        }
-
-
-        /// <summary>
-        /// This tests if a A1 will be different than a1 (it tests that case matters).
-        /// </summary>
-        [TestMethod]
-        public void CaseSensitiveCells()
-        {
-            AbstractSpreadsheet s = new Spreadsheet();
-
-            s.SetCellContents("a1", 2.0);
-            s.SetCellContents("A1", 5.0);
-
-            Assert.AreEqual(2.0, s.GetCellContents("a1"));
-            Assert.AreEqual(5.0, s.GetCellContents("A1"));
+            String f = randomName(rand);
+            for (int i = 0; i < 10; i++)
+            {
+                switch (rand.Next(4))
+                {
+                    case 0:
+                        f += "+";
+                        break;
+                    case 1:
+                        f += "-";
+                        break;
+                    case 2:
+                        f += "*";
+                        break;
+                    case 3:
+                        f += "/";
+                        break;
+                }
+                switch (rand.Next(2))
+                {
+                    case 0:
+                        f += 7.2;
+                        break;
+                    case 1:
+                        f += randomName(rand);
+                        break;
+                }
+            }
+            return f;
         }
     }
 }
