@@ -58,6 +58,8 @@ namespace SpreadsheetTests
             }
         }
 
+
+
         public void CreateInvalidOrderXML(string name)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
@@ -90,6 +92,8 @@ namespace SpreadsheetTests
             }
         }
 
+
+
         public void CreateInvalidCellNameXML(string name)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
@@ -117,6 +121,8 @@ namespace SpreadsheetTests
                 writer.WriteEndDocument();
             }
         }
+
+
 
         public void CreateInvalidCircularXML(string name)
         {
@@ -151,6 +157,8 @@ namespace SpreadsheetTests
             }
         }
 
+
+
         public void CreateNoVersionXML(string name)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
@@ -183,6 +191,8 @@ namespace SpreadsheetTests
             }
         }
 
+
+
         public void CreateInvalidFormulaXML(string name)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
@@ -210,6 +220,9 @@ namespace SpreadsheetTests
                 writer.WriteEndDocument();
             }
         }
+
+
+
         public void CreateInvalidEndXML(string name)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
@@ -233,6 +246,8 @@ namespace SpreadsheetTests
                 writer.WriteEndDocument();
             }
         }
+
+
 
         public void CreateInvalidElementXML(string name)
         {
@@ -259,6 +274,8 @@ namespace SpreadsheetTests
             }
         }
 
+
+
         [TestMethod]
         public void TestReadXML()
         {
@@ -275,6 +292,8 @@ namespace SpreadsheetTests
             Assert.AreEqual("text", s.GetCellValue("B3"));
         }
 
+
+
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         [TestMethod]
         public void TestReadXMLWrongVersion()
@@ -283,12 +302,16 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet("Test2.xml", n => true, n => n, "BestVersion");
         }
 
+
+
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         [TestMethod]
         public void TestReadXMLInvalidFileName()
         {
             Spreadsheet s = new Spreadsheet("Invalid.xml", n => true, n => n, "1.0");
         }
+
+
 
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         [TestMethod]
@@ -298,6 +321,8 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet("Test3.xml", n => true, n => n, "1.0");
         }
 
+
+
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         [TestMethod]
         public void TestReadXMLInvalidElementName()
@@ -305,6 +330,8 @@ namespace SpreadsheetTests
             CreateInvalidCellNameXML("Test4.xml");
             Spreadsheet s = new Spreadsheet("Test4.xml", n => true, n => n, "1.0");
         }
+
+
 
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         [TestMethod]
@@ -314,6 +341,8 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet("Test5.xml", n => true, n => n, "1.0");
         }
 
+
+
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         [TestMethod]
         public void TestReadXMLInvalidFormula()
@@ -321,6 +350,8 @@ namespace SpreadsheetTests
             CreateInvalidFormulaXML("Test6.xml");
             Spreadsheet s = new Spreadsheet("Test6.xml", n => true, n => n, "1.0");
         }
+
+
 
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         [TestMethod]
@@ -330,6 +361,8 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet("Test7.xml", n => true, n => n, "1.0");
         }
 
+
+
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         [TestMethod]
         public void TestReadXMLInvalidEnding()
@@ -337,6 +370,8 @@ namespace SpreadsheetTests
             CreateInvalidEndXML("Test8.xml");
             Spreadsheet s = new Spreadsheet("Test8.xml", n => true, n => n, "1.0");
         }
+
+
 
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         [TestMethod]
@@ -346,12 +381,16 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet("Test9.xml", n => true, n => n, "1.0");
         }
 
+
+
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         [TestMethod]
         public void TestReadXMLFileNull()
         {
             Spreadsheet s = new Spreadsheet((string)null, n => true, n => n, "1.0");
         }
+
+
 
         [TestMethod]
         public void TestWriteXML()
@@ -377,6 +416,8 @@ namespace SpreadsheetTests
             Assert.AreEqual("text", s2.GetCellValue("B3"));
 
         }
+        
+
 
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         [TestMethod]
@@ -392,6 +433,8 @@ namespace SpreadsheetTests
             s.Save((string) null);
         }
 
+
+
         [TestMethod]
         public void TestChanged()
         {
@@ -400,6 +443,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("A1", "4.0");
             Assert.IsTrue(s.Changed);
         }
+
+
 
         [ExpectedException(typeof(InvalidNameException))]
         [TestMethod]
@@ -411,6 +456,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("AA1", "4.0");
         }
 
+
+
         [TestMethod]
         public void TestValueDouble()
         {
@@ -419,6 +466,8 @@ namespace SpreadsheetTests
             Assert.AreEqual(1.5, s.GetCellValue("A1"));
         }
 
+
+
         [TestMethod]
         public void TestValueFormulaDouble()
         {
@@ -426,6 +475,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("A1", "=1.5");
             Assert.AreEqual(1.5, s.GetCellValue("A1"));
         }
+
+
 
         [TestMethod]
         public void TestValueComplexFormulaDouble()
@@ -437,6 +488,8 @@ namespace SpreadsheetTests
             Assert.AreEqual(4.0, s.GetCellValue("A1"));
         }
 
+
+
         [TestMethod]
         public void TestValueString()
         {
@@ -444,6 +497,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("A1", "why not");
             Assert.AreEqual("why not", s.GetCellValue("A1"));
         }
+
+
 
         [TestMethod]
         public void TestValueFormulaError()
@@ -453,6 +508,8 @@ namespace SpreadsheetTests
             Assert.IsTrue(s.GetCellValue("A1") is FormulaError);
         }
 
+
+
         [TestMethod]
         public void SetCellToEmpty()
         {
@@ -461,6 +518,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("A1", "");
             Assert.AreEqual("", s.GetCellValue("A1"));
         }
+        
+
 
         [TestMethod]
         public void SetCellFromFormulaToString()
@@ -473,6 +532,156 @@ namespace SpreadsheetTests
             Assert.AreEqual("text", s.GetCellValue("A1"));
         }
 
+
+
+        [TestMethod]
+        public void StressTest1()
+        {
+            Spreadsheet s = new Spreadsheet();
+
+            s.SetContentsOfCell("A200", "1");
+
+            for (int i = 0; i < 200; i++)
+            {
+                s.SetContentsOfCell("A" + i, "=A" + (i + 1));
+            }
+
+            for (int i = 0; i < 201; i++)
+            {
+                Assert.AreEqual(1.0, s.GetCellValue("A" + i));
+            }
+
+            s.SetContentsOfCell("A200", "10");
+
+            for (int i = 0; i < 201; i++)
+            {
+                Assert.AreEqual(10.0, s.GetCellValue("A" + i));
+            }
+        }
+
+
+
+        [TestMethod]
+        public void StressTest1a()
+        {
+            StressTest1();
+        }
+
+
+
+        [TestMethod]
+        public void StressTest1b()
+        {
+            StressTest1();
+        }
+
+
+
+        [TestMethod]
+        public void StressTest1c()
+        {
+            StressTest1();
+        }
+
+
+
+        [ExpectedException(typeof(CircularException))]
+        [TestMethod]
+        public void StressTest2()
+        {
+            Spreadsheet s = new Spreadsheet();
+
+            s.SetContentsOfCell("A200", "=A1");
+
+            for (int i = 0; i < 200; i++)
+            {
+                s.SetContentsOfCell("A" + i, "=A" + (i + 1));
+            }
+        }
+
+
+
+        [ExpectedException(typeof(CircularException))]
+        [TestMethod]
+        public void StressTest2a()
+        {
+            StressTest2();
+        }
+
+
+
+        [ExpectedException(typeof(CircularException))]
+        [TestMethod]
+        public void StressTest2b()
+        {
+            StressTest2();
+        }
+
+
+
+        [ExpectedException(typeof(CircularException))]
+        [TestMethod]
+        public void StressTest2c()
+        {
+            StressTest2();
+        }
+
+
+
+        [TestMethod]
+        public void StressTest3()
+        {
+            Spreadsheet s = new Spreadsheet();
+
+            s.SetContentsOfCell("A200", "1");
+
+            for (int i = 0; i < 200; i++)
+            {
+                s.SetContentsOfCell("A" + i, "=A" + (i + 1));
+            }
+
+            for (int i = 0; i < 201; i++)
+            {
+                Assert.AreEqual(1.0, s.GetCellValue("A" + i));
+            }
+
+            s.Save("Stress3.xml");
+
+            Spreadsheet s2 = new Spreadsheet("Stress3.xml", i => true, i => i, "default");
+
+            for (int i = 0; i < 201; i++)
+            {
+                Assert.AreEqual(1.0, s2.GetCellValue("A" + i));
+            }
+        }
+
+
+
+        [TestMethod]
+        public void StressTest3a()
+        {
+            StressTest3();
+        }
+
+
+
+        [TestMethod]
+        public void StressTest3b()
+        {
+            StressTest3();
+        }
+
+
+
+        [TestMethod]
+        public void StressTest3c()
+        {
+            StressTest3();
+        }
+
+
+
+        // PS4 GRADING TESTS
         // EMPTY SPREADSHEETS
         [TestMethod(), Timeout(5000)]
         [ExpectedException(typeof(InvalidNameException))]
@@ -482,6 +691,8 @@ namespace SpreadsheetTests
             s.GetCellContents(null);
         }
 
+
+
         [TestMethod(), Timeout(5000)]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestEmptyGetContents()
@@ -490,12 +701,16 @@ namespace SpreadsheetTests
             s.GetCellContents("1AA");
         }
 
+
+
         [TestMethod(), Timeout(5000)]
         public void TestGetEmptyContents()
         {
             Spreadsheet s = new Spreadsheet();
             Assert.AreEqual("", s.GetCellContents("A2"));
         }
+
+
 
         [TestMethod(), Timeout(5000)]
         [ExpectedException(typeof(InvalidNameException))]
@@ -505,6 +720,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("1A1A", "1.5");
         }
 
+
+
         [TestMethod(), Timeout(5000)]
         public void TestSimpleSetDouble()
         {
@@ -512,6 +729,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("Z7", "1.5");
             Assert.AreEqual(1.5, (double)s.GetCellContents("Z7"), 1e-9);
         }
+
+
 
         // SETTING CELL TO A STRING
         [TestMethod(), Timeout(5000)]
@@ -522,6 +741,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("A8", null);
         }
 
+
+
         [TestMethod(), Timeout(5000)]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetNullName()
@@ -529,6 +750,8 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet();
             s.SetContentsOfCell(null, "hello");
         }
+
+
 
         [TestMethod(), Timeout(5000)]
         [ExpectedException(typeof(InvalidNameException))]
@@ -538,6 +761,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("1AZ", "hello");
         }
 
+
+
         [TestMethod(), Timeout(5000)]
         public void TestSetGetSimpleString()
         {
@@ -546,6 +771,8 @@ namespace SpreadsheetTests
             Assert.AreEqual("hello", s.GetCellContents("Z7"));
         }
 
+
+
         [TestMethod(), Timeout(5000)]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetSimpleForm()
@@ -553,6 +780,8 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet();
             s.SetContentsOfCell("1AZ", "=2");
         }
+
+
 
         [TestMethod(), Timeout(5000)]
         public void TestSetGetForm()
@@ -564,6 +793,8 @@ namespace SpreadsheetTests
             Assert.AreNotEqual(new Formula("2"), f);
         }
 
+
+
         // CIRCULAR FORMULA DETECTION
         [TestMethod(), Timeout(5000)]
         [ExpectedException(typeof(CircularException))]
@@ -573,6 +804,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("A1", "=A2");
             s.SetContentsOfCell("A2", "=A1");
         }
+
+
 
         [TestMethod(), Timeout(5000)]
         [ExpectedException(typeof(CircularException))]
@@ -584,6 +817,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("A5", "=A6+A7");
             s.SetContentsOfCell("A7", "=A1+A1");
         }
+
+
 
         [TestMethod(), Timeout(5000)]
         [ExpectedException(typeof(CircularException))]
@@ -604,6 +839,8 @@ namespace SpreadsheetTests
             }
         }
 
+
+
         // NONEMPTY CELLS
         [TestMethod(), Timeout(5000)]
         public void TestEmptyNames()
@@ -611,6 +848,8 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet();
             Assert.IsFalse(s.GetNamesOfAllNonemptyCells().GetEnumerator().MoveNext());
         }
+
+
 
         [TestMethod(), Timeout(5000)]
         public void TestExplicitEmptySet()
@@ -620,6 +859,8 @@ namespace SpreadsheetTests
             Assert.IsFalse(s.GetNamesOfAllNonemptyCells().GetEnumerator().MoveNext());
         }
 
+
+
         [TestMethod(), Timeout(5000)]
         public void TestSimpleNamesString()
         {
@@ -627,6 +868,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("B1", "hello");
             Assert.IsTrue(new HashSet<string>(s.GetNamesOfAllNonemptyCells()).SetEquals(new HashSet<string>() { "B1" }));
         }
+
+
 
         [TestMethod(), Timeout(5000)]
         public void TestSimpleNamesDouble()
@@ -636,6 +879,8 @@ namespace SpreadsheetTests
             Assert.IsTrue(new HashSet<string>(s.GetNamesOfAllNonemptyCells()).SetEquals(new HashSet<string>() { "B1" }));
         }
 
+
+
         [TestMethod(), Timeout(5000)]
         public void TestSimpleNamesFormula()
         {
@@ -643,6 +888,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("B1", "=3.5");
             Assert.IsTrue(new HashSet<string>(s.GetNamesOfAllNonemptyCells()).SetEquals(new HashSet<string>() { "B1" }));
         }
+
+
 
         [TestMethod(), Timeout(5000)]
         public void TestMixedNames()
@@ -654,6 +901,8 @@ namespace SpreadsheetTests
             Assert.IsTrue(new HashSet<string>(s.GetNamesOfAllNonemptyCells()).SetEquals(new HashSet<string>() { "A1", "B1", "C1" }));
         }
 
+
+
         // RETURN VALUE OF SET CELL CONTENTS
         [TestMethod(), Timeout(5000)]
         public void TestSetSingletonDouble()
@@ -664,6 +913,8 @@ namespace SpreadsheetTests
             Assert.IsTrue(s.SetContentsOfCell("A1", "=17.2").SequenceEqual(new List<string>() { "A1" }));
         }
 
+
+
         [TestMethod(), Timeout(5000)]
         public void TestSetSingletonString()
         {
@@ -673,6 +924,8 @@ namespace SpreadsheetTests
             Assert.IsTrue(s.SetContentsOfCell("B1", "hello").SequenceEqual(new List<string>() { "B1" }));
         }
 
+
+
         [TestMethod(), Timeout(5000)]
         public void TestSetSingletonFormula()
         {
@@ -681,6 +934,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("B1", "hello");
             Assert.IsTrue(s.SetContentsOfCell("C1", "=5").SequenceEqual(new List<string>() { "C1" }));
         }
+
+
 
         [TestMethod(), Timeout(5000)]
         public void TestSetChain()
@@ -693,6 +948,8 @@ namespace SpreadsheetTests
             Assert.IsTrue(s.SetContentsOfCell("A5", "82.5").SequenceEqual(new List<string>() { "A5", "A4", "A3", "A1" }));
         }
 
+
+
         // CHANGING CELLS
         [TestMethod(), Timeout(5000)]
         public void TestChangeFtoD()
@@ -703,6 +960,8 @@ namespace SpreadsheetTests
             Assert.AreEqual(2.5, (double)s.GetCellContents("A1"), 1e-9);
         }
 
+
+
         [TestMethod(), Timeout(5000)]
         public void TestChangeFtoS()
         {
@@ -711,6 +970,8 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("A1", "Hello");
             Assert.AreEqual("Hello", (string)s.GetCellContents("A1"));
         }
+
+
 
         [TestMethod(), Timeout(5000)]
         public void TestChangeStoF()
@@ -721,6 +982,5 @@ namespace SpreadsheetTests
             Assert.AreEqual(new Formula("23"), (Formula)s.GetCellContents("A1"));
             Assert.AreNotEqual(new Formula("24"), (Formula)s.GetCellContents("A1"));
         }
-
     }
 }
