@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Xml;
 
 namespace SpreadsheetTests
 {
@@ -14,12 +15,408 @@ namespace SpreadsheetTests
     [TestClass]
     public class SpreadsheetTests
     {
+        public void CreateValidXML(string name)
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "\t";
+
+            using (XmlWriter writer = XmlWriter.Create(name))
+            {
+                writer.WriteStartDocument();
+
+
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "1.0");
+
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A1");
+                writer.WriteElementString("content", "15");
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A2");
+                writer.WriteElementString("content", "5");
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "B1");
+                writer.WriteElementString("content", "=A1+A2");
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "B3");
+                writer.WriteElementString("content", "text");
+                writer.WriteEndElement();
+
+
+                writer.WriteEndElement();
+
+
+                writer.WriteEndDocument();
+            }
+        }
+
+        public void CreateInvalidOrderXML(string name)
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "\t";
+
+            using (XmlWriter writer = XmlWriter.Create(name))
+            {
+                writer.WriteStartDocument();
+
+
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "1.0");
+
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A1");
+                writer.WriteElementString("content", "15");
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A2");
+                writer.WriteElementString("content", "5");
+                writer.WriteEndElement();
+
+
+                writer.WriteEndElement();
+
+
+                writer.WriteEndDocument();
+            }
+        }
+
+        public void CreateInvalidCellNameXML(string name)
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "\t";
+
+            using (XmlWriter writer = XmlWriter.Create(name))
+            {
+                writer.WriteStartDocument();
+
+
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "1.0");
+
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "11A");
+                writer.WriteElementString("content", "15");
+                writer.WriteEndElement();
+
+
+                writer.WriteEndElement();
+
+
+                writer.WriteEndDocument();
+            }
+        }
+
+        public void CreateInvalidCircularXML(string name)
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "\t";
+
+            using (XmlWriter writer = XmlWriter.Create(name))
+            {
+                writer.WriteStartDocument();
+
+
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "1.0");
+
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A1");
+                writer.WriteElementString("content", "=A2");
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A2");
+                writer.WriteElementString("content", "=A1");
+                writer.WriteEndElement();
+
+
+                writer.WriteEndElement();
+
+
+                writer.WriteEndDocument();
+            }
+        }
+
+        public void CreateNoVersionXML(string name)
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "\t";
+
+            using (XmlWriter writer = XmlWriter.Create(name))
+            {
+                writer.WriteStartDocument();
+
+
+                writer.WriteStartElement("spreadsheets");
+
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A1");
+                writer.WriteElementString("content", "=A2");
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A2");
+                writer.WriteElementString("content", "=A1");
+                writer.WriteEndElement();
+
+
+                writer.WriteEndElement();
+
+
+                writer.WriteEndDocument();
+            }
+        }
+
+        public void CreateInvalidFormulaXML(string name)
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "\t";
+
+            using (XmlWriter writer = XmlWriter.Create(name))
+            {
+                writer.WriteStartDocument();
+
+
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "1.0");
+
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A1");
+                writer.WriteElementString("content", "=1++3");
+                writer.WriteEndElement();
+
+
+                writer.WriteEndElement();
+
+
+                writer.WriteEndDocument();
+            }
+        }
+        public void CreateInvalidEndXML(string name)
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "\t";
+
+            using (XmlWriter writer = XmlWriter.Create(name))
+            {
+                writer.WriteStartDocument();
+
+
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "1.0");
+
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A1");
+                writer.WriteElementString("content", "=1++3");
+
+
+                writer.WriteEndDocument();
+            }
+        }
+
+        public void CreateInvalidElementXML(string name)
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "\t";
+
+            using (XmlWriter writer = XmlWriter.Create(name))
+            {
+                writer.WriteStartDocument();
+
+
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "1.0");
+
+
+                writer.WriteStartElement("cellular");
+
+
+                writer.WriteEndElement();
+
+
+                writer.WriteEndDocument();
+            }
+        }
+
+        [TestMethod]
+        public void TestReadXML()
+        {
+            CreateValidXML("Test1.xml");
+            Spreadsheet s = new Spreadsheet("Test1.xml", n => true, n => n, "1.0");
+
+            Assert.AreEqual(15.0, s.GetCellContents("A1"));
+            Assert.AreEqual(15.0, s.GetCellValue("A1"));
+            Assert.AreEqual(5.0, s.GetCellContents("A2"));
+            Assert.AreEqual(5.0, s.GetCellValue("A2"));
+            Assert.AreEqual(new Formula("A1 + A2"), s.GetCellContents("B1"));
+            Assert.AreEqual(20.0, s.GetCellValue("B1"));
+            Assert.AreEqual("text", s.GetCellContents("B3"));
+            Assert.AreEqual("text", s.GetCellValue("B3"));
+        }
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestReadXMLWrongVersion()
+        {
+            CreateValidXML("Test2.xml");
+            Spreadsheet s = new Spreadsheet("Test2.xml", n => true, n => n, "BestVersion");
+        }
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestReadXMLInvalidFileName()
+        {
+            Spreadsheet s = new Spreadsheet("Invalid.xml", n => true, n => n, "1.0");
+        }
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestReadXMLInvalidElementOrder()
+        {
+            CreateInvalidOrderXML("Test3.xml");
+            Spreadsheet s = new Spreadsheet("Test3.xml", n => true, n => n, "1.0");
+        }
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestReadXMLInvalidElementName()
+        {
+            CreateInvalidCellNameXML("Test4.xml");
+            Spreadsheet s = new Spreadsheet("Test4.xml", n => true, n => n, "1.0");
+        }
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestReadXMLInvalidCircularError()
+        {
+            CreateInvalidCircularXML("Test5.xml");
+            Spreadsheet s = new Spreadsheet("Test5.xml", n => true, n => n, "1.0");
+        }
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestReadXMLInvalidFormula()
+        {
+            CreateInvalidFormulaXML("Test6.xml");
+            Spreadsheet s = new Spreadsheet("Test6.xml", n => true, n => n, "1.0");
+        }
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestReadXMLInvalidElement()
+        {
+            CreateInvalidElementXML("Test7.xml");
+            Spreadsheet s = new Spreadsheet("Test7.xml", n => true, n => n, "1.0");
+        }
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestReadXMLInvalidEnding()
+        {
+            CreateInvalidEndXML("Test8.xml");
+            Spreadsheet s = new Spreadsheet("Test8.xml", n => true, n => n, "1.0");
+        }
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestReadXMLNoVersion()
+        {
+            CreateNoVersionXML("Test9.xml");
+            Spreadsheet s = new Spreadsheet("Test9.xml", n => true, n => n, "1.0");
+        }
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestReadXMLFileNull()
+        {
+            Spreadsheet s = new Spreadsheet((string)null, n => true, n => n, "1.0");
+        }
+
+        [TestMethod]
+        public void TestWriteXML()
+        {
+            Spreadsheet s1 = new Spreadsheet();
+
+            s1.SetContentsOfCell("A1", "15");
+            s1.SetContentsOfCell("A2", "5");
+            s1.SetContentsOfCell("B1", "=A1 + A2");
+            s1.SetContentsOfCell("B3", "text");
+
+            s1.Save("Test10.xml");
+
+            Spreadsheet s2 = new Spreadsheet("Test10.xml", n => true, n => n, "default");
+
+            Assert.AreEqual(15.0, s2.GetCellContents("A1"));
+            Assert.AreEqual(15.0, s2.GetCellValue("A1"));
+            Assert.AreEqual(5.0, s2.GetCellContents("A2"));
+            Assert.AreEqual(5.0, s2.GetCellValue("A2"));
+            Assert.AreEqual(new Formula("A1 + A2"), s2.GetCellContents("B1"));
+            Assert.AreEqual(20.0, s2.GetCellValue("B1"));
+            Assert.AreEqual("text", s2.GetCellContents("B3"));
+            Assert.AreEqual("text", s2.GetCellValue("B3"));
+
+        }
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestWriteXMLNull()
+        {
+            Spreadsheet s = new Spreadsheet();
+
+            s.SetContentsOfCell("A1", "15");
+            s.SetContentsOfCell("A2", "5");
+            s.SetContentsOfCell("B1", "=A1 + A2");
+            s.SetContentsOfCell("B3", "text");
+
+            s.Save((string) null);
+        }
+
+        [TestMethod]
+        public void TestChanged()
+        {
+            Spreadsheet s = new Spreadsheet();
+            Assert.IsFalse(s.Changed);
+            s.SetContentsOfCell("A1", "4.0");
+            Assert.IsTrue(s.Changed);
+        }
+
+        [ExpectedException(typeof(InvalidNameException))]
+        [TestMethod]
+        public void TestDelegates()
+        {
+            Spreadsheet s = new Spreadsheet(n => n.Length == 2, n => n.ToUpper(), "1.0");
+            s.SetContentsOfCell("a1", "4.0");
+            Assert.AreEqual(4.0, s.GetCellContents("A1"));
+            s.SetContentsOfCell("AA1", "4.0");
+        }
+
         [TestMethod]
         public void TestValueDouble()
         {
             Spreadsheet s = new Spreadsheet();
             s.SetContentsOfCell("A1", "1.5");
-            Assert.AreEqual(s.GetCellValue("A1"), 1.5);
+            Assert.AreEqual(1.5, s.GetCellValue("A1"));
         }
 
         [TestMethod]
@@ -27,7 +424,7 @@ namespace SpreadsheetTests
         {
             Spreadsheet s = new Spreadsheet();
             s.SetContentsOfCell("A1", "=1.5");
-            Assert.AreEqual(s.GetCellValue("A1"), 1.5);
+            Assert.AreEqual(1.5, s.GetCellValue("A1"));
         }
 
         [TestMethod]
@@ -37,7 +434,7 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("B1", "=1.5");
             s.SetContentsOfCell("C1", "=5.5");
             s.SetContentsOfCell("A1", "=C1 - B1");
-            Assert.AreEqual(s.GetCellValue("A1"), 4.0);
+            Assert.AreEqual(4.0, s.GetCellValue("A1"));
         }
 
         [TestMethod]
@@ -45,7 +442,7 @@ namespace SpreadsheetTests
         {
             Spreadsheet s = new Spreadsheet();
             s.SetContentsOfCell("A1", "why not");
-            Assert.AreEqual(s.GetCellValue("A1"), "why not");
+            Assert.AreEqual("why not", s.GetCellValue("A1"));
         }
 
         [TestMethod]
@@ -54,6 +451,26 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet();
             s.SetContentsOfCell("A1", "=1/0");
             Assert.IsTrue(s.GetCellValue("A1") is FormulaError);
+        }
+
+        [TestMethod]
+        public void SetCellToEmpty()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "10");
+            s.SetContentsOfCell("A1", "");
+            Assert.AreEqual("", s.GetCellValue("A1"));
+        }
+
+        [TestMethod]
+        public void SetCellFromFormulaToString()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "=A2 + A3");
+            s.SetContentsOfCell("A2", "4");
+            s.SetContentsOfCell("A3", "10");
+            s.SetContentsOfCell("A1", "text");
+            Assert.AreEqual("text", s.GetCellValue("A1"));
         }
 
         // EMPTY SPREADSHEETS
@@ -305,86 +722,5 @@ namespace SpreadsheetTests
             Assert.AreNotEqual(new Formula("24"), (Formula)s.GetCellContents("A1"));
         }
 
-        /// <summary>
-        /// Sets random contents for a random cell 10000 times
-        /// </summary>
-        /// <param name="seed">Random seed</param>
-        /// <param name="size">The known resulting spreadsheet size, given the seed</param>
-        public void RunRandomizedTest(int seed, int size)
-        {
-            Spreadsheet s = new Spreadsheet();
-            Random rand = new Random(seed);
-            for (int i = 0; i < 10000; i++)
-            {
-                try
-                {
-                    switch (rand.Next(3))
-                    {
-                        case 0:
-                            s.SetContentsOfCell(randomName(rand), "3.14");
-                            break;
-                        case 1:
-                            s.SetContentsOfCell(randomName(rand), "hello");
-                            break;
-                        case 2:
-                            s.SetContentsOfCell(randomName(rand), randomFormula(rand));
-                            break;
-                    }
-                }
-                catch (CircularException)
-                {
-                }
-            }
-            ISet<string> set = new HashSet<string>(s.GetNamesOfAllNonemptyCells());
-            Assert.AreEqual(size, set.Count);
-        }
-
-        /// <summary>
-        /// Generates a random cell name with a capital letter and number between 1 - 99
-        /// </summary>
-        /// <param name="rand"></param>
-        /// <returns></returns>
-        private String randomName(Random rand)
-        {
-            return "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Substring(rand.Next(26), 1) + (rand.Next(99) + 1);
-        }
-
-        /// <summary>
-        /// Generates a random Formula
-        /// </summary>
-        /// <param name="rand"></param>
-        /// <returns></returns>
-        private String randomFormula(Random rand)
-        {
-            String f = randomName(rand);
-            for (int i = 0; i < 10; i++)
-            {
-                switch (rand.Next(4))
-                {
-                    case 0:
-                        f += "+";
-                        break;
-                    case 1:
-                        f += "-";
-                        break;
-                    case 2:
-                        f += "*";
-                        break;
-                    case 3:
-                        f += "/";
-                        break;
-                }
-                switch (rand.Next(2))
-                {
-                    case 0:
-                        f += 7.2;
-                        break;
-                    case 1:
-                        f += randomName(rand);
-                        break;
-                }
-            }
-            return f;
-        }
     }
 }

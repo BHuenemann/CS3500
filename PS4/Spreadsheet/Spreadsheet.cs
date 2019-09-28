@@ -100,7 +100,8 @@ namespace SS
         /// <param name="normalize">Method to define a standard form for all cell names</param>
         /// <param name="version">Version of the spreadsheet being created</param>
         public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) :
-            base(isValid, normalize, version) { }
+            base(isValid, normalize, version)
+        { }
 
         /// <summary>
         /// Constructs an abstract spreadsheet by recording the file path that contains the
@@ -151,10 +152,6 @@ namespace SS
             {
                 throw new SpreadsheetReadWriteException("Couldn't read since filename was set to null");
             }
-            catch (UriFormatException)
-            {
-                throw new SpreadsheetReadWriteException("Invalid URI was detected while reading the file");
-            }
             //Catches any other exception and gives a generic error message
             catch (Exception)
             {
@@ -165,7 +162,7 @@ namespace SS
 
             try
             {
-                while(reader.Read())
+                while (reader.Read())
                 {
                     if (reader.IsStartElement())
                     {
@@ -248,7 +245,7 @@ namespace SS
             try
             {
                 writer.WriteStartDocument();
-                
+
 
                 writer.WriteStartElement("spreadsheet");
                 writer.WriteAttributeString("version", Version);
@@ -280,14 +277,6 @@ namespace SS
             catch (InvalidOperationException)
             {
                 throw new SpreadsheetReadWriteException("Invalid operation while writing file");
-            }
-            catch (EncoderFallbackException)
-            {
-                throw new SpreadsheetReadWriteException("Encoder fallback while writing file");
-            }
-            catch (ArgumentException)
-            {
-                throw new SpreadsheetReadWriteException("Invalid argument while writing file");
             }
             catch (Exception)
             {
@@ -341,7 +330,8 @@ namespace SS
                                 break;
 
                             case "cell":
-                                CheckPreviousElement(previousElement, 1, 4);
+                                if (previousElement != 1 && previousElement != 6)
+                                    throw new SpreadsheetReadWriteException("Invalid element order in XML file");
                                 previousElement = 2;
                                 break;
 
@@ -355,12 +345,12 @@ namespace SS
                                 break;
 
                             case "content":
-                                CheckPreviousElement(previousElement, 3);
+                                CheckPreviousElement(previousElement, 7);
                                 previousElement = 4;
                                 reader.Read();
 
                                 //Creates a cell with the specified name and value
-                                SetCellContents(nameStack.Pop(), reader.Value);
+                                SetContentsOfCell(nameStack.Pop(), reader.Value);
                                 break;
 
                             //Thows an exception if the element is unknown
@@ -375,23 +365,23 @@ namespace SS
                         switch (reader.Name)
                         {
                             case "spreadsheet":
-                                CheckPreviousElement(previousElement, 2);
-                                previousElement = 1;
+                                CheckPreviousElement(previousElement, 6);
+                                previousElement = 5;
                                 break;
 
                             case "cell":
-                                CheckPreviousElement(previousElement, 4);
-                                previousElement = 2;
+                                CheckPreviousElement(previousElement, 8);
+                                previousElement = 6;
                                 break;
 
                             case "name":
                                 CheckPreviousElement(previousElement, 3);
-                                previousElement = 3;
+                                previousElement = 7;
                                 break;
 
                             case "content":
                                 CheckPreviousElement(previousElement, 4);
-                                previousElement = 4;
+                                previousElement = 8;
                                 break;
 
                             default:
@@ -400,7 +390,7 @@ namespace SS
                     }
                 }
                 //If it doesn't end with an spreadsheet end element, it throws an error
-                if (previousElement != 1)
+                if (previousElement != 5)
                     throw new SpreadsheetReadWriteException("Invalid end element");
             }
 
@@ -410,18 +400,6 @@ namespace SS
             catch (SpreadsheetReadWriteException)
             {
                 throw;
-            }
-            catch (InvalidOperationException)
-            {
-                throw new SpreadsheetReadWriteException("Unmatched content while reading the file");
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                throw new SpreadsheetReadWriteException("Couldn't find the version of the spreadsheet while reading file");
-            }
-            catch (ArgumentNullException)
-            {
-                throw new SpreadsheetReadWriteException("Null argument while reading the file");
             }
             catch (InvalidNameException)
             {
@@ -448,14 +426,15 @@ namespace SS
             }
         }
 
-        protected void CheckPreviousElement(int currentValue, int previousCondition)
+        /// <summary>
+        /// Helper method for checking to see if the current value matches the correct condition.
+        /// If they don't match, it throws a spreadsheetReadWriteException.
+        /// </summary>
+        /// <param name="currentValue">Value that should be compared</param>
+        /// <param name="correctCondition">Condition that the value should match</param>
+        protected void CheckPreviousElement(int currentValue, int correctCondition)
         {
-            if (currentValue != previousCondition)
-                throw new SpreadsheetReadWriteException("Invalid element order in XML file");
-        }
-        protected void CheckPreviousElement(int currentValue, int previousCondition1, int previousCondition2)
-        {
-            if (currentValue != previousCondition1 && currentValue != previousCondition2)
+            if (currentValue != correctCondition)
                 throw new SpreadsheetReadWriteException("Invalid element order in XML file");
         }
 
@@ -465,10 +444,13 @@ namespace SS
         /// Otherwise, returns the value (as opposed to the contents) of the named cell.  The return
         /// value should be either a string, a double, or a SpreadsheetUtilities.FormulaError.
         /// </summary>
+        /// <param name="name">Name of the cell being accessed</param>
+        /// <returns>Value of the cell being accessed</returns>
         public override object GetCellValue(String name)
         {
+            //Normalizes the name in this scope and handles name exceptions
             name = Normalize(name);
-            ExceptionHandling(name);
+            CellNameExceptionHandling(name);
 
             if (!Cells.ContainsKey(name))
                 return "";
@@ -479,6 +461,7 @@ namespace SS
         /// <summary>
         /// Enumerates the names of all the non-empty cells in the spreadsheet.
         /// </summary>
+        /// <returns>Enumerable of all nonempty cells</returns>
         public override IEnumerable<String> GetNamesOfAllNonemptyCells()
         {
             foreach (KeyValuePair<string, Cell> CellPair in Cells)
@@ -498,8 +481,9 @@ namespace SS
         public override object GetCellContents(String name)
         {
             name = Normalize(name);
-            ExceptionHandling(name);
+            CellNameExceptionHandling(name);
 
+            //If the cell is empty it returns an empty string
             if (!Cells.ContainsKey(name))
                 return "";
             return Cells[name].CellContent;
@@ -535,29 +519,40 @@ namespace SS
         /// are satisfied by the time they are evaluated.
         /// 
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
-        /// list {A1, B1, C1} is returned.
         /// </summary>
+        /// <param name="name">Name of the cell that should be set</param>
+        /// <param name="content">Content the cell should be set to</param>
+        /// <returns></returns>
         public override IList<String> SetContentsOfCell(String name, String content)
         {
             name = Normalize(name);
             IList<string> cellDependents;
 
-            ExceptionHandling(name, content);
+            CellNameExceptionHandling(name);
 
+            if (content is null)
+                throw new ArgumentNullException();
+
+            //DOUBLE
             if (Regex.IsMatch(content, @"^(\d+\.\d*|\d*\.\d+|\d+)+$"))
                 cellDependents = SetCellContents(name, Double.Parse(content));
+
+            //FORMULA
             else if (content != "" && content[0] == '=')
             {
                 Formula cellFormula = new Formula(content.Substring(1), Normalize, IsValid);
 
                 cellDependents = SetCellContents(name, cellFormula);
             }
+
+            //STRING
             else
                 cellDependents = SetCellContents(name, content);
 
             Changed = true;
 
-            foreach(string s in cellDependents)
+            //Updates the values of all of the dependents
+            foreach (string s in cellDependents)
             {
                 if (Cells.ContainsKey(s) && Cells[s].CellContent is Formula)
                     Cells[s].CellValue = ((Formula)Cells[s].CellContent).Evaluate(CellValueLookup);
@@ -592,6 +587,7 @@ namespace SS
                         Dependencies.RemoveDependency(variable, name);
                 }
                 Cells[name].CellContent = number;
+                Cells[name].CellValue = number;
             }
 
             //If the name already has a cell, replace the cell
@@ -626,7 +622,6 @@ namespace SS
 
             if (Cells.ContainsKey(name))
             {
-                //It only removes the dependencies if it is a formula
                 if (Cells[name].CellContent is Formula)
                 {
                     foreach (string variable in ((Formula)Cells[name].CellContent).GetVariables())
@@ -636,7 +631,11 @@ namespace SS
                 if (text == "")
                     Cells.Remove(name);
                 else
+                {
                     Cells[name].CellContent = text;
+                    Cells[name].CellValue = text;
+                }
+
             }
             else if (text != "")
                 Cells.Add(name, new Cell(name, text));
@@ -714,49 +713,57 @@ namespace SS
         protected override IEnumerable<String> GetDirectDependents(String name)
         {
             name = Normalize(name);
-            ExceptionHandling(name);
+            CellNameExceptionHandling(name);
 
             foreach (string dependent in Dependencies.GetDependents(name))
                 yield return dependent;
         }
 
+        /// <summary>
+        /// Lookup formula to be passed into a formula evaluate method. It returns the value of the inputted
+        /// cell as a double. If the cell's value is a string or FormulaError, it throws an ArgumentException.
+        /// </summary>
+        /// <param name="cell">Name of cell that's being looked up</param>
+        /// <returns>Value of the cell as a double</returns>
         protected double CellValueLookup(string cell)
         {
             object value = GetCellValue(cell);
             if (value is string || value is FormulaError)
                 throw new ArgumentException();
 
-            return (double) value;
-        }
-
-        private void ExceptionHandling(string s)
-        {
-            if (s is null || !isNameValid(s))
-                throw new InvalidNameException();
-        }
-        private void ExceptionHandling(string s1, object s2)
-        {
-            if (s1 is null || !isNameValid(s1))
-                throw new InvalidNameException();
-            else if (s2 is null)
-                throw new ArgumentNullException();
+            return (double)value;
         }
 
         /// <summary>
-        /// Tests if a string fits the format of a variable. This format is that it is a letter or underscore followed by a combination of 
-        /// letters, underscores, or digits. FIX LATER
+        /// Helper method that takes in a string and makes sure that it's valid and that it isn't null. If
+        /// it's either invalid or null, it throws an InvalidNameException. This is used to test cell name
+        /// inputs.
+        /// </summary>
+        /// <param name="s">Name that shoudl be tested (string)</param>
+        private void CellNameExceptionHandling(string s)
+        {
+            if (s is null || !IsNameValid(s))
+                throw new InvalidNameException();
+        }
+
+        /// <summary>
+        /// Tests if a string fits the format of a cell name. This format is that it is one or more letters
+        /// followed by one or more digits.
         /// </summary>
         /// <param name="s">String to be tested</param>
-        /// <returns>Whether or not the string is a variable</returns>
-        private bool isNameValid(string s)
+        /// <returns>Whether or not the string is a valid cell name</returns>
+        private bool IsNameValid(string s)
         {
             return Regex.IsMatch(s, @"^[a-zA-Z]+\d+$") && IsValid(s);
         }
 
         /// <summary>
         /// Private cell class for the elements of the dictionary. Each cell
-        /// stores it's name and it's value. The cell's value can only be a
-        /// double, string, or formula.
+        /// stores it's name, value, and content.
+        /// 
+        /// A cell's content can only be a double, string, or formula.
+        /// 
+        /// A cell's value can only be a double, string, or FormulaError.
         /// 
         /// The name of a cell is immutable but it's value can be changed.
         /// </summary>
@@ -775,7 +782,7 @@ namespace SS
             }
 
             /// <summary>
-            /// 
+            /// Constructor for if the cell holds a string
             /// </summary>
             /// <param name="name">Name of the cell</param>
             /// <param name="text">String that should be stored in the cell</param>
@@ -787,7 +794,8 @@ namespace SS
             }
 
             /// <summary>
-            /// 
+            /// Constructor for if the cell holds a formula. It calculates the value in the SetContentsOfCell
+            /// method.
             /// </summary>
             /// <param name="name">Name of the cell</param>
             /// <param name="formula">Formula that should be stored in the cell</param>
@@ -798,7 +806,8 @@ namespace SS
             }
 
             /// <summary>
-            /// Immutable name property of the cell. This way the only way to change the name is by creating a new cell.
+            /// Immutable name property of the cell. This way the only way to change the name is by creating
+            /// a new cell.
             /// </summary>
             public string Name
             {
@@ -807,22 +816,14 @@ namespace SS
             }
 
             /// <summary>
-            /// Content the cell is storing. It's written as a property since future versions
-            /// may require different get and set methods.
+            /// Content the cell is storing.
             /// </summary>
-            public object CellContent
-            {
-                get;
-                set;
-            }
+            public object CellContent;
+
             /// <summary>
             /// Value that the cell is storing.
             /// </summary>
-            public object CellValue
-            {
-                get;
-                set;
-            }
+            public object CellValue;
         }
     }
 }
