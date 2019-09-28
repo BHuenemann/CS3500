@@ -94,6 +94,36 @@ namespace SpreadsheetTests
 
 
 
+        public void CreateInvalidOrderXML2(string name)
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "\t";
+
+            using (XmlWriter writer = XmlWriter.Create(name))
+            {
+                writer.WriteStartDocument();
+
+
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "1.0");
+
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("content", "15");
+                writer.WriteElementString("name", "A1");
+                writer.WriteEndElement();
+
+
+                writer.WriteEndElement();
+
+
+                writer.WriteEndDocument();
+            }
+        }
+
+
+
         public void CreateInvalidCellNameXML(string name)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
@@ -319,6 +349,16 @@ namespace SpreadsheetTests
         {
             CreateInvalidOrderXML("Test3.xml");
             Spreadsheet s = new Spreadsheet("Test3.xml", n => true, n => n, "1.0");
+        }
+
+
+
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        [TestMethod]
+        public void TestReadXMLInvalidElementOrder2()
+        {
+            CreateInvalidOrderXML2("Test3-2.xml");
+            Spreadsheet s = new Spreadsheet("Test3-2.xml", n => true, n => n, "1.0");
         }
 
 
