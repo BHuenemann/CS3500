@@ -152,11 +152,6 @@ namespace SS
             {
                 throw new SpreadsheetReadWriteException("Couldn't read since filename was set to null");
             }
-            //Catches any other exception and gives a generic error message
-            catch (Exception)
-            {
-                throw new SpreadsheetReadWriteException("Encountered an error while reading the file");
-            }
 
 
 
@@ -182,10 +177,6 @@ namespace SS
             catch (SpreadsheetReadWriteException)
             {
                 throw;
-            }
-            catch (Exception)
-            {
-                throw new SpreadsheetReadWriteException("Error occured while reading file");
             }
             finally
             {
@@ -236,10 +227,6 @@ namespace SS
             catch (ArgumentNullException)
             {
                 throw new SpreadsheetReadWriteException("Couldn't save since filename was set to null");
-            }
-            catch (Exception)
-            {
-                throw new SpreadsheetReadWriteException("Error occured while writing the file");
             }
 
             try
@@ -379,9 +366,6 @@ namespace SS
                                 CheckPreviousElement(previousElement, 4);
                                 previousElement = 8;
                                 break;
-
-                            default:
-                                throw new SpreadsheetReadWriteException("Unknown element while reading file");
                         }
                     }
                 }
@@ -405,10 +389,6 @@ namespace SS
             catch (FormulaFormatException)
             {
                 throw new SpreadsheetReadWriteException("Tried to insert an invalid formula while reading the file");
-            }
-            catch (Exception)
-            {
-                throw new SpreadsheetReadWriteException("Error occured while reading the file");
             }
 
 
