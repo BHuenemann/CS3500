@@ -1,4 +1,21 @@
-Made by Ben Huenemann (9/18/2019)
+Made by Ben Huenemann
+
+(9/27/2019)
+
+The spreadsheet internals have been uupdated so that it
+also stores values of the cells now. Whenever a cell is
+set to something, the value also updates. It also has
+been updated to support XML saving and loading. The
+biggest change in the way it's accessed is that setting
+the contents of the cell only takes in a string now. If
+the user wants to put in a formula, the string must start
+with "=".
+
+This spreadsheet project is now an updated version of
+PS4. It was created in a separate branch and then merged.
+
+
+(9/18/2019)
 
 The spreadsheet internals will be setup so that an empty
 spreadsheet created that stores cells. The cells will be
