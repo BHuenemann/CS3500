@@ -261,6 +261,10 @@ namespace SS
 
 
 
+            catch (InvalidOperationException)
+            {
+                throw new SpreadsheetReadWriteException("Invalid operation while writing file");
+            }
             catch (Exception)
             {
                 throw new SpreadsheetReadWriteException("Error occured while writing file");
@@ -369,6 +373,9 @@ namespace SS
                         }
                     }
                 }
+                //If it doesn't end with an spreadsheet end element, it throws an error
+                if (previousElement != 5)
+                    throw new SpreadsheetReadWriteException("Invalid end element");
             }
 
 
