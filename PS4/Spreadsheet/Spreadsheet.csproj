@@ -4,6 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>C:\Users\ben41\source\repos\u1190338\PS4\Spreadsheet\Spreadsheet.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <Reference Include="DependencyGraph">
       <HintPath>..\Resources\Libraries\DependencyGraph.dll</HintPath>
