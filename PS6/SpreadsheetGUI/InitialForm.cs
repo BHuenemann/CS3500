@@ -13,9 +13,9 @@ using System.Windows.Forms;
 
 namespace SpreadsheetGUI
 {
-    public partial class Form1 : Form
+    public partial class InitialForm : Form
     {
-        private Spreadsheet mainSpreadsheet;
+        public Spreadsheet mainSpreadsheet;
 
 
 
@@ -33,7 +33,7 @@ namespace SpreadsheetGUI
 
 
 
-        public Form1()
+        public InitialForm()
         {
             InitializeComponent();
             mainSpreadsheet = new Spreadsheet(SpreadsheetCellIsValid, SpreadsheetCellNormalizer, "ps6");
@@ -41,23 +41,10 @@ namespace SpreadsheetGUI
 
 
 
-        public void OpenSaveDialogue()
+        public void StartSaveDialogue()
         {
-            Stream stream;
-            SaveFileDialog saveWindow = new SaveFileDialog();
-
-            saveWindow.Filter = "Spreadsheet|*.sprd|All Files|*.*";
-            saveWindow.Title = "Save your spreadsheet";
-
-            if(saveWindow.ShowDialog() == DialogResult.OK)
-            {
-                if((stream = saveWindow.OpenFile()) != null)
-                {
-                    stream.Close();
-                }
-            }
-
-            saveWindow.Dispose();
+            if (SaveDialogBox.ShowDialog() == DialogResult.OK)
+                SaveFile(SaveDialogBox.FileName);
         }
 
 
@@ -76,6 +63,21 @@ namespace SpreadsheetGUI
 
 
 
+        private void StartOpenDialog()
+        {
+            if (OpenDialogBox.ShowDialog() == DialogResult.OK)
+                OpenFile(OpenDialogBox.FileName);
+        }
+
+
+
+        private void OpenFile(string FileName)
+        {
+            mainSpreadsheet = new Spreadsheet(FileName, SpreadsheetCellIsValid, SpreadsheetCellNormalizer, "ps6");
+        }
+
+
+
         private void Form1_Load(object sender, EventArgs e)
         {
 
@@ -90,25 +92,43 @@ namespace SpreadsheetGUI
 
 
 
-        private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
+        private void NewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Form WarningBox = new Form();
-
-            this.Close();
+            mainSpreadsheet = new Spreadsheet(SpreadsheetCellIsValid, SpreadsheetCellNormalizer, "ps6");
         }
 
 
 
         private void SaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenSaveDialogue();
+            StartSaveDialogue();
         }
 
 
 
-        private void SaveDialogBox_FileOk(object sender, CancelEventArgs e)
+        private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveFile(SaveDialogBox.FileName);
+            StartOpenDialog();
+        }
+
+
+        private void OpenDialogBox_FileOk(object sender, CancelEventArgs e)
+        {
+            OpenFile(OpenDialogBox.FileName);
+        }
+
+
+
+        private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+
+
+        private void SpreadsheetGrid_KeyDown(object sender, KeyEventArgs e)
+        {
+            Console.WriteLine(mainSpreadsheet.GetNamesOfAllNonemptyCells());
         }
     }
 }

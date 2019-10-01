@@ -1,6 +1,6 @@
 ﻿namespace SpreadsheetGUI
 {
-    partial class Form1
+    partial class InitialForm
     {
         /// <summary>
         /// Required designer variable.
@@ -41,19 +41,21 @@
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SaveDialogBox = new System.Windows.Forms.SaveFileDialog();
+            this.OpenDialogBox = new System.Windows.Forms.OpenFileDialog();
             this.Menu.SuspendLayout();
             this.SuspendLayout();
             // 
             // SpreadsheetGrid
             // 
-            this.SpreadsheetGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.SpreadsheetGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SpreadsheetGrid.Location = new System.Drawing.Point(4, 51);
             this.SpreadsheetGrid.Margin = new System.Windows.Forms.Padding(2);
             this.SpreadsheetGrid.Name = "SpreadsheetGrid";
             this.SpreadsheetGrid.Size = new System.Drawing.Size(572, 306);
             this.SpreadsheetGrid.TabIndex = 0;
+            this.SpreadsheetGrid.KeyDown += new System.Windows.Forms.KeyEventHandler(this.SpreadsheetGrid_KeyDown);
             // 
             // CellNameBox
             // 
@@ -73,7 +75,7 @@
             // 
             // CellContentsBox
             // 
-            this.CellContentsBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.CellContentsBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.CellContentsBox.Location = new System.Drawing.Point(157, 25);
             this.CellContentsBox.Margin = new System.Windows.Forms.Padding(2);
@@ -109,31 +111,33 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.newToolStripMenuItem.Text = "New";
+            this.newToolStripMenuItem.Click += new System.EventHandler(this.NewToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.openToolStripMenuItem.Text = "Open";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(100, 6);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.CloseToolStripMenuItem_Click);
             // 
@@ -145,9 +149,17 @@
             // 
             // SaveDialogBox
             // 
-            this.SaveDialogBox.FileOk += new System.ComponentModel.CancelEventHandler(this.SaveDialogBox_FileOk);
+            this.SaveDialogBox.Filter = "Spreadsheet|*.sprd|All Files|*.*";
+            this.SaveDialogBox.Title = "Save your spreadsheet";
             // 
-            // Form1
+            // OpenDialogBox
+            // 
+            this.OpenDialogBox.FileName = "OpenDialogBox";
+            this.OpenDialogBox.Filter = "Spreadsheet|*.sprd|All Files|*.*";
+            this.OpenDialogBox.Title = "Open a spreadsheet file";
+            this.OpenDialogBox.FileOk += new System.ComponentModel.CancelEventHandler(this.OpenDialogBox_FileOk);
+            // 
+            // InitialForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -158,7 +170,7 @@
             this.Controls.Add(this.SpreadsheetGrid);
             this.Controls.Add(this.Menu);
             this.Margin = new System.Windows.Forms.Padding(2);
-            this.Name = "Form1";
+            this.Name = "InitialForm";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Menu.ResumeLayout(false);
@@ -183,6 +195,7 @@
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog SaveDialogBox;
+        private System.Windows.Forms.OpenFileDialog OpenDialogBox;
     }
 }
 
