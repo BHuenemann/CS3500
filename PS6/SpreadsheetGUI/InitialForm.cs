@@ -33,14 +33,6 @@ namespace SpreadsheetGUI
 
 
 
-        public InitialForm()
-        {
-            InitializeComponent();
-            mainSpreadsheet = new Spreadsheet(SpreadsheetCellIsValid, SpreadsheetCellNormalizer, "ps6");
-        }
-
-
-
         public void StartSaveDialogue()
         {
             if (SaveDialogBox.ShowDialog() == DialogResult.OK)
@@ -78,14 +70,15 @@ namespace SpreadsheetGUI
 
 
 
-        private void Form1_Load(object sender, EventArgs e)
+        public InitialForm()
         {
-
+            InitializeComponent();
+            mainSpreadsheet = new Spreadsheet(SpreadsheetCellIsValid, SpreadsheetCellNormalizer, "ps6");
         }
 
 
 
-        private void Filebar_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void Form1_Load(object sender, EventArgs e)
         {
 
         }
@@ -112,23 +105,10 @@ namespace SpreadsheetGUI
         }
 
 
-        private void OpenDialogBox_FileOk(object sender, CancelEventArgs e)
-        {
-            OpenFile(OpenDialogBox.FileName);
-        }
-
-
 
         private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
-        }
-
-
-
-        private void SpreadsheetGrid_KeyDown(object sender, KeyEventArgs e)
-        {
-            Console.WriteLine(mainSpreadsheet.GetNamesOfAllNonemptyCells());
         }
     }
 }

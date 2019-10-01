@@ -55,7 +55,6 @@
             this.SpreadsheetGrid.Name = "SpreadsheetGrid";
             this.SpreadsheetGrid.Size = new System.Drawing.Size(572, 306);
             this.SpreadsheetGrid.TabIndex = 0;
-            this.SpreadsheetGrid.KeyDown += new System.Windows.Forms.KeyEventHandler(this.SpreadsheetGrid_KeyDown);
             // 
             // CellNameBox
             // 
