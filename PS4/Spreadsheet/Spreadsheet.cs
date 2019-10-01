@@ -244,11 +244,11 @@ namespace SS
 
                     writer.WriteElementString("name", c.Name);
                     if (c.CellContent is string)
-                        writer.WriteElementString("content", (string)c.CellContent);
+                        writer.WriteElementString("contents", (string)c.CellContent);
                     else if (c.CellContent is double)
-                        writer.WriteElementString("content", c.CellContent.ToString());
+                        writer.WriteElementString("contents", c.CellContent.ToString());
                     else if (c.CellContent is Formula)
-                        writer.WriteElementString("content", "=" + c.CellContent.ToString());
+                        writer.WriteElementString("contents", "=" + c.CellContent.ToString());
 
                     writer.WriteEndElement();
                 }
@@ -264,10 +264,6 @@ namespace SS
             catch (InvalidOperationException)
             {
                 throw new SpreadsheetReadWriteException("Invalid operation while writing file");
-            }
-            catch (Exception)
-            {
-                throw new SpreadsheetReadWriteException("Error occured while writing file");
             }
 
 
@@ -331,7 +327,7 @@ namespace SS
                                 nameStack.Push(reader.Value);
                                 break;
 
-                            case "content":
+                            case "contents":
                                 CheckPreviousElement(previousElement, 7);
                                 previousElement = 4;
                                 reader.Read();
@@ -366,16 +362,13 @@ namespace SS
                                 previousElement = 7;
                                 break;
 
-                            case "content":
+                            case "contents":
                                 CheckPreviousElement(previousElement, 4);
                                 previousElement = 8;
                                 break;
                         }
                     }
                 }
-                //If it doesn't end with an spreadsheet end element, it throws an error
-                if (previousElement != 5)
-                    throw new SpreadsheetReadWriteException("Invalid end element");
             }
 
 

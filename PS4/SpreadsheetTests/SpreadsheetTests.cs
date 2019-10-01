@@ -32,22 +32,22 @@ namespace SpreadsheetTests
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "A1");
-                writer.WriteElementString("content", "15");
+                writer.WriteElementString("contents", "15");
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "A2");
-                writer.WriteElementString("content", "5");
+                writer.WriteElementString("contents", "5");
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "B1");
-                writer.WriteElementString("content", "=A1+A2");
+                writer.WriteElementString("contents", "=A1+A2");
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "B3");
-                writer.WriteElementString("content", "text");
+                writer.WriteElementString("contents", "text");
                 writer.WriteEndElement();
 
 
@@ -77,11 +77,11 @@ namespace SpreadsheetTests
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "A1");
-                writer.WriteElementString("content", "15");
+                writer.WriteElementString("contents", "15");
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "A2");
-                writer.WriteElementString("content", "5");
+                writer.WriteElementString("contents", "5");
                 writer.WriteEndElement();
 
 
@@ -111,7 +111,7 @@ namespace SpreadsheetTests
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "11A");
-                writer.WriteElementString("content", "15");
+                writer.WriteElementString("contents", "15");
                 writer.WriteEndElement();
 
 
@@ -141,12 +141,12 @@ namespace SpreadsheetTests
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "A1");
-                writer.WriteElementString("content", "=A2");
+                writer.WriteElementString("contents", "=A2");
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "A2");
-                writer.WriteElementString("content", "=A1");
+                writer.WriteElementString("contents", "=A1");
                 writer.WriteEndElement();
 
 
@@ -175,12 +175,12 @@ namespace SpreadsheetTests
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "A1");
-                writer.WriteElementString("content", "=A2");
+                writer.WriteElementString("contents", "=A2");
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "A2");
-                writer.WriteElementString("content", "=A1");
+                writer.WriteElementString("contents", "=A1");
                 writer.WriteEndElement();
 
 
@@ -210,7 +210,7 @@ namespace SpreadsheetTests
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "A1");
-                writer.WriteElementString("content", "=1++3");
+                writer.WriteElementString("contents", "=1++3");
                 writer.WriteEndElement();
 
 
@@ -240,7 +240,7 @@ namespace SpreadsheetTests
 
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "A1");
-                writer.WriteElementString("content", "=1++3");
+                writer.WriteElementString("contents", "=1++3");
 
 
                 writer.WriteEndDocument();
