@@ -282,6 +282,7 @@ namespace SS
 
             finally
             {
+                Changed = false;
                 writer.Dispose();
             }
         }
