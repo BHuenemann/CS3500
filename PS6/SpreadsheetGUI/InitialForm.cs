@@ -16,6 +16,7 @@ namespace SpreadsheetGUI
     public partial class InitialForm : Form
     {
         public Spreadsheet mainSpreadsheet;
+        private string FileName = "";
 
 
 
@@ -33,23 +34,39 @@ namespace SpreadsheetGUI
 
 
 
-        public void StartSaveDialogue()
+        public void StartSaveDialog()
         {
-            if (SaveDialogBox.ShowDialog() == DialogResult.OK)
-                SaveFile(SaveDialogBox.FileName);
+            try
+            {
+                SaveDialogBox.OverwritePrompt = !(File.Exists(SaveDialogBox.FileName) && SaveDialogBox.FileName == FileName);
+
+                if (SaveDialogBox.ShowDialog() == DialogResult.OK)
+                {
+                    if (File.Exists(SaveDialogBox.FileName) && SaveDialogBox.FileName == FileName)
+                        File.Delete(SaveDialogBox.FileName);
+
+                    SaveFile(SaveDialogBox.FileName);
+                }
+            }
+            catch(Exception)
+            {
+                DialogResult = MessageBox.Show("An error occured while trying to save the file", "Save Spreadsheet Error", MessageBoxButtons.OK);
+            }
         }
 
 
 
         private void SaveFile(string FileName)
         {
-            if (SaveDialogBox.FilterIndex == 1 || FileName.Substring(FileName.Length - 5) == ".sprd")
+            if (SaveDialogBox.FilterIndex == 2 || FileName.Substring(FileName.Length - 5) == ".sprd")
             {
-                mainSpreadsheet.Save(SaveDialogBox.FileName);
+                mainSpreadsheet.Save(FileName);
+                this.FileName = SaveDialogBox.FileName;
             }
             else
             {
-                mainSpreadsheet.Save(SaveDialogBox.FileName + ".sprd");
+                mainSpreadsheet.Save(FileName);
+                this.FileName = SaveDialogBox.FileName + ".sprd";
             }
         }
 
@@ -57,8 +74,19 @@ namespace SpreadsheetGUI
 
         private void StartOpenDialog()
         {
-            if (OpenDialogBox.ShowDialog() == DialogResult.OK)
-                OpenFile(OpenDialogBox.FileName);
+            try
+            {
+                if (OpenDialogBox.ShowDialog() == DialogResult.OK)
+                    OpenFile(OpenDialogBox.FileName);
+            }
+            catch (SpreadsheetReadWriteException)
+            {
+                DialogResult = MessageBox.Show("File is in an incorrect format", "Open Spreadsheet Error", MessageBoxButtons.OK);
+            }
+            catch (Exception)
+            {
+                DialogResult = MessageBox.Show("Error while trying to open the file", "Open Spreadsheet Error", MessageBoxButtons.OK);
+            }
         }
 
 
@@ -66,6 +94,31 @@ namespace SpreadsheetGUI
         private void OpenFile(string FileName)
         {
             mainSpreadsheet = new Spreadsheet(FileName, SpreadsheetCellIsValid, SpreadsheetCellNormalizer, "ps6");
+            this.FileName = FileName;
+        }
+
+
+
+        private bool UnsavedWarning()
+        {
+            if (mainSpreadsheet.Changed)
+            {
+                DialogResult warningBox = MessageBox.Show("File contains unsaved changes. Would you like to save your work?", "Unsaved Changes", MessageBoxButtons.YesNoCancel);
+                switch (warningBox)
+                {
+                    case DialogResult.Yes:
+                        StartSaveDialog();
+                        return false;
+
+                    case DialogResult.No:
+                        return false;
+
+                    case DialogResult.Cancel:
+                        return true;
+                }
+            }
+
+            return false;
         }
 
 
@@ -94,7 +147,7 @@ namespace SpreadsheetGUI
 
         private void SaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            StartSaveDialogue();
+            StartSaveDialog();
         }
 
 
@@ -108,7 +161,15 @@ namespace SpreadsheetGUI
 
         private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
+        }
+
+
+
+        private void InitialForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (UnsavedWarning())
+                e.Cancel = true;
         }
     }
 }

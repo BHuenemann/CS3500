@@ -156,7 +156,6 @@
             this.OpenDialogBox.FileName = "OpenDialogBox";
             this.OpenDialogBox.Filter = "Spreadsheet|*.sprd|All Files|*.*";
             this.OpenDialogBox.Title = "Open a spreadsheet file";
-            this.OpenDialogBox.FileOk += new System.ComponentModel.CancelEventHandler(this.OpenDialogBox_FileOk);
             // 
             // InitialForm
             // 
@@ -171,6 +170,7 @@
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "InitialForm";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.InitialForm_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Menu.ResumeLayout(false);
             this.Menu.PerformLayout();
