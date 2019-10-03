@@ -426,13 +426,13 @@ namespace SpreadsheetGUI
             CellContentsBox.SelectionStart = CellContentsBox.Text.Length + 1;
         }
 
-        //private void InitialForm_KeyDown(object sender, KeyEventArgs e)
-        //{
-        //    if (e.KeyCode == Keys.C && e.Modifiers == Keys.Control)
-        //    {
+        private void InitialForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.C && e.Modifiers == Keys.Control)
+            {
 
-        //        MessageBox.Show("You pressed ctrl + c");
-        //    }
-        //}
+                MessageBox.Show("You pressed ctrl + c");
+            }
+        }
     }
 }
