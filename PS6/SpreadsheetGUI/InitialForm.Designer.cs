@@ -61,6 +61,7 @@
             this.CellNameBox.Location = new System.Drawing.Point(4, 25);
             this.CellNameBox.Margin = new System.Windows.Forms.Padding(2);
             this.CellNameBox.Name = "CellNameBox";
+            this.CellNameBox.ReadOnly = true;
             this.CellNameBox.Size = new System.Drawing.Size(76, 20);
             this.CellNameBox.TabIndex = 3;
             // 
@@ -69,6 +70,7 @@
             this.CellValueBox.Location = new System.Drawing.Point(84, 25);
             this.CellValueBox.Margin = new System.Windows.Forms.Padding(2);
             this.CellValueBox.Name = "CellValueBox";
+            this.CellValueBox.ReadOnly = true;
             this.CellValueBox.Size = new System.Drawing.Size(69, 20);
             this.CellValueBox.TabIndex = 4;
             // 
@@ -80,7 +82,8 @@
             this.CellContentsBox.Margin = new System.Windows.Forms.Padding(2);
             this.CellContentsBox.Name = "CellContentsBox";
             this.CellContentsBox.Size = new System.Drawing.Size(420, 20);
-            this.CellContentsBox.TabIndex = 5;
+            this.CellContentsBox.TabIndex = 0;
+            this.CellContentsBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CellContentsBox_KeyDown);
             // 
             // Menu
             // 

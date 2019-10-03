@@ -1,4 +1,5 @@
-﻿using SS;
+﻿using SpreadsheetUtilities;
+using SS;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,8 +16,10 @@ namespace SpreadsheetGUI
 {
     public partial class InitialForm : Form
     {
-        public Spreadsheet mainSpreadsheet;
+        private Spreadsheet mainSpreadsheet;
         private string FileName = "";
+        private int previousCol = 0;
+        private int previousRow = 0;
 
 
 
@@ -48,7 +51,7 @@ namespace SpreadsheetGUI
                     SaveFile(SaveDialogBox.FileName);
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 DialogResult = MessageBox.Show("An error occured while trying to save the file", "Save Spreadsheet Error", MessageBoxButtons.OK);
             }
@@ -81,7 +84,7 @@ namespace SpreadsheetGUI
             }
             catch (SpreadsheetReadWriteException)
             {
-                DialogResult = MessageBox.Show("File is in an incorrect format", "Open Spreadsheet Error", MessageBoxButtons.OK);
+                DialogResult = MessageBox.Show("File contents are incompatible", "Open Spreadsheet Error", MessageBoxButtons.OK);
             }
             catch (Exception)
             {
@@ -127,6 +130,11 @@ namespace SpreadsheetGUI
         {
             InitializeComponent();
             mainSpreadsheet = new Spreadsheet(SpreadsheetCellIsValid, SpreadsheetCellNormalizer, "ps6");
+            SpreadsheetGrid.SelectionChanged += OnSelectionChanged;
+
+            SpreadsheetGrid.GetSelection(out int col, out int row);
+            int selectedRow = row + 1;
+            CellNameBox.Text = SelectedCellName(col, row);
         }
 
 
@@ -170,6 +178,188 @@ namespace SpreadsheetGUI
         {
             if (UnsavedWarning())
                 e.Cancel = true;
+        }
+
+        //Jon's Code Methods
+
+        private void OnSelectionChanged(SpreadsheetPanel spreadSheet)
+        {
+            spreadSheet.GetSelection(out int col, out int row);
+
+            UpdateCells(previousCol, previousRow);
+
+            spreadSheet.SetSelection(col, row);
+            previousCol = col;
+            previousRow = row;
+            string cellName = SelectedCellName(col, row);
+
+            CellNameBox.Text = cellName;
+            CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
+
+            if (mainSpreadsheet.GetCellContents(cellName) is Formula)
+            {
+                CellContentsBox.Text = "=" + mainSpreadsheet.GetCellContents(cellName).ToString();
+            }
+            else
+            {
+                CellContentsBox.Text = mainSpreadsheet.GetCellContents(cellName).ToString();
+            }
+            CellContentsBox.Focus();
+
+            CellContentsBox.SelectionStart = CellContentsBox.Text.Length + 1;
+
+        }
+
+        private String ColNumberToLetter(int col)
+        {
+            Char c = (Char)((true ? 65 : 97) + (col));
+
+            return c.ToString();
+        }
+
+        private String SelectedCellName(int col, int row)
+        {
+            row++;
+            return ColNumberToLetter(col) + row.ToString();
+        }
+
+        private void UpdateCells(int col, int row)
+        {
+            string cellName = SelectedCellName(col, row);
+
+            foreach (string cell in mainSpreadsheet.SetContentsOfCell(cellName, CellContentsBox.Text))
+            {
+                char colToChange = cell[0];
+                int rowToChange = Int32.Parse(cell.Substring(1)) - 1;
+                int letterToNumberCol = char.ToUpper(colToChange) - 65;
+
+
+                SpreadsheetGrid.SetValue(letterToNumberCol, rowToChange, mainSpreadsheet.GetCellValue(cell).ToString());
+
+            }
+
+            SpreadsheetGrid.SetSelection(col, row);
+            // Visual Change in cell
+            SpreadsheetGrid.SetValue(col, row, mainSpreadsheet.GetCellValue(cellName).ToString());
+
+            CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
+
+            if (mainSpreadsheet.GetCellContents(cellName) is Formula)
+            {
+                CellContentsBox.Text = "=" + mainSpreadsheet.GetCellContents(cellName).ToString();
+            }
+            else
+            {
+                CellContentsBox.Text = mainSpreadsheet.GetCellContents(cellName).ToString();
+            }
+        }
+
+        private void VisualUpdate(string cellName)
+        {
+            CellNameBox.Text = cellName;
+            CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
+
+            if (mainSpreadsheet.GetCellContents(cellName) is Formula)
+            {
+                CellContentsBox.Text = "=" + mainSpreadsheet.GetCellContents(cellName).ToString();
+            }
+            else
+            {
+                CellContentsBox.Text = mainSpreadsheet.GetCellContents(cellName).ToString();
+            }
+            CellContentsBox.Focus();
+        }
+
+        private void CellContentsBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            SpreadsheetGrid.GetSelection(out int col, out int row);
+
+            if (e.KeyCode == Keys.Enter)
+            {
+                UpdateCells(col, row);
+            }
+
+            if (e.KeyCode == Keys.Up)
+            {
+                UpdateCells(col, row);
+                string cellName;
+                if (row != 0)
+                {
+                    previousCol = col;
+                    previousRow = row - 1;
+                    SpreadsheetGrid.SetSelection(col, row - 1);
+                    cellName = SelectedCellName(col, row - 1);
+                }
+                else
+                {
+                    cellName = SelectedCellName(col, row);
+
+                }
+
+                VisualUpdate(cellName);
+            }
+
+            if (e.KeyCode == Keys.Down)
+            {
+                UpdateCells(col, row);
+                string cellName;
+                if (row != 98)
+                {
+                    previousCol = col;
+                    previousRow = row + 1;
+                    SpreadsheetGrid.SetSelection(col, row + 1);
+                    cellName = SelectedCellName(col, row + 1);
+                }
+                else
+                {
+                    cellName = SelectedCellName(col, row);
+                }
+
+                VisualUpdate(cellName);
+            }
+
+            if (e.KeyCode == Keys.Left)
+            {
+                UpdateCells(col, row);
+                string cellName;
+                if (col != 0)
+                {
+                    previousCol = col - 1;
+                    previousRow = row;
+                    SpreadsheetGrid.SetSelection(col - 1, row);
+                    cellName = SelectedCellName(col - 1, row);
+                }
+                else
+                {
+                    cellName = SelectedCellName(col, row);
+
+                }
+
+                VisualUpdate(cellName);
+            }
+
+            if (e.KeyCode == Keys.Right)
+            {
+                UpdateCells(col, row);
+                string cellName;
+                if (col != 25)
+                {
+                    previousCol = col + 1;
+                    previousRow = row;
+                    SpreadsheetGrid.SetSelection(col + 1, row);
+                    cellName = SelectedCellName(col + 1, row);
+                }
+                else
+                {
+
+                    cellName = SelectedCellName(col, row);
+
+                }
+
+                VisualUpdate(cellName);
+            }
+
+            CellContentsBox.SelectionStart = CellContentsBox.Text.Length + 1;
         }
     }
 }
