@@ -325,6 +325,11 @@ namespace SpreadsheetGUI
 
         private void CellContentsBox_KeyDown(object sender, KeyEventArgs e)
         {
+            HandleKeys(e);
+        }
+
+        private void HandleKeys(KeyEventArgs e)
+        {
             SpreadsheetGrid.GetSelection(out int col, out int row);
 
             if (e.KeyCode == Keys.Enter)
@@ -412,7 +417,22 @@ namespace SpreadsheetGUI
                 VisualUpdate(cellName);
             }
 
+            if (e.KeyCode == Keys.Control && e.Modifiers == Keys.Z)
+            {
+
+                MessageBox.Show("You pressed ctrl + z");
+            }
+
             CellContentsBox.SelectionStart = CellContentsBox.Text.Length + 1;
         }
+
+        //private void InitialForm_KeyDown(object sender, KeyEventArgs e)
+        //{
+        //    if (e.KeyCode == Keys.C && e.Modifiers == Keys.Control)
+        //    {
+
+        //        MessageBox.Show("You pressed ctrl + c");
+        //    }
+        //}
     }
 }
