@@ -194,7 +194,16 @@ namespace SpreadsheetGUI
             string cellName = SelectedCellName(col, row);
 
             CellNameBox.Text = cellName;
-            CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
+
+            if (mainSpreadsheet.GetCellValue(cellName) is FormulaError)
+            {
+                CellValueBox.Text = "Formula Error";
+            }
+
+            else
+            {
+                CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
+            }
 
             if (mainSpreadsheet.GetCellContents(cellName) is Formula)
             {
@@ -226,38 +235,82 @@ namespace SpreadsheetGUI
         private void UpdateCells(int col, int row)
         {
             string cellName = SelectedCellName(col, row);
+            string previousContents = CellContentsBox.Text;
 
-            foreach (string cell in mainSpreadsheet.SetContentsOfCell(cellName, CellContentsBox.Text))
+            try
             {
-                char colToChange = cell[0];
-                int rowToChange = Int32.Parse(cell.Substring(1)) - 1;
-                int letterToNumberCol = char.ToUpper(colToChange) - 65;
+                IList<string> dependencies = mainSpreadsheet.SetContentsOfCell(cellName, CellContentsBox.Text);
 
+                foreach (string cell in dependencies)
+                {
 
-                SpreadsheetGrid.SetValue(letterToNumberCol, rowToChange, mainSpreadsheet.GetCellValue(cell).ToString());
+                    char colToChange = cell[0];
+                    int rowToChange = Int32.Parse(cell.Substring(1)) - 1;
+                    int letterToNumberCol = char.ToUpper(colToChange) - 65;
 
+                    string cellValueInFourEach = mainSpreadsheet.GetCellValue(cell).ToString();
+                    if (cellValueInFourEach == "SpreadsheetUtilities.FormulaError")
+                    {
+                        SpreadsheetGrid.SetValue(letterToNumberCol, rowToChange, "Formula Error");
+                        CellValueBox.Text = "Formula Error";
+                    }
+                    else
+                    {
+                        SpreadsheetGrid.SetValue(letterToNumberCol, rowToChange, mainSpreadsheet.GetCellValue(cell).ToString());
+                    }
+                    
+
+                }
+
+                SpreadsheetGrid.SetSelection(col, row);
+                // Visual Change in cell
+                //SpreadsheetGrid.SetValue(col, row, mainSpreadsheet.GetCellValue(cellName).ToString());
+                string cellValue = mainSpreadsheet.GetCellValue(cellName).ToString();
+                if (cellValue == "SpreadsheetUtilities.FormulaError")
+                {
+                    SpreadsheetGrid.SetValue(col, row, "Formula Error");
+                    CellValueBox.Text = "Formula Error";
+                }
+                else
+                {
+                    SpreadsheetGrid.SetValue(col, row, mainSpreadsheet.GetCellValue(cellName).ToString());
+
+                    if (mainSpreadsheet.GetCellContents(cellName) is Formula)
+                    {
+                        CellContentsBox.Text = "=" + mainSpreadsheet.GetCellContents(cellName).ToString();
+                    }
+                    else
+                    {
+                        CellContentsBox.Text = mainSpreadsheet.GetCellContents(cellName).ToString();
+                        CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
+                    }
+                }
+
+                //CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
+
+                
             }
 
-            SpreadsheetGrid.SetSelection(col, row);
-            // Visual Change in cell
-            SpreadsheetGrid.SetValue(col, row, mainSpreadsheet.GetCellValue(cellName).ToString());
-
-            CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
-
-            if (mainSpreadsheet.GetCellContents(cellName) is Formula)
+            catch
             {
-                CellContentsBox.Text = "=" + mainSpreadsheet.GetCellContents(cellName).ToString();
-            }
-            else
-            {
-                CellContentsBox.Text = mainSpreadsheet.GetCellContents(cellName).ToString();
+                MessageBox.Show("An error occured while trying to change the contents of a cell", "Contents of Cell Error", MessageBoxButtons.OK);
+                VisualUpdate(cellName);
             }
         }
 
         private void VisualUpdate(string cellName)
         {
             CellNameBox.Text = cellName;
-            CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
+
+            if (mainSpreadsheet.GetCellValue(cellName) is FormulaError)
+            {
+                CellValueBox.Text = "Formula Error";
+            }
+
+            else
+            {
+                CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
+            }
 
             if (mainSpreadsheet.GetCellContents(cellName) is Formula)
             {
