@@ -40,10 +40,10 @@
     <Content Include="Libraries\DependencyGraph.xml" />
     <Content Include="Libraries\Formula.dll" />
     <Content Include="Libraries\Formula.xml" />
-    <Content Include="Libraries\Spreadsheet.dll" />
     <Content Include="Libraries\Spreadsheet.xml" />
     <Content Include="Libraries\SpreadsheetPanel.dll" />
     <Content Include="Libraries\SpreadsheetPanel.xml" />
+    <Content Include="Spreadsheet.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

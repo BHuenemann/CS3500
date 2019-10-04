@@ -430,7 +430,16 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet((string)null, n => true, n => n, "1.0");
         }
 
+        [TestMethod]
+        public void WeirdGlitch()
+        {
+            Spreadsheet s1 = new Spreadsheet();
 
+            s1.SetContentsOfCell("E4", "5");
+            s1.SetContentsOfCell("A1", "=E4");
+
+            Assert.AreEqual(5.0, s1.GetCellValue("A1"));
+        }
 
         [TestMethod]
         public void TestWriteXML()

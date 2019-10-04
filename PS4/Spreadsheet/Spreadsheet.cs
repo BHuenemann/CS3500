@@ -542,7 +542,8 @@ namespace SS
             else
                 cellDependents = SetCellContents(name, content);
 
-            Changed = true;
+            if(content != "")
+                Changed = true;
 
             //Updates the values of all of the dependents
             foreach (string s in cellDependents)
