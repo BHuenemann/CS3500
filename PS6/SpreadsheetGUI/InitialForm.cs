@@ -336,6 +336,7 @@ namespace SpreadsheetGUI
 
 
 
+
         public InitialForm()
         {
             InitializeComponent();
@@ -353,7 +354,7 @@ namespace SpreadsheetGUI
 
         private void NewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CreateNewSpreadsheet();
+            SpreadsheetApplicationContext.GetAppContext().RunForm(new InitialForm());
         }
 
 
