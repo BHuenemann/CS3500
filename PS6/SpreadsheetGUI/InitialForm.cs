@@ -190,11 +190,12 @@ namespace SpreadsheetGUI
         {
             spreadSheet.GetSelection(out int col, out int row);
             setUndo();
-            UpdateCells(transformedCol, transformedRow);
+            UpdateCells(previousCol, previousRow);
 
             spreadSheet.SetSelection(col, row);
             transformedCol = col;
             transformedRow = row;
+
             string cellName = SelectedCellName(col, row);
 
             setTextBoxesVisuals(cellName);
@@ -217,7 +218,6 @@ namespace SpreadsheetGUI
         private void UpdateCells(int col, int row)
         {
             string cellName = SelectedCellName(col, row);
-            //string previousContents = CellContentsBox.Text;
 
             try
             {
@@ -263,7 +263,6 @@ namespace SpreadsheetGUI
                     else
                     {
                         CellContentsBox.Text = mainSpreadsheet.GetCellContents(cellName).ToString();
-                        //CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
                     }
                 }
 
@@ -413,16 +412,17 @@ namespace SpreadsheetGUI
         {
             if (e.KeyCode == Keys.Z && e.Modifiers == Keys.Control && possibleToUndo)
             {
-                
+                undoing = true;
                 string previousCellName = SelectedCellName(previousCol, previousRow);
                 mainSpreadsheet.SetContentsOfCell(previousCellName, previousContents);
                 SpreadsheetGrid.SetSelection(previousCol, previousRow);
 
+
                 setTextBoxesVisuals(previousCellName);
 
                 UpdateCells(previousCol, previousRow);
-                
 
+                undoing = false;
                 possibleToUndo = false;
                 MessageBox.Show("You pressed ctrl + z");
             }
