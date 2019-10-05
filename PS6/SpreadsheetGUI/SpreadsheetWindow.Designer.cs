@@ -1,6 +1,8 @@
-﻿namespace SpreadsheetGUI
+﻿//Authors: Ben Huenemann and Jonathan Wigderson
+
+namespace SpreadsheetGUI
 {
-    partial class InitialForm
+    partial class SpreadsheetWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -157,6 +159,7 @@
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.helpToolStripMenuItem.Text = "Help";
+            this.helpToolStripMenuItem.Click += new System.EventHandler(this.HelpToolStripMenuItem_Click);
             // 
             // SaveDialogBox
             // 
@@ -169,7 +172,7 @@
             this.OpenDialogBox.Filter = "Spreadsheet|*.sprd|All Files|*.*";
             this.OpenDialogBox.Title = "Open a spreadsheet file";
             // 
-            // InitialForm
+            // SpreadsheetWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -181,9 +184,9 @@
             this.Controls.Add(this.Menu);
             this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(2);
-            this.Name = "InitialForm";
+            this.Name = "SpreadsheetWindow";
             this.Text = "Form1";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.InitialForm_FormClosing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SpreadsheetWindow_FormClosing);
             this.Menu.ResumeLayout(false);
             this.Menu.PerformLayout();
             this.ResumeLayout(false);

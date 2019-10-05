@@ -1,4 +1,6 @@
-﻿using System;
+﻿//Authors: Ben Huenemann and Jonathan Wigderson
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -67,7 +69,7 @@ namespace SpreadsheetGUI
             Application.SetCompatibleTextRenderingDefault(false);
 
             SpreadsheetApplicationContext appContext = SpreadsheetApplicationContext.GetAppContext();
-            appContext.RunForm(new InitialForm());
+            appContext.RunForm(new SpreadsheetWindow());
             Application.Run(appContext);
         }
     }
