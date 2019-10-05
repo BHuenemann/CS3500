@@ -1,8 +1,31 @@
+Made by Ben Huenemann and Jonathan Wigderson
+
+(10/4/2019)
+
+Now a GUI has been added that has an internal spreadsheet
+class item. This GUI updates the spreadsheet as the cell
+contents are changed and updates the visuals when the
+values in the spreadsheet are changed. It also has a file
+system that can handle opening and saving files. The new
+button opens a new window of the spreadsheet on the same
+thread. If that window closes, it just modifies the window
+count but doesn't close the form. This also provides warnings
+for overwriting files and closing unsaved files. There is
+also a help menu that describes the features in the
+spreadsheet so the user can learn how to use it.
+
+The class also keeps track of whether or not a file has been
+changed and indicates that with an asterisk in the title.
+Additionally, it also has a save button that saves to the
+previous file and you can do ctrl+z to undo one change that
+you made in the file.
+
+
 Made by Ben Huenemann
 
 (9/27/2019)
 
-The spreadsheet internals have been uupdated so that it
+The spreadsheet internals have been updated so that it
 also stores values of the cells now. Whenever a cell is
 set to something, the value also updates. It also has
 been updated to support XML saving and loading. The

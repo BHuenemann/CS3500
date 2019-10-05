@@ -187,6 +187,7 @@ namespace SpreadsheetGUI
             this.Name = "SpreadsheetWindow";
             this.Text = "Form1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SpreadsheetWindow_FormClosing);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.SpreadsheetWindow_KeyDown);
             this.Menu.ResumeLayout(false);
             this.Menu.PerformLayout();
             this.ResumeLayout(false);

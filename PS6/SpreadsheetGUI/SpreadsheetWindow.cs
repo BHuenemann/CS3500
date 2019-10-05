@@ -46,8 +46,19 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Keeps track of the previous columns and rows selected.
         /// </summary>
+        private int transformedCol = 0;
+        private int transformedRow = 0;
+
         private int previousCol = 0;
         private int previousRow = 0;
+
+        /// <summary>
+        /// Keeps track of the previous contents of a cell and 
+        /// whether an undo is possible.
+        /// </summary>
+        private string previousContents = "";
+        private bool possibleToUndo = false;
+
 
 
 
@@ -159,7 +170,7 @@ namespace SpreadsheetGUI
         {
             //Clears the spreadsheet and updates the previous row/column
             SpreadsheetGrid.Clear();
-            previousCol = previousRow = 0;
+            transformedCol = transformedRow = 0;
 
             //Imports the spreadsheet and records the text. The title of the form is set equal to the file name.
             mainSpreadsheet = new Spreadsheet(FileName, SpreadsheetCellIsValid, SpreadsheetCellNormalizer, "ps6");
@@ -254,10 +265,7 @@ namespace SpreadsheetGUI
         /// <param name="row">Row of the cell that's being updated</param>
         private void UpdateCells(int col, int row)
         {
-            if (CellContentsBox.Text.Trim() == "") return;
-
             string cellName = SelectedCellName(col, row);
-            string previousContents = CellContentsBox.Text;
 
             try
             {
@@ -333,19 +341,23 @@ namespace SpreadsheetGUI
 
             //Enter Key
             if (keyCode == Keys.Enter)
+            {
+                SetUndo();
                 UpdateCells(col, row);
+            }
 
             //Up Arrow Key
             if (keyCode == Keys.Up)
             {
+                SetUndo();
                 UpdateCells(col, row);
                 string cellName = SelectedCellName(col, row);
 
                 //Only moves up if the row isn't at 0
                 if (row != 0)
                 {
-                    previousCol = col;
-                    previousRow = row - 1;
+                    transformedCol = col;
+                    transformedRow = row - 1;
                     SpreadsheetGrid.SetSelection(col, row - 1);
                     cellName = SelectedCellName(col, row - 1);
                 }
@@ -356,12 +368,13 @@ namespace SpreadsheetGUI
             //Down Arrow Key
             if (keyCode == Keys.Down)
             {
+                SetUndo();
                 UpdateCells(col, row);
                 string cellName = SelectedCellName(col, row);
                 if (row != 98)
                 {
-                    previousCol = col;
-                    previousRow = row + 1;
+                    transformedCol = col;
+                    transformedRow = row + 1;
                     SpreadsheetGrid.SetSelection(col, row + 1);
                     cellName = SelectedCellName(col, row + 1);
                 }
@@ -372,12 +385,13 @@ namespace SpreadsheetGUI
             //Left Arrow Key
             if (keyCode == Keys.Left)
             {
+                SetUndo();
                 UpdateCells(col, row);
                 string cellName = SelectedCellName(col, row);
                 if (col != 0)
                 {
-                    previousCol = col - 1;
-                    previousRow = row;
+                    transformedCol = col - 1;
+                    transformedRow = row;
                     SpreadsheetGrid.SetSelection(col - 1, row);
                     cellName = SelectedCellName(col - 1, row);
                 }
@@ -388,12 +402,13 @@ namespace SpreadsheetGUI
             //Right Arrow Key
             if (keyCode == Keys.Right)
             {
+                SetUndo();
                 UpdateCells(col, row);
                 string cellName = SelectedCellName(col, row);
                 if (col != 25)
                 {
-                    previousCol = col + 1;
-                    previousRow = row;
+                    transformedCol = col + 1;
+                    transformedRow = row;
                     SpreadsheetGrid.SetSelection(col + 1, row);
                     cellName = SelectedCellName(col + 1, row);
                 }
@@ -401,14 +416,69 @@ namespace SpreadsheetGUI
                 VisualUpdate(cellName);
             }
 
-            //Control + Z
-            if (keyCode == Keys.Control && keyModifier == Keys.Z)
+            CellContentsBox.SelectionStart = CellContentsBox.Text.Length + 1;
+        }
+
+
+        /// <summary>
+        /// Helper method to keep track whether a undo command is possible or not.
+        /// 
+        /// If the boolean 'possibleToUndo' is false, it will set 'possibleToUndo' to true.
+        /// If 'possibleToUndo' is true, it weill record the row and column currently on, and saved them 
+        /// to global variables called 'previousRow' and 'previousCol' respectively. 
+        /// It will also record the contents of the current cell and record it in the 
+        /// global variable 'previousContents'. 
+        /// </summary>
+        private void SetUndo()
+        {
+            if (possibleToUndo)
             {
-                MessageBox.Show("You pressed ctrl + z");
+                previousRow = transformedRow;
+                previousCol = transformedCol;
+                string cellName = SelectedCellName(previousCol, previousRow);
+                if (mainSpreadsheet.GetCellContents(cellName) is Formula)
+                {
+                    previousContents = "=" + mainSpreadsheet.GetCellContents(cellName).ToString();
+                }
+                else
+                {
+                    previousContents = mainSpreadsheet.GetCellContents(cellName).ToString();
+                }
             }
+
+            possibleToUndo = true;
+        }
+
+
+        /// <summary>
+        /// A helper method that helps updates the visuals of the GUI.
+        /// It will update tehe text boxes as well as the cells visuals. 
+        /// 
+        /// For Formula Error's it will set the cell's visual contents and 
+        /// the cell's contents in general to, Formula Error.
+        /// 
+        /// The cursor is set to the end of the the contents text box as well.
+        /// </summary>
+        /// <param name="cellName"></param>
+        private void SetTextBoxesVisuals(string cellName)
+        {
+            CellNameBox.Text = cellName;
+
+            if (mainSpreadsheet.GetCellValue(cellName) is FormulaError)
+                CellValueBox.Text = "Formula Error";
+            else
+                CellValueBox.Text = mainSpreadsheet.GetCellValue(cellName).ToString();
+
+            if (mainSpreadsheet.GetCellContents(cellName) is Formula)
+                CellContentsBox.Text = "=" + mainSpreadsheet.GetCellContents(cellName).ToString();
+            else
+                CellContentsBox.Text = mainSpreadsheet.GetCellContents(cellName).ToString();
+
+            CellContentsBox.Focus();
 
             CellContentsBox.SelectionStart = CellContentsBox.Text.Length + 1;
         }
+
 
 
 
@@ -440,18 +510,18 @@ namespace SpreadsheetGUI
         private void OnSelectionChanged(SpreadsheetPanel spreadSheet)
         {
             spreadSheet.GetSelection(out int col, out int row);
+            SetUndo();
 
             UpdateCells(previousCol, previousRow);
 
             spreadSheet.SetSelection(col, row);
-            previousCol = col;
-            previousRow = row;
+            transformedCol = col;
+            transformedRow = row;
 
-            VisualUpdate(SelectedCellName(col, row));
+            string cellName = SelectedCellName(col, row);
+            VisualUpdate(cellName);
 
-            CellContentsBox.Focus();
-
-            CellContentsBox.SelectionStart = CellContentsBox.Text.Length + 1;
+            SetTextBoxesVisuals(cellName);
         }
 
 
@@ -541,6 +611,38 @@ namespace SpreadsheetGUI
         private void CellContentsBox_KeyDown(object sender, KeyEventArgs e)
         {
             HandleKeys(e.KeyCode, e.Modifiers);
+        }
+
+
+        /// <summary>
+        /// Undo Method
+        /// 
+        /// This method undoes one change made in the spreadsheet if the keys
+        /// CONTROL and Z are clicked at the same time. Undoing will also only
+        /// occur when the variable 'possibleToUndo' is true.
+        /// 
+        /// The spreadsheet will select the previously selected cell and update its
+        /// contents to its previous contents. Then re-update the cell entirely as 
+        /// to make sure dependencies are also updated.
+        /// 
+        /// 'possibleToUndo' will be reset to false. So undoing is only possible once
+        /// until another change is made.
+        /// </summary>
+        private void SpreadsheetWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Z && e.Modifiers == Keys.Control && possibleToUndo)
+            {
+                string previousCellName = SelectedCellName(previousCol, previousRow);
+                mainSpreadsheet.SetContentsOfCell(previousCellName, previousContents);
+                SpreadsheetGrid.SetSelection(previousCol, previousRow);
+
+
+                SetTextBoxesVisuals(previousCellName);
+
+                UpdateCells(previousCol, previousRow);
+
+                possibleToUndo = false;
+            }
         }
     }
 }

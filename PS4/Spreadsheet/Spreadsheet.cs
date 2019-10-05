@@ -542,7 +542,7 @@ namespace SS
             else
                 cellDependents = SetCellContents(name, content);
 
-            if(content != "")
+            if(content.Trim() != "")
                 Changed = true;
 
             //Updates the values of all of the dependents
