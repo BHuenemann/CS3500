@@ -177,6 +177,7 @@ namespace FormulaEvaluator
                 if (operatorStack.Count != 1 || valueStack.Count != 2)
                     throw new ArgumentException("Invalid expression");
                 return CalcFromStacks(valueStack, operatorStack);
+                //
             }
         }
     }
