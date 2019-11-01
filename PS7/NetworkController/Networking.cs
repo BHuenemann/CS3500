@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace NetworkUtil
 {
@@ -21,7 +22,15 @@ namespace NetworkUtil
         /// <param name="port">The the port to listen on</param>
         public static TcpListener StartServer(Action<SocketState> toCall, int port)
         {
-            throw new NotImplementedException();
+            TcpListener listener = new TcpListener(IPAddress.Any, port);
+
+            listener.Start();
+
+            Tuple<Action<SocketState>, TcpListener> tcpInfo = new Tuple<Action<SocketState>, TcpListener>(toCall, listener);
+
+            listener.BeginAcceptSocket(AcceptNewClient, tcpInfo);
+
+            return listener;
         }
 
         /// <summary>
@@ -44,7 +53,24 @@ namespace NetworkUtil
         /// 1) a delegate so the user can take action (a SocketState Action), and 2) the TcpListener</param>
         private static void AcceptNewClient(IAsyncResult ar)
         {
-            throw new NotImplementedException();
+            TcpListener listener = ((Tuple<Action<SocketState>, TcpListener>)ar.AsyncState).Item2;
+
+            Action<SocketState> toCall = ((Tuple<Action<SocketState>, TcpListener>)ar.AsyncState).Item1;
+
+            try
+            {
+                SocketState socketState = new SocketState(toCall, listener.EndAcceptSocket(ar));
+                socketState.OnNetworkAction(socketState);
+                listener.BeginAcceptSocket(AcceptNewClient, listener);
+            }
+            catch
+            {
+                SocketState errorSocketState = new SocketState(toCall, listener.EndAcceptSocket(ar));
+                errorSocketState.ErrorOccured = true;
+                errorSocketState.ErrorMessage = "";
+
+                errorSocketState.OnNetworkAction(errorSocketState);
+            }
         }
 
         /// <summary>
@@ -124,6 +150,8 @@ namespace NetworkUtil
             socket.NoDelay = true;
 
             // TODO: Finish the remainder of the connection process as specified.
+            SocketState ss1 = new SocketState(toCall, socket);
+            ss1.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ss1);
         }
 
         /// <summary>
@@ -141,7 +169,12 @@ namespace NetworkUtil
         /// <param name="ar">The object asynchronously passed via BeginConnect</param>
         private static void ConnectedCallback(IAsyncResult ar)
         {
-            throw new NotImplementedException();
+            SocketState theServer = (SocketState)ar.AsyncState;
+
+            theServer.TheSocket.EndConnect(ar);
+
+            theServer.TheSocket.BeginReceive(theServer.buffer, 0, theServer.buffer.Length,
+              SocketFlags.None, ReceiveCallback, theServer);
         }
 
 
@@ -185,7 +218,50 @@ namespace NetworkUtil
         /// </param>
         private static void ReceiveCallback(IAsyncResult ar)
         {
-            throw new NotImplementedException();
+            SocketState theServer = (SocketState)ar.AsyncState;
+            int numBytes = theServer.TheSocket.EndReceive(ar);
+
+            string message = Encoding.UTF8.GetString(theServer.buffer,
+                0, numBytes);
+
+            theServer.data.Append(message);
+
+            ProcessMessages(theServer.data);
+
+            //Process the message
+
+            // Continue the "event loop" and receive more data
+            theServer.TheSocket.BeginReceive(theServer.buffer, 0, theServer.buffer.Length,
+                SocketFlags.None, ReceiveCallback, theServer);
+        }
+
+        /// <summary>
+        /// Look for complete messages (terminated by a '.'), 
+        /// then print and remove them from the string builder.
+        /// </summary>
+        /// <param name="sb"></param>
+        private static void ProcessMessages(StringBuilder sb)
+        {
+            string totalData = sb.ToString();
+            string[] parts = Regex.Split(totalData, @"(?<=[\.])");
+
+            foreach (string p in parts)
+            {
+                // Ignore empty strings added by the regex splitter
+                if (p.Length == 0)
+                    continue;
+
+                // Ignore last message if incomplete
+                if (p[p.Length - 1] != '.')
+                    break;
+
+                // process p
+                Console.WriteLine("message received");
+                Console.WriteLine(p);
+
+                sb.Remove(0, p.Length);
+
+            }
         }
 
         /// <summary>
