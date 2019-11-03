@@ -65,11 +65,7 @@ namespace NetworkUtil
             }
             catch
             {
-                SocketState errorSocketState = new SocketState(toCall, listener.EndAcceptSocket(ar));
-                errorSocketState.ErrorOccured = true;
-                errorSocketState.ErrorMessage = "";
-
-                errorSocketState.OnNetworkAction(errorSocketState);
+                ErrorSocketState(toCall, "Error occurred while accepting a new client");
             }
         }
 
@@ -78,7 +74,7 @@ namespace NetworkUtil
         /// </summary>
         public static void StopServer(TcpListener listener)
         {
-            throw new NotImplementedException();
+            listener.Stop();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -126,6 +122,8 @@ namespace NetworkUtil
                 if (!foundIPV4)
                 {
                     // TODO: Indicate an error to the user, as specified in the documentation
+
+                    ErrorSocketState(toCall, "Couldn't find any IPV4 addresses");
                 }
             }
             catch (Exception)
@@ -138,6 +136,8 @@ namespace NetworkUtil
                 catch (Exception)
                 {
                     // TODO: Indicate an error to the user, as specified in the documentation
+
+                    ErrorSocketState(toCall, "Host name isn't a valid ipaddress");
                 }
             }
 
@@ -150,8 +150,26 @@ namespace NetworkUtil
             socket.NoDelay = true;
 
             // TODO: Finish the remainder of the connection process as specified.
-            SocketState ss1 = new SocketState(toCall, socket);
-            ss1.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ss1);
+            try
+            {
+                SocketState ss1 = new SocketState(toCall, socket);
+                IAsyncResult result = ss1.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ss1);
+                bool success = result.AsyncWaitHandle.WaitOne(3000, true);
+
+                if(ss1.TheSocket.Connected)
+                {
+                    ss1.TheSocket.EndConnect(result);
+                }
+                else
+                {
+                    socket.Close();
+                    ErrorSocketState(toCall, "Timed out while connecting to server");
+                }
+            }
+            catch
+            {
+                ErrorSocketState(toCall, "An error occured while connecting to server");
+            }
         }
 
         /// <summary>
@@ -330,5 +348,14 @@ namespace NetworkUtil
             throw new NotImplementedException();
         }
 
+
+        private static void ErrorSocketState(Action<SocketState> toCall, string message)
+        {
+            SocketState errorSocketState = new SocketState(toCall, null);
+            errorSocketState.ErrorOccured = true;
+            errorSocketState.ErrorMessage = message;
+
+            errorSocketState.OnNetworkAction(errorSocketState);
+        }
     }
 }
