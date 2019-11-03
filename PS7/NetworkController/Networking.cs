@@ -189,10 +189,24 @@ namespace NetworkUtil
         {
             SocketState theServer = (SocketState)ar.AsyncState;
 
-            theServer.TheSocket.EndConnect(ar);
+            try
+            {
+                theServer.TheSocket.EndConnect(ar);
 
-            theServer.TheSocket.BeginReceive(theServer.buffer, 0, theServer.buffer.Length,
-              SocketFlags.None, ReceiveCallback, theServer);
+                SocketState socketState = new SocketState(theServer.OnNetworkAction, theServer.TheSocket);
+                theServer.OnNetworkAction(socketState);
+
+                //theServer.TheSocket.BeginReceive(theServer.buffer, 0, theServer.buffer.Length,
+                  //SocketFlags.None, ReceiveCallback, theServer);
+            }
+
+            catch
+            {
+                ErrorSocketState(theServer, "An error occurred during connection callback");
+            }
+
+
+
         }
 
 
@@ -214,7 +228,16 @@ namespace NetworkUtil
         /// <param name="state">The SocketState to begin receiving</param>
         public static void GetData(SocketState state)
         {
-            throw new NotImplementedException();
+            try
+            {
+                state.TheSocket.BeginReceive(state.buffer, 0, state.buffer.Length,
+                  SocketFlags.None, ReceiveCallback, state);
+            }
+
+            catch
+            {
+                ErrorSocketState(state, "Error occurred while starting the receive process");
+            }
         }
 
         /// <summary>
@@ -237,49 +260,29 @@ namespace NetworkUtil
         private static void ReceiveCallback(IAsyncResult ar)
         {
             SocketState theServer = (SocketState)ar.AsyncState;
-            int numBytes = theServer.TheSocket.EndReceive(ar);
+            try
+            {
+                int numBytes = theServer.TheSocket.EndReceive(ar);
 
-            string message = Encoding.UTF8.GetString(theServer.buffer,
-                0, numBytes);
+                string message = Encoding.UTF8.GetString(theServer.buffer,
+                    0, numBytes);
 
-            theServer.data.Append(message);
+                theServer.data.Append(message);
 
-            ProcessMessages(theServer.data);
+                //ProcessMessages(theServer.data);
 
-            //Process the message
+                theServer.OnNetworkAction(theServer);
+            }
+
+            catch
+            {
+                ErrorSocketState(theServer, "Error occured during the receive process");
+            }
+
 
             // Continue the "event loop" and receive more data
             theServer.TheSocket.BeginReceive(theServer.buffer, 0, theServer.buffer.Length,
                 SocketFlags.None, ReceiveCallback, theServer);
-        }
-
-        /// <summary>
-        /// Look for complete messages (terminated by a '.'), 
-        /// then print and remove them from the string builder.
-        /// </summary>
-        /// <param name="sb"></param>
-        private static void ProcessMessages(StringBuilder sb)
-        {
-            string totalData = sb.ToString();
-            string[] parts = Regex.Split(totalData, @"(?<=[\.])");
-
-            foreach (string p in parts)
-            {
-                // Ignore empty strings added by the regex splitter
-                if (p.Length == 0)
-                    continue;
-
-                // Ignore last message if incomplete
-                if (p[p.Length - 1] != '.')
-                    break;
-
-                // process p
-                Console.WriteLine("message received");
-                Console.WriteLine(p);
-
-                sb.Remove(0, p.Length);
-
-            }
         }
 
         /// <summary>
@@ -356,6 +359,14 @@ namespace NetworkUtil
             errorSocketState.ErrorMessage = message;
 
             errorSocketState.OnNetworkAction(errorSocketState);
+        }
+
+        private static void ErrorSocketState(SocketState state, string message)
+        {
+            state.ErrorOccured = true;
+            state.ErrorMessage = message;
+
+            state.OnNetworkAction(state);
         }
     }
 }
