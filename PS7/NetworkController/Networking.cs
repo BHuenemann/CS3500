@@ -157,17 +157,13 @@ namespace NetworkUtil
             {
                 SocketState ss1 = new SocketState(toCall, socket);
                 IAsyncResult result = ss1.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ss1);
-                //bool success = result.AsyncWaitHandle.WaitOne(3000, true);
+                bool success = result.AsyncWaitHandle.WaitOne(3000, true);
 
-                //if (ss1.TheSocket.Connected)
-                //{
-                //    ss1.TheSocket.EndConnect(result);
-                //}
-                //else
-                //{
-                //    socket.Close();
-                //    ErrorSocketState(toCall, "Timed out while connecting to server");
-                //}
+                if (!ss1.TheSocket.Connected)
+                {
+                    socket.Close();
+                    ErrorSocketState(toCall, "Timed out while connecting to server");
+                }
             }
             catch
             {
@@ -263,7 +259,10 @@ namespace NetworkUtil
                 string message = Encoding.UTF8.GetString(theServer.buffer,
                     0, numBytes);
 
-                theServer.data.Append(message);
+                lock (theServer.data)
+                {
+                    theServer.data.Append(message);
+                }
 
                 theServer.OnNetworkAction(theServer);
             }
