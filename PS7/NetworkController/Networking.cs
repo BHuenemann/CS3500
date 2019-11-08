@@ -155,14 +155,13 @@ namespace NetworkUtil
             // TODO: Finish the remainder of the connection process as specified.
             try
             {
-                SocketState ss1 = new SocketState(toCall, socket);
-                IAsyncResult result = ss1.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ss1);
+                SocketState TheServer = new SocketState(toCall, socket);
+                IAsyncResult result = TheServer.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, TheServer);
                 bool success = result.AsyncWaitHandle.WaitOne(3000, true);
 
-                if (!ss1.TheSocket.Connected)
+                if (!TheServer.TheSocket.Connected)
                 {
-                    socket.Close();
-                    ErrorSocketState(toCall, "Timed out while connecting to server");
+                    TheServer.TheSocket.Close();
                 }
             }
             catch
@@ -255,6 +254,9 @@ namespace NetworkUtil
             try
             {
                 int numBytes = theServer.TheSocket.EndReceive(ar);
+
+                if (numBytes == 0)
+                    ErrorSocketState(theServer, "Socket was closed");
 
                 string message = Encoding.UTF8.GetString(theServer.buffer,
                     0, numBytes);
