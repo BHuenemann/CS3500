@@ -159,7 +159,7 @@ namespace NetworkUtil
                 IAsyncResult result = ss1.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ss1);
                 bool success = result.AsyncWaitHandle.WaitOne(3000, true);
 
-                if (ss1.TheSocket.Connected)
+                if (!ss1.TheSocket.Connected)
                 {
                     socket.Close();
                     ErrorSocketState(toCall, "Timed out while connecting to server");
@@ -259,7 +259,10 @@ namespace NetworkUtil
                 string message = Encoding.UTF8.GetString(theServer.buffer,
                     0, numBytes);
 
-                theServer.data.Append(message);
+                lock (theServer.data)
+                {
+                    theServer.data.Append(message);
+                }
 
                 theServer.OnNetworkAction(theServer);
             }
