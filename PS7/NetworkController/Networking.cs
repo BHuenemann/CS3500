@@ -102,9 +102,6 @@ namespace NetworkUtil
         /// <param name="port">The port on which the server is listening</param>
         public static void ConnectToServer(Action<SocketState> toCall, string hostName, int port)
         {
-            // TODO: This method is incomplete, but contains a starting point 
-            //       for decoding a host address
-
             // Establish the remote endpoint for the socket.
             IPHostEntry ipHostInfo;
             IPAddress ipAddress = IPAddress.None;
@@ -124,22 +121,18 @@ namespace NetworkUtil
                 // Didn't find any IPV4 addresses
                 if (!foundIPV4)
                 {
-                    // TODO: Indicate an error to the user, as specified in the documentation
-
                     ErrorSocketState(toCall, "Couldn't find any IPV4 addresses");
                 }
             }
             catch (Exception)
             {
-                // see if host name is a valid ipaddress
+                // See if host name is a valid ipaddress
                 try
                 {
                     ipAddress = IPAddress.Parse(hostName);
                 }
                 catch (Exception)
                 {
-                    // TODO: Indicate an error to the user, as specified in the documentation
-
                     ErrorSocketState(toCall, "Host name isn't a valid ipaddress");
                 }
             }
@@ -152,7 +145,6 @@ namespace NetworkUtil
             // game like ours will be 
             socket.NoDelay = true;
 
-            // TODO: Finish the remainder of the connection process as specified.
             try
             {
                 SocketState TheServer = new SocketState(toCall, socket);
@@ -389,7 +381,14 @@ namespace NetworkUtil
             }
         }
 
-
+        /// <summary>
+        /// Helper method for reporting an error.
+        /// This method takes in the toCall delegate and a error message.
+        /// The method creates a new socket state with which its error flag is set to true.
+        /// It also calls on network action on the newly created socket state.
+        /// </summary>
+        /// <param name="toCall">Delegate to be given to the socket state.</param>
+        /// <param name="message">Reason why the error has occurred.</param>
         private static void ErrorSocketState(Action<SocketState> toCall, string message)
         {
             SocketState errorSocketState = new SocketState(toCall, null);
@@ -399,6 +398,13 @@ namespace NetworkUtil
             errorSocketState.OnNetworkAction(errorSocketState);
         }
 
+        /// <summary>
+        /// Helper method for reporting an error with a prexisting socket state as well as an error message.
+        /// The given socket state has its error flag set to true.
+        /// It also calls on network action on the newly created socket state.
+        /// </summary>
+        /// <param name="state">A prexisiting socket state.</param>
+        /// <param name="message">reason why the error has occurred.</param>
         private static void ErrorSocketState(SocketState state, string message)
         {
             state.ErrorOccured = true;
