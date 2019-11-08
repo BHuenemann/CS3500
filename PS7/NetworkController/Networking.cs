@@ -122,6 +122,7 @@ namespace NetworkUtil
                 if (!foundIPV4)
                 {
                     ErrorSocketState(toCall, "Couldn't find any IPV4 addresses");
+                    return;
                 }
             }
             catch (Exception)
@@ -248,7 +249,10 @@ namespace NetworkUtil
                 int numBytes = theServer.TheSocket.EndReceive(ar);
 
                 if (numBytes == 0)
+                {
                     ErrorSocketState(theServer, "Socket was closed");
+                    return;
+                }
 
                 string message = Encoding.UTF8.GetString(theServer.buffer,
                     0, numBytes);
