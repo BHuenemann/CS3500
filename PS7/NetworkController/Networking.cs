@@ -68,7 +68,11 @@ namespace NetworkUtil
             }
             catch
             {
-                ErrorSocketState(toCall, "Error occurred while accepting a new client");
+                SocketState errorSocketState = new SocketState(toCall, null);
+                errorSocketState.ErrorOccured = true;
+                errorSocketState.ErrorMessage = "Error occurred while accepting a new client";
+
+                errorSocketState.OnNetworkAction(errorSocketState);
             }
         }
 
@@ -121,7 +125,11 @@ namespace NetworkUtil
                 // Didn't find any IPV4 addresses
                 if (!foundIPV4)
                 {
-                    ErrorSocketState(toCall, "Couldn't find any IPV4 addresses");
+                    SocketState errorSocketState = new SocketState(toCall, null);
+                    errorSocketState.ErrorOccured = true;
+                    errorSocketState.ErrorMessage = "Couldn't find any IPV4 addresses";
+
+                    errorSocketState.OnNetworkAction(errorSocketState);
                     return;
                 }
             }
@@ -134,7 +142,11 @@ namespace NetworkUtil
                 }
                 catch (Exception)
                 {
-                    ErrorSocketState(toCall, "Host name isn't a valid ipaddress");
+                    SocketState errorSocketState = new SocketState(toCall, null);
+                    errorSocketState.ErrorOccured = true;
+                    errorSocketState.ErrorMessage = "Host name isn't a valid ipaddress";
+
+                    errorSocketState.OnNetworkAction(errorSocketState);
                 }
             }
 
@@ -159,7 +171,11 @@ namespace NetworkUtil
             }
             catch
             {
-                ErrorSocketState(toCall, "An error occured while connecting to server");
+                SocketState errorSocketState = new SocketState(toCall, null);
+                errorSocketState.ErrorOccured = true;
+                errorSocketState.ErrorMessage = "An error occured while connecting to server";
+
+                errorSocketState.OnNetworkAction(errorSocketState);
             }
         }
 
@@ -189,7 +205,10 @@ namespace NetworkUtil
             }
             catch
             {
-                ErrorSocketState(theServer, "An error occured during the connection callback");
+                theServer.ErrorOccured = true;
+                theServer.ErrorMessage = "An error occured during the connection callback";
+
+                theServer.OnNetworkAction(theServer);
             }
         }
 
@@ -220,7 +239,10 @@ namespace NetworkUtil
 
             catch
             {
-                ErrorSocketState(state, "Error occurred while starting the receive process");
+                state.ErrorOccured = true;
+                state.ErrorMessage = "Error occurred while starting the receive process";
+
+                state.OnNetworkAction(state);
             }
         }
 
@@ -250,7 +272,10 @@ namespace NetworkUtil
 
                 if (numBytes == 0)
                 {
-                    ErrorSocketState(theServer, "Socket was closed");
+                    theServer.ErrorOccured = true;
+                    theServer.ErrorMessage = "Socket was closed";
+
+                    theServer.OnNetworkAction(theServer);
                     return;
                 }
 
@@ -267,7 +292,10 @@ namespace NetworkUtil
 
             catch
             {
-                ErrorSocketState(theServer, "Error occured during the receive process");
+                theServer.ErrorOccured = true;
+                theServer.ErrorMessage = "Error occured during the receive process";
+
+                theServer.OnNetworkAction(theServer);
             }
         }
 
@@ -383,38 +411,6 @@ namespace NetworkUtil
             {
                 socket.Close();
             }
-        }
-
-        /// <summary>
-        /// Helper method for reporting an error.
-        /// This method takes in the toCall delegate and a error message.
-        /// The method creates a new socket state with which its error flag is set to true.
-        /// It also calls on network action on the newly created socket state.
-        /// </summary>
-        /// <param name="toCall">Delegate to be given to the socket state.</param>
-        /// <param name="message">Reason why the error has occurred.</param>
-        private static void ErrorSocketState(Action<SocketState> toCall, string message)
-        {
-            SocketState errorSocketState = new SocketState(toCall, null);
-            errorSocketState.ErrorOccured = true;
-            errorSocketState.ErrorMessage = message;
-
-            errorSocketState.OnNetworkAction(errorSocketState);
-        }
-
-        /// <summary>
-        /// Helper method for reporting an error with a prexisting socket state as well as an error message.
-        /// The given socket state has its error flag set to true.
-        /// It also calls on network action on the newly created socket state.
-        /// </summary>
-        /// <param name="state">A prexisiting socket state.</param>
-        /// <param name="message">reason why the error has occurred.</param>
-        private static void ErrorSocketState(SocketState state, string message)
-        {
-            state.ErrorOccured = true;
-            state.ErrorMessage = message;
-
-            state.OnNetworkAction(state);
         }
     }
 }
