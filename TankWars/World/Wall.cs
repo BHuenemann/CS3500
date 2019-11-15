@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace World
+namespace TankWars
 {
     class Wall
     {

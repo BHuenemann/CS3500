@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace World
+namespace TankWars
 {
-    class Tank
+    public class Tank
     {
     }
 }

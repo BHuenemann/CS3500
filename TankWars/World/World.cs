@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace World
+namespace TankWars
 {
     public class World
     {
