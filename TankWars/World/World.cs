@@ -14,6 +14,8 @@ namespace TankWars
         public Dictionary<int, Projectile> Projectiles;
         public Dictionary<int, Wall> Walls;
 
+        public int worldSize;
+
 
         public World()
         {

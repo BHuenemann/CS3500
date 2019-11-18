@@ -9,13 +9,13 @@ namespace TankWars
     public class Wall
     {
         [JsonProperty(PropertyName = "wall")]
-        private int ID;
+        public int ID { get; private set; }
 
         [JsonProperty(PropertyName = "p1")]
-        private Vector2D endPoint1;
+        public Vector2D endPoint1 { get; private set; }
 
         [JsonProperty(PropertyName = "p2")]
-        private Vector2D endPoint2;
+        public Vector2D endPoint2 { get; private set; }
 
         public Wall()
         {

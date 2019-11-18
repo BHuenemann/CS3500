@@ -12,10 +12,10 @@ namespace TankWars
         private int ID;
 
         [JsonProperty(PropertyName = "org")]
-        private Vector2D origin;
+        public Vector2D origin { get; private set; }
 
         [JsonProperty(PropertyName = "dir")]
-        private Vector2D orientation;
+        public Vector2D orientation { get; private set; }
 
         [JsonProperty(PropertyName = "owner")]
         public int ownerID { get; private set; }

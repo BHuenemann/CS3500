@@ -7,13 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using View.Properties;
 
 namespace TankWars
 {
     public partial class TankWars : Form
     {
         private GameController theController;
-
 
 
         public TankWars(GameController ctl)
@@ -37,6 +37,21 @@ namespace TankWars
         // A delegate for DrawObjectWithTransform
         // Methods matching this delegate can draw whatever they want using e  
         public delegate void ObjectDrawer(object o, PaintEventArgs e);
+
+        public void drawBackground(bool connected, string message)
+        {
+            if(!connected)
+            {
+                //dialog box
+            }
+
+            else
+            {
+                ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.jpg");
+                //ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.jpg");
+            }
+        }
+
 
         /// <summary>
         /// This method performs a translation and rotation to drawn an object in the world.
@@ -65,69 +80,80 @@ namespace TankWars
 
         private void ConnectButton_Click(object sender, EventArgs e)
         {
-            theController.ConnectPlayer(NameInput.Text, ServerInput.Text, 11000);
+            theController.TryConnect(NameInput.Text, ServerInput.Text, 11000);
+
         }
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
+            //do the player location stuff here TODO
+
             lock (theController.TheWorld)
             {
                 // Draw the players
                 foreach (Tank tank in theController.TheWorld.Tanks.Values)
                 {
-                    DrawObjectWithTransform(e, tank, this.Size.Width, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), 
-                        TankDrawer(tank, e);
+                    DrawObjectWithTransform(e, tank, this.Size.Width, tank.location.GetX(), tank.location.GetY(), tank.orientation.ToAngle(), 
+                        TankDrawer);
                 }
 
                 // Draw the powerups
                 foreach (PowerUp pow in theController.TheWorld.PowerUps.Values)
                 {
-                    DrawObjectWithTransform(e, pow, this.Size.Width, pow.GetLocation().GetX(), pow.GetLocation().GetY(), 0, PowerupDrawer);
+                    DrawObjectWithTransform(e, pow, this.Size.Width, pow.location.GetX(), pow.location.GetY(), 0, PowerUpDrawer);
                 }
 
-                // Draw the powerups
+                // Draw the beams
                 foreach (Beam beam in theController.TheWorld.Beams.Values)
                 {
-                    DrawObjectWithTransform(e, beam, this.Size.Width, beam.GetLocation().GetX(), beam.GetLocation().GetY(), 0, BeamDrawer);
+                    DrawObjectWithTransform(e, beam, this.Size.Width, beam.origin.GetX(), beam.origin.GetY(), beam.origin.ToAngle(), BeamDrawer);
                 }
 
-                // Draw the powerups
+                // Draw the projectiles
                 foreach (Projectile proj in theController.TheWorld.Projectiles.Values)
                 {
-                    DrawObjectWithTransform(e, proj, this.Size.Width, proj.GetLocation().GetX(), proj.GetLocation().GetY(), 0, ProjectileDrawer);
+                    DrawObjectWithTransform(e, proj, this.Size.Width, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
                 }
 
-                // Draw the powerups
+                // Draw the walls
                 foreach (Wall wall in theController.TheWorld.Walls.Values)
                 {
-                    DrawObjectWithTransform(e, wall, this.Size.Width, wall.GetLocation().GetX(), wall.GetLocation().GetY(), 0, WallDrawer);
+                    //if x is same for p1 and p2 is same then vertically long
+                    //if y is same for p1 and p2 is same then horizontally long
+                    DrawObjectWithTransform(e, wall, this.Size.Width, (wall.endPoint1.GetX() + wall.endPoint2.GetX())/2, 
+                        (wall.endPoint1.GetY() + wall.endPoint2.GetY()) / 2, 0, WallDrawer);
                 }
             }
 
             // Do anything that Panel (from which we inherit) needs to do
             base.OnPaint(e);
         }
-    }
 
-    /// <summary>
-    /// Scrap example for referance
-    /// </summary>
-    /// <param name="o"></param>
-    /// <param name="e"></param>
-    private void TankDrawer(object o, PaintEventArgs e)
+        private void TankDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
-            if(t.ID == 9)
-            {
+        }
 
-            }
-            if(t.ID == ...)
-                color = ...;
-            else if(...)
-                color = ...;
-            Rectangle r = new Rectangle(-(tankWidth / 2), -(tankWidth / 2), tankWidth, tankWidth);
-            e.Graphics.FillRectangle(someBrush, r);
+        private void PowerUpDrawer(object o, PaintEventArgs e)
+        {
+            PowerUp p = o as PowerUp;
+        }
+
+        private void BeamDrawer(object o, PaintEventArgs e)
+        {
+            Beam b = o as Beam;
+        }
+
+        private void ProjectileDrawer(object o, PaintEventArgs e)
+        {
+            Projectile p = o as Projectile;
+        }
+
+        private void WallDrawer(object o, PaintEventArgs e)
+        {
+            Wall w = o as Wall;
         }
     }
 }
+

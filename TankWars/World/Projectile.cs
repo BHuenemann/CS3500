@@ -12,10 +12,10 @@ namespace TankWars
         private int ID;
 
         [JsonProperty(PropertyName = "loc")]
-        private Vector2D location;
+        public Vector2D location { get; private set; }
 
         [JsonProperty(PropertyName = "dir")]
-        private Vector2D orientation;
+        public Vector2D orientation { get; private set; }
 
         [JsonProperty(PropertyName = "died")]
         private bool died = false;

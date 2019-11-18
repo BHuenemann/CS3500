@@ -13,6 +13,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameController", "GameController\GameController.csproj", "{44711E58-5F19-405C-B676-484D6ECB1CA0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "View", "View\View.csproj", "{7A710B97-F5D9-47C8-94D5-E946C0DDE1A9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0221E40-F8EE-4959-A5A3-F264C5521750} = {C0221E40-F8EE-4959-A5A3-F264C5521750}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vector2D", "Vector2D\Vector2D.csproj", "{C0221E40-F8EE-4959-A5A3-F264C5521750}"
 EndProject
