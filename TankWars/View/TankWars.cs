@@ -15,6 +15,7 @@ namespace TankWars
         private GameController theController;
 
 
+
         public TankWars(GameController ctl)
         {
             InitializeComponent();
@@ -65,6 +66,68 @@ namespace TankWars
         private void ConnectButton_Click(object sender, EventArgs e)
         {
             theController.ConnectPlayer(NameInput.Text, ServerInput.Text, 11000);
+        }
+
+        // This method is invoked when the DrawingPanel needs to be re-drawn
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            lock (theController.TheWorld)
+            {
+                // Draw the players
+                foreach (Tank tank in theController.TheWorld.Tanks.Values)
+                {
+                    DrawObjectWithTransform(e, tank, this.Size.Width, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), 
+                        TankDrawer(tank, e);
+                }
+
+                // Draw the powerups
+                foreach (PowerUp pow in theController.TheWorld.PowerUps.Values)
+                {
+                    DrawObjectWithTransform(e, pow, this.Size.Width, pow.GetLocation().GetX(), pow.GetLocation().GetY(), 0, PowerupDrawer);
+                }
+
+                // Draw the powerups
+                foreach (Beam beam in theController.TheWorld.Beams.Values)
+                {
+                    DrawObjectWithTransform(e, beam, this.Size.Width, beam.GetLocation().GetX(), beam.GetLocation().GetY(), 0, BeamDrawer);
+                }
+
+                // Draw the powerups
+                foreach (Projectile proj in theController.TheWorld.Projectiles.Values)
+                {
+                    DrawObjectWithTransform(e, proj, this.Size.Width, proj.GetLocation().GetX(), proj.GetLocation().GetY(), 0, ProjectileDrawer);
+                }
+
+                // Draw the powerups
+                foreach (Wall wall in theController.TheWorld.Walls.Values)
+                {
+                    DrawObjectWithTransform(e, wall, this.Size.Width, wall.GetLocation().GetX(), wall.GetLocation().GetY(), 0, WallDrawer);
+                }
+            }
+
+            // Do anything that Panel (from which we inherit) needs to do
+            base.OnPaint(e);
+        }
+    }
+
+    /// <summary>
+    /// Scrap example for referance
+    /// </summary>
+    /// <param name="o"></param>
+    /// <param name="e"></param>
+    private void TankDrawer(object o, PaintEventArgs e)
+        {
+            Tank t = o as Tank;
+            if(t.ID == 9)
+            {
+
+            }
+            if(t.ID == ...)
+                color = ...;
+            else if(...)
+                color = ...;
+            Rectangle r = new Rectangle(-(tankWidth / 2), -(tankWidth / 2), tankWidth, tankWidth);
+            e.Graphics.FillRectangle(someBrush, r);
         }
     }
 }
