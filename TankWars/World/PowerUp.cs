@@ -9,7 +9,7 @@ namespace TankWars
     public class PowerUp
     {
         [JsonProperty(PropertyName = "power")]
-        private int ID;
+        public int ID { get; private set; }
 
         [JsonProperty(PropertyName = "loc")]
         public Vector2D location { get; private set; }

@@ -9,7 +9,7 @@ namespace TankWars
     public class Beam
     {
         [JsonProperty(PropertyName = "beam")]
-        private int ID;
+        public int ID { get; private set; }
 
         [JsonProperty(PropertyName = "org")]
         public Vector2D origin { get; private set; }
