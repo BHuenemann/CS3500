@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using NetworkUtil;
 
 namespace TankWars
@@ -9,20 +10,17 @@ namespace TankWars
 
     public class GameController
     {
-        private World theWorld;
-
+        public World TheWorld
+        {
+            get;
+            private set;
+        }
         private int worldSize;
-
         private Tank clientTank;
 
         public GameController()
         {
-            theWorld = new World();
-        }
-
-        public World GetWorld()
-        {
-            return theWorld;
+            TheWorld = new World();
         }
 
         public void ConnectPlayer(string name, string server, int port)
@@ -51,7 +49,7 @@ namespace TankWars
                 //Throw Error
             }
 
-            if(!Networking.Send(ss.TheSocket, clientTank.Name + "\n"))
+            if(!Networking.Send(ss.TheSocket, clientTank.Name + @"\n"))
             {
                 //Throw Error (Socket was closed)
             }
@@ -67,7 +65,7 @@ namespace TankWars
                 //Throw Error
             }
 
-            string[] startingInfo = Regex.Split(ss.GetData(), @"\n");
+            string[] startingInfo = Regex.Split(ss.GetData(), @"(?<=[\n])");
 
             clientTank.ID = Int32.Parse(startingInfo[0]);
             worldSize = Int32.Parse(startingInfo[1]);
@@ -79,7 +77,30 @@ namespace TankWars
 
         private void ReceiveFrameData(SocketState ss)
         {
+            string totalData = ss.GetData();
+            string[] parts = Regex.Split(totalData, @"(?<=[\n])");
 
+            foreach (string p in parts)
+            {
+                //This is to ignore empty strings
+                if (p.Length == 0)
+                    continue;
+                //This is so it ignores the last string if it doesn't end in \n
+                if (p[p.Length - 1] != '\n')
+                    break;
+
+                UpdateObject(p.Substring(0, p.Length - 2));
+
+                // Then remove it from the SocketState's growable buffer
+                ss.RemoveData(0, p.Length);
+            }
+
+            Networking.GetData(ss);
+        }
+
+        private void UpdateObject(string serializedObject)
+        {
+            throw new NotImplementedException();
         }
     }
 }
