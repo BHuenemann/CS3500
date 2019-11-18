@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 namespace TankWars
 {
     [JsonObject(MemberSerialization.OptIn)]
@@ -9,10 +10,10 @@ namespace TankWars
     {
 
         [JsonProperty(PropertyName = "tank")]
-        private int ID;
-
+        public int ID { get; private set; }
+        
         [JsonProperty(PropertyName = "loc")]
-        private Vector2D location;
+        public Vector2D location { get; private set; }
 
         [JsonProperty(PropertyName = "bdir")]
         private Vector2D orientation;
@@ -42,5 +43,11 @@ namespace TankWars
         {
         
         }
+
+        public Tank(string tankName)
+        {
+            name = tankName;
+        }
+
     }
 }
