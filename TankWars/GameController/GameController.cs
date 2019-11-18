@@ -4,6 +4,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using NetworkUtil;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace TankWars
 {
@@ -15,27 +17,30 @@ namespace TankWars
             get;
             private set;
         }
-        private int worldSize;
-        private Tank clientTank;
+
+        public Tank clientTank;
+        private string tankName;
+
+        private Action<bool, string> connectDelegate;
+
+        private bool wallsDone = false;
+
 
         public GameController()
         {
             TheWorld = new World();
         }
 
-        public void ConnectPlayer(string name, string server, int port)
+        public void TryConnect(string name, string server, int port, Action<bool, string> OnConnect)
         {
+            connectDelegate = OnConnect;
+
             if (name.Length <= 16)
-            {
-                clientTank = new Tank();
-            }
+                tankName = name;
             else
-            {
-                //Throw Error
-            }
+                connectDelegate(false, "Name is longer than 16 characters");
 
             Networking.ConnectToServer(SendName, server, port);
-
         }
 
         /// <summary>
@@ -45,14 +50,10 @@ namespace TankWars
         private void SendName(SocketState ss)
         {
             if(ss.ErrorOccured == true)
-            {
-                //Throw Error
-            }
+                connectDelegate(false, "Unable to connect to server");
 
-            if(!Networking.Send(ss.TheSocket, clientTank.Name + @"\n"))
-            {
-                //Throw Error (Socket was closed)
-            }
+            if (!Networking.Send(ss.TheSocket, tankName + @"\n"))
+                connectDelegate(false, "Couldn't send player name since socket was closed");
 
             ss.OnNetworkAction = ReceiveStartingData;
             Networking.GetData(ss);
@@ -61,21 +62,35 @@ namespace TankWars
         private void ReceiveStartingData(SocketState ss)
         {
             if (ss.ErrorOccured == true)
-            {
-                //Throw Error
-            }
+                connectDelegate(false, "Unable to receive tank ID and world size");
 
-            string[] startingInfo = Regex.Split(ss.GetData(), @"(?<=[\n])");
+            string[] startingInfo = Regex.Split(ss.GetData(), @"\n");
 
-            clientTank.ID = Int32.Parse(startingInfo[0]);
-            worldSize = Int32.Parse(startingInfo[1]);
+            clientTank = new Tank(tankName, Int32.Parse(startingInfo[0]));
+            TheWorld.worldSize = Int32.Parse(startingInfo[1]);
+
+            connectDelegate(true, "");
 
             ss.OnNetworkAction = ReceiveFrameData;
-
             Networking.GetData(ss);
         }
 
         private void ReceiveFrameData(SocketState ss)
+        {
+            ProcessData(ss);
+
+            if (wallsDone)
+                Networking.Send(ss.TheSocket, SerializeObjects());
+
+            Networking.GetData(ss);
+        }
+
+        private string SerializeObjects()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ProcessData(SocketState ss)
         {
             string totalData = ss.GetData();
             string[] parts = Regex.Split(totalData, @"(?<=[\n])");
@@ -94,13 +109,55 @@ namespace TankWars
                 // Then remove it from the SocketState's growable buffer
                 ss.RemoveData(0, p.Length);
             }
-
-            Networking.GetData(ss);
         }
 
         private void UpdateObject(string serializedObject)
         {
-            throw new NotImplementedException();
+            JObject obj = JObject.Parse(serializedObject);
+
+            JToken token = obj["tank"];
+            if (token != null)
+            {
+                Tank tank = JsonConvert.DeserializeObject<Tank>(serializedObject);
+                TheWorld.Tanks[tank.ID] = tank;
+                wallsDone = true;
+                return;
+            }
+
+            token = obj["proj"];
+            if (token != null)
+            {
+                Projectile proj = JsonConvert.DeserializeObject<Projectile>(serializedObject);
+                TheWorld.Projectiles[proj.ID] = proj;
+                wallsDone = true;
+                return;
+            }
+
+            token = obj["power"];
+            if (token != null)
+            {
+                PowerUp power = JsonConvert.DeserializeObject<PowerUp>(serializedObject);
+                TheWorld.PowerUps[power.ID] = power;
+                wallsDone = true;
+                return;
+            }
+
+            token = obj["beam"];
+            if (token != null)
+            {
+                Beam beam = JsonConvert.DeserializeObject<Beam>(serializedObject);
+                TheWorld.Beams[beam.ID] = beam;
+                wallsDone = true;
+                return;
+            }
+
+            token = obj["wall"];
+            if (token != null)
+            {
+                Wall wall = JsonConvert.DeserializeObject<Wall>(serializedObject);
+                TheWorld.Walls[wall.ID] = wall;
+                return;
+            }
         }
     }
 }
