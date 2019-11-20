@@ -20,6 +20,8 @@ namespace TankWars
         {
             InitializeComponent();
             theController = ctl;
+
+            theController.OnConnectEvent += drawBackground;
         }
 
         /// <summary>
@@ -80,7 +82,6 @@ namespace TankWars
         private void ConnectButton_Click(object sender, EventArgs e)
         {
             theController.TryConnect(NameInput.Text, ServerInput.Text, 11000);
-            theController.OnConnectEvent += drawBackground;
         }
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
