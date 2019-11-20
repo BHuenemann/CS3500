@@ -52,24 +52,37 @@ namespace TankWars
         private void SendName(SocketState ss)
         {
             if(ss.ErrorOccured == true)
+            {
                 OnConnectEvent(true, "Unable to connect to server");
+                ss.TheSocket.Close();
+                return;
+            }
 
-            if (!Networking.Send(ss.TheSocket, tankName + @"\n"))
+            if (!Networking.Send(ss.TheSocket, tankName + "\n")) {
                 OnConnectEvent(true, "Couldn't send player name since socket was closed");
+                ss.TheSocket.Close();
+                return;
+            }
 
-            ss.OnNetworkAction = ReceiveStartingData;
+        ss.OnNetworkAction = ReceiveStartingData;
             Networking.GetData(ss);
         }
 
         private void ReceiveStartingData(SocketState ss)
         {
             if (ss.ErrorOccured == true)
+            {
                 OnConnectEvent(true, "Unable to receive tank ID and world size");
+                ss.TheSocket.Close();
+                return;
+            }
 
             string[] startingInfo = Regex.Split(ss.GetData(), @"\n");
 
             clientTank = new Tank(tankName, Int32.Parse(startingInfo[0]));
             TheWorld.worldSize = Int32.Parse(startingInfo[1]);
+
+            ss.ClearData();
 
             OnConnectEvent(false);
 
@@ -79,9 +92,16 @@ namespace TankWars
 
         private void ReceiveFrameData(SocketState ss)
         {
+            if (ss.ErrorOccured == true)
+            {
+                //OnConnectEvent(true, "Unable to receive tank ID and world size");
+                ss.TheSocket.Close();
+                return;
+            }
+
             ProcessData(ss);
 
-            OnFrameEvent();
+ //           OnFrameEvent();
 
             if (wallsDone)
                 Networking.Send(ss.TheSocket, SerializeObjects());
@@ -92,11 +112,32 @@ namespace TankWars
         private string SerializeObjects()
         {
             StringBuilder message = new StringBuilder();
-            foreach (Tank tank in TheWorld.Tanks.Values)
+
+            lock (TheWorld.Tanks)
             {
-                
+                foreach (Tank tank in TheWorld.Tanks.Values)
+                    message.Append(JsonConvert.SerializeObject(tank));
             }
-            throw new NotImplementedException();
+
+            lock (TheWorld.Projectiles)
+            {
+                foreach (Projectile proj in TheWorld.Projectiles.Values)
+                    message.Append(JsonConvert.SerializeObject(proj));
+            }
+
+            lock (TheWorld.PowerUps)
+            {
+                foreach (PowerUp power in TheWorld.PowerUps.Values)
+                    message.Append(JsonConvert.SerializeObject(power));
+            }
+
+            lock (TheWorld.Beams)
+            {
+                foreach (Beam beam in TheWorld.Beams.Values)
+                    message.Append(JsonConvert.SerializeObject(beam));
+            }
+
+            return message.ToString();
         }
 
         private void ProcessData(SocketState ss)
@@ -113,7 +154,7 @@ namespace TankWars
                 if (p[p.Length - 1] != '\n')
                     break;
 
-                UpdateObject(p.Substring(0, p.Length - 2));
+                UpdateObject(p.Substring(0, p.Length - 1));
 
                 // Then remove it from the SocketState's growable buffer
                 ss.RemoveData(0, p.Length);
@@ -128,7 +169,10 @@ namespace TankWars
             if (token != null)
             {
                 Tank tank = JsonConvert.DeserializeObject<Tank>(serializedObject);
-                TheWorld.Tanks[tank.ID] = tank;
+                lock(TheWorld.Tanks)
+                {
+                    TheWorld.Tanks[tank.ID] = tank;
+                }
                 wallsDone = true;
                 return;
             }
@@ -137,7 +181,10 @@ namespace TankWars
             if (token != null)
             {
                 Projectile proj = JsonConvert.DeserializeObject<Projectile>(serializedObject);
-                TheWorld.Projectiles[proj.ID] = proj;
+                lock (TheWorld.Projectiles)
+                {
+                    TheWorld.Projectiles[proj.ID] = proj;
+                }
                 wallsDone = true;
                 return;
             }
@@ -146,7 +193,10 @@ namespace TankWars
             if (token != null)
             {
                 PowerUp power = JsonConvert.DeserializeObject<PowerUp>(serializedObject);
-                TheWorld.PowerUps[power.ID] = power;
+                lock (TheWorld.PowerUps)
+                {
+                    TheWorld.PowerUps[power.ID] = power;
+                }
                 wallsDone = true;
                 return;
             }
@@ -155,7 +205,10 @@ namespace TankWars
             if (token != null)
             {
                 Beam beam = JsonConvert.DeserializeObject<Beam>(serializedObject);
-                TheWorld.Beams[beam.ID] = beam;
+                lock (TheWorld.Beams)
+                {
+                    TheWorld.Beams[beam.ID] = beam;
+                }
                 wallsDone = true;
                 return;
             }
@@ -164,7 +217,10 @@ namespace TankWars
             if (token != null)
             {
                 Wall wall = JsonConvert.DeserializeObject<Wall>(serializedObject);
-                TheWorld.Walls[wall.ID] = wall;
+                lock (TheWorld.Walls)
+                {
+                    TheWorld.Walls[wall.ID] = wall;
+                }
                 return;
             }
         }
