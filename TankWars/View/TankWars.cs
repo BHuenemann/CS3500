@@ -39,7 +39,7 @@ namespace TankWars
             }
             else
             {
-                ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.jpg");
+                //ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.jpg");
                 //ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.jpg");
             }
         }
@@ -79,7 +79,7 @@ namespace TankWars
         {
             //do the player location stuff here TODO
 
-            lock (theController.TheWorld)
+            lock (theController.TheWorld.Tanks)
             {
                 // Draw the players
                 foreach (Tank tank in theController.TheWorld.Tanks.Values)
@@ -87,25 +87,37 @@ namespace TankWars
                     DrawObjectWithTransform(e, tank, this.Size.Width, tank.location.GetX(), tank.location.GetY(), tank.orientation.ToAngle(),
                         TankDrawer);
                 }
+            }
 
+            lock (theController.TheWorld.PowerUps)
+            {
                 // Draw the powerups
                 foreach (PowerUp pow in theController.TheWorld.PowerUps.Values)
                 {
                     DrawObjectWithTransform(e, pow, this.Size.Width, pow.location.GetX(), pow.location.GetY(), 0, PowerUpDrawer);
                 }
+            }
 
+            lock (theController.TheWorld.Beams)
+            {
                 // Draw the beams
                 foreach (Beam beam in theController.TheWorld.Beams.Values)
                 {
                     DrawObjectWithTransform(e, beam, this.Size.Width, beam.origin.GetX(), beam.origin.GetY(), beam.origin.ToAngle(), BeamDrawer);
                 }
+            }
 
+            lock (theController.TheWorld.Projectiles)
+            {
                 // Draw the projectiles
                 foreach (Projectile proj in theController.TheWorld.Projectiles.Values)
                 {
                     DrawObjectWithTransform(e, proj, this.Size.Width, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
                 }
+            }
 
+            lock (theController.TheWorld.Walls)
+            {
                 // Draw the walls
                 foreach (Wall wall in theController.TheWorld.Walls.Values)
                 {
