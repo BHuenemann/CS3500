@@ -9,13 +9,13 @@ namespace TankWars
     public class ControlCommands
     {
         [JsonProperty(PropertyName = "moving")]
-        private string direction;
+        public string direction;
 
         [JsonProperty(PropertyName = "fire")]
-        private string fire;
+        public string fire;
 
         [JsonProperty(PropertyName = "tdir")]
-        private Vector2D aiming = new Vector2D(0, -1);
+        public Vector2D aiming = new Vector2D(0, -1);
 
         public ControlCommands()
         {
