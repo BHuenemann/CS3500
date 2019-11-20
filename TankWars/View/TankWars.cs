@@ -39,8 +39,8 @@ namespace TankWars
             }
             else
             {
-                //ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.jpg");
-                //ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.jpg");
+                //ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.png");
+                ViewPanel.BackgroundImage = Image.FromFile(@"..\\..\\..\\Resources\Images\Background.png");
             }
         }
 
@@ -77,7 +77,18 @@ namespace TankWars
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
-            //do the player location stuff here TODO
+            ////do the player location stuff here TODO
+            //double playerx = ...;
+            //double playery = ...;
+
+            //// calculate view/world size ratio
+            //double ratio = (double)viewSize / (double)theController.TheWorld.worldSize;
+            //int halfSizeScaled = (int)(theController.TheWorld.worldSize / 2.0 * ratio);
+
+            //double inverseTranslateX = -WorldSpaceToImageSpace(theController.TheWorld.worldSize, playerX) + halfSizeScaled;
+            //double inverseTranslateY = -WorldSpaceToImageSpace(theController.TheWorld.worldSize, playerY) + halfSizeScaled;
+
+            //e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
 
             lock (theController.TheWorld.Tanks)
             {
