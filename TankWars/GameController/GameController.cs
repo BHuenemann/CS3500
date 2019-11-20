@@ -21,7 +21,11 @@ namespace TankWars
         public Tank clientTank;
         private string tankName;
 
-        private Action<bool, string> connectDelegate;
+        public delegate void ConnectEventHandler(bool errorOccurred, string errorMessage = "");
+        public event ConnectEventHandler OnConnectEvent;
+
+        public delegate void OnFrameHandler();
+        public event OnFrameHandler OnFrameEvent;
 
         private bool wallsDone = false;
 
@@ -31,14 +35,12 @@ namespace TankWars
             TheWorld = new World();
         }
 
-        public void TryConnect(string name, string server, int port, Action<bool, string> OnConnect)
+        public void TryConnect(string name, string server, int port)
         {
-            connectDelegate = OnConnect;
-
             if (name.Length <= 16)
                 tankName = name;
             else
-                connectDelegate(false, "Name is longer than 16 characters");
+                OnConnectEvent(true, "Name is longer than 16 characters");
 
             Networking.ConnectToServer(SendName, server, port);
         }
@@ -50,10 +52,10 @@ namespace TankWars
         private void SendName(SocketState ss)
         {
             if(ss.ErrorOccured == true)
-                connectDelegate(false, "Unable to connect to server");
+                OnConnectEvent(true, "Unable to connect to server");
 
             if (!Networking.Send(ss.TheSocket, tankName + @"\n"))
-                connectDelegate(false, "Couldn't send player name since socket was closed");
+                OnConnectEvent(true, "Couldn't send player name since socket was closed");
 
             ss.OnNetworkAction = ReceiveStartingData;
             Networking.GetData(ss);
@@ -62,14 +64,14 @@ namespace TankWars
         private void ReceiveStartingData(SocketState ss)
         {
             if (ss.ErrorOccured == true)
-                connectDelegate(false, "Unable to receive tank ID and world size");
+                OnConnectEvent(true, "Unable to receive tank ID and world size");
 
             string[] startingInfo = Regex.Split(ss.GetData(), @"\n");
 
             clientTank = new Tank(tankName, Int32.Parse(startingInfo[0]));
             TheWorld.worldSize = Int32.Parse(startingInfo[1]);
 
-            connectDelegate(true, "");
+            OnConnectEvent(false);
 
             ss.OnNetworkAction = ReceiveFrameData;
             Networking.GetData(ss);
@@ -79,6 +81,8 @@ namespace TankWars
         {
             ProcessData(ss);
 
+            OnFrameEvent();
+
             if (wallsDone)
                 Networking.Send(ss.TheSocket, SerializeObjects());
 
@@ -87,6 +91,11 @@ namespace TankWars
 
         private string SerializeObjects()
         {
+            StringBuilder message = new StringBuilder();
+            foreach (Tank tank in TheWorld.Tanks.Values)
+            {
+                
+            }
             throw new NotImplementedException();
         }
 

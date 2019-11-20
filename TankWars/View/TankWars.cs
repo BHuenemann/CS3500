@@ -20,7 +20,6 @@ namespace TankWars
         {
             InitializeComponent();
             theController = ctl;
-
         }
 
         /// <summary>
@@ -38,9 +37,9 @@ namespace TankWars
         // Methods matching this delegate can draw whatever they want using e  
         public delegate void ObjectDrawer(object o, PaintEventArgs e);
 
-        public void drawBackground(bool connected, string message)
+        public void drawBackground(bool errorOccured, string errorMessage)
         {
-            if(!connected)
+            if(errorOccured)
             {
                 //dialog box
             }
@@ -81,7 +80,7 @@ namespace TankWars
         private void ConnectButton_Click(object sender, EventArgs e)
         {
             theController.TryConnect(NameInput.Text, ServerInput.Text, 11000);
-
+            theController.OnConnectEvent += drawBackground;
         }
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
