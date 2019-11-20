@@ -19,12 +19,13 @@ namespace TankWars
         }
 
         public Tank clientTank;
+        public ControlCommands commands;
         private string tankName;
 
-        public delegate void ConnectEventHandler(bool errorOccurred, string errorMessage = "");
+        public delegate void ConnectEventHandler(bool errorOccurred = false, string errorMessage = "");
         public event ConnectEventHandler OnConnectEvent;
 
-        public delegate void OnFrameHandler();
+        public delegate void OnFrameHandler(bool errorOccurred = false, string errorMessage = "");
         public event OnFrameHandler OnFrameEvent;
 
         private bool wallsDone = false;
@@ -94,50 +95,19 @@ namespace TankWars
         {
             if (ss.ErrorOccured == true)
             {
-                //OnConnectEvent(true, "Unable to receive tank ID and world size");
+ //               OnFrameEvent(true, "Unable to receive tank ID and world size");
                 ss.TheSocket.Close();
                 return;
             }
 
             ProcessData(ss);
 
- //           OnFrameEvent();
+//            OnFrameEvent();
 
             if (wallsDone)
-                Networking.Send(ss.TheSocket, SerializeObjects());
+                Networking.Send(ss.TheSocket, JsonConvert.SerializeObject(commands));
 
             Networking.GetData(ss);
-        }
-
-        private string SerializeObjects()
-        {
-            StringBuilder message = new StringBuilder();
-
-            lock (TheWorld.Tanks)
-            {
-                foreach (Tank tank in TheWorld.Tanks.Values)
-                    message.Append(JsonConvert.SerializeObject(tank));
-            }
-
-            lock (TheWorld.Projectiles)
-            {
-                foreach (Projectile proj in TheWorld.Projectiles.Values)
-                    message.Append(JsonConvert.SerializeObject(proj));
-            }
-
-            lock (TheWorld.PowerUps)
-            {
-                foreach (PowerUp power in TheWorld.PowerUps.Values)
-                    message.Append(JsonConvert.SerializeObject(power));
-            }
-
-            lock (TheWorld.Beams)
-            {
-                foreach (Beam beam in TheWorld.Beams.Values)
-                    message.Append(JsonConvert.SerializeObject(beam));
-            }
-
-            return message.ToString();
         }
 
         private void ProcessData(SocketState ss)
