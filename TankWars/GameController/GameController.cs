@@ -18,14 +18,13 @@ namespace TankWars
             private set;
         }
 
-        public Tank clientTank;
         public ControlCommands commands;
         private string tankName;
 
         public delegate void ConnectEventHandler(bool errorOccurred = false, string errorMessage = "");
         public event ConnectEventHandler OnConnectEvent;
 
-        public delegate void OnFrameHandler(bool errorOccurred = false, string errorMessage = "");
+        public delegate void OnFrameHandler();
         public event OnFrameHandler OnFrameEvent;
 
         private bool wallsDone = false;
@@ -80,7 +79,10 @@ namespace TankWars
 
             string[] startingInfo = Regex.Split(ss.GetData(), @"\n");
 
-            clientTank = new Tank(tankName, Int32.Parse(startingInfo[0]));
+            lock(TheWorld.Tanks)
+            {
+                TheWorld.Tanks[Int32.Parse(startingInfo[0])] = new Tank(tankName, Int32.Parse(startingInfo[0]));
+            }
             TheWorld.worldSize = Int32.Parse(startingInfo[1]);
 
             ss.ClearData();
@@ -95,14 +97,14 @@ namespace TankWars
         {
             if (ss.ErrorOccured == true)
             {
- //               OnFrameEvent(true, "Unable to receive tank ID and world size");
+                OnConnectEvent(true, "Error occured while receiving data from the server");
                 ss.TheSocket.Close();
                 return;
             }
 
             ProcessData(ss);
 
-//            OnFrameEvent();
+            OnFrameEvent();
 
             if (wallsDone)
                 Networking.Send(ss.TheSocket, JsonConvert.SerializeObject(commands));

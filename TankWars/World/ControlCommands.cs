@@ -12,7 +12,7 @@ namespace TankWars
         public string direction;
 
         [JsonProperty(PropertyName = "fire")]
-        public string fire;
+        public string fire = "none";
 
         [JsonProperty(PropertyName = "tdir")]
         public Vector2D aiming = new Vector2D(0, -1);

@@ -13,15 +13,29 @@ namespace TankWars
 {
     public partial class TankWars : Form
     {
-        private GameController theController;
-
+        private GameController TheController;
 
         public TankWars(GameController ctl)
         {
             InitializeComponent();
-            theController = ctl;
+            TheController = ctl;
 
-            theController.OnConnectEvent += drawBackground;
+            TheController.OnConnectEvent += DrawBackground;
+            TheController.OnFrameEvent += OnFrame;
+        }
+
+        private void OnFrame()
+        {
+            // Don't try to redraw if the window doesn't exist yet.
+            // This might happen if the controller sends an update
+            // before the Form has started.
+            if (!IsHandleCreated)
+                return;
+
+            // Invalidate this form and all its children
+            // This will cause the form to redraw as soon as it can
+            MethodInvoker m = new MethodInvoker(() => Invalidate(true));
+            this.Invoke(m);
         }
 
         /// <summary>
@@ -39,7 +53,7 @@ namespace TankWars
         // Methods matching this delegate can draw whatever they want using e  
         public delegate void ObjectDrawer(object o, PaintEventArgs e);
 
-        public void drawBackground(bool errorOccured, string errorMessage)
+        private void DrawBackground(bool errorOccured, string errorMessage)
         {
             if(errorOccured)
             {
@@ -81,7 +95,7 @@ namespace TankWars
 
         private void ConnectButton_Click(object sender, EventArgs e)
         {
-            theController.TryConnect(NameInput.Text, ServerInput.Text, 11000);
+            TheController.TryConnect(NameInput.Text, ServerInput.Text, 11000);
         }
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
@@ -89,47 +103,47 @@ namespace TankWars
         {
             //do the player location stuff here TODO
 
-            lock (theController.TheWorld.Tanks)
+            lock (TheController.TheWorld.Tanks)
             {
                 // Draw the players
-                foreach (Tank tank in theController.TheWorld.Tanks.Values)
+                foreach (Tank tank in TheController.TheWorld.Tanks.Values)
                 {
                     DrawObjectWithTransform(e, tank, this.Size.Width, tank.location.GetX(), tank.location.GetY(), tank.orientation.ToAngle(),
                         TankDrawer);
                 }
             }
 
-            lock (theController.TheWorld.PowerUps)
+            lock (TheController.TheWorld.PowerUps)
             {
                 // Draw the powerups
-                foreach (PowerUp pow in theController.TheWorld.PowerUps.Values)
+                foreach (PowerUp pow in TheController.TheWorld.PowerUps.Values)
                 {
                     DrawObjectWithTransform(e, pow, this.Size.Width, pow.location.GetX(), pow.location.GetY(), 0, PowerUpDrawer);
                 }
             }
 
-            lock (theController.TheWorld.Beams)
+            lock (TheController.TheWorld.Beams)
             {
                 // Draw the beams
-                foreach (Beam beam in theController.TheWorld.Beams.Values)
+                foreach (Beam beam in TheController.TheWorld.Beams.Values)
                 {
                     DrawObjectWithTransform(e, beam, this.Size.Width, beam.origin.GetX(), beam.origin.GetY(), beam.origin.ToAngle(), BeamDrawer);
                 }
             }
 
-            lock (theController.TheWorld.Projectiles)
+            lock (TheController.TheWorld.Projectiles)
             {
                 // Draw the projectiles
-                foreach (Projectile proj in theController.TheWorld.Projectiles.Values)
+                foreach (Projectile proj in TheController.TheWorld.Projectiles.Values)
                 {
                     DrawObjectWithTransform(e, proj, this.Size.Width, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
                 }
             }
 
-            lock (theController.TheWorld.Walls)
+            lock (TheController.TheWorld.Walls)
             {
                 // Draw the walls
-                foreach (Wall wall in theController.TheWorld.Walls.Values)
+                foreach (Wall wall in TheController.TheWorld.Walls.Values)
                 {
                     //if x is same for p1 and p2 is same then vertically long
                     //if y is same for p1 and p2 is same then horizontally long
@@ -165,6 +179,23 @@ namespace TankWars
         private void WallDrawer(object o, PaintEventArgs e)
         {
             Wall w = o as Wall;
+        }
+
+        private void TankWars_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode.Equals(Keys.W))
+                TheController.commands.direction = "up";
+            else if (e.KeyCode.Equals(Keys.S))
+                TheController.commands.direction = "down";
+            else if (e.KeyCode.Equals(Keys.A))
+                TheController.commands.direction = "left";
+            else if (e.KeyCode.Equals(Keys.D))
+                TheController.commands.direction = "right";
+        }
+
+        private void TankWars_KeyUp(object sender, KeyEventArgs e)
+        {
+            TheController.commands.direction = "none";
         }
     }
 }
