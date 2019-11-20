@@ -29,6 +29,9 @@ namespace TankWars
 
         private bool wallsDone = false;
 
+        private Dictionary<int, int> TankColorRecord = new Dictionary<int, int>();
+        private int SeenPlayers = 0;
+
 
         public GameController()
         {
@@ -144,6 +147,11 @@ namespace TankWars
                 lock(TheWorld.Tanks)
                 {
                     TheWorld.Tanks[tank.ID] = tank;
+                    if(!TankColorRecord.ContainsKey(tank.ID))
+                    {
+                        TankColorRecord.Add(tank.ID, SeenPlayers % 8);
+                        SeenPlayers++;
+                    }
                 }
                 wallsDone = true;
                 return;
@@ -195,6 +203,11 @@ namespace TankWars
                 }
                 return;
             }
+        }
+
+        public int GetColor(int ID)
+        {
+            return TankColorRecord[ID];
         }
     }
 }
