@@ -146,26 +146,63 @@ namespace TankWars
         private void TankDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
+
+            int tankWidth = 60;
+            int tankHeight = 60;
+            int turretWidth = 50;
+            int turretHeight = 50;
+
+            using (System.Drawing.SolidBrush blueBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Blue))
+            {
+                Rectangle r = new Rectangle(-(tankWidth / 2), -(tankWidth / 2), tankWidth, tankWidth);
+                e.Graphics.FillRectangle(blueBrush, r);
+            }
         }
 
         private void PowerUpDrawer(object o, PaintEventArgs e)
         {
             PowerUp p = o as PowerUp;
+
+            int width = 8;
+            int height = 8;
+
+            // Creat Bitmap object of image
+            Image sourceImage = Image.FromFile(@"..\\..\\..\\Resources\Images\RedTurret.png");
+            // Draw portion of source image
+            Rectangle sourceRect = new Rectangle(0, 0, width, height);
+            e.Graphics.DrawImage(sourceImage, 0, 0, sourceRect, GraphicsUnit.Pixel);
         }
 
         private void BeamDrawer(object o, PaintEventArgs e)
         {
             Beam b = o as Beam;
+
+            int width = 30;
+            int height = 30;
+
+            // Creat Bitmap object of image
+            Image sourceImage = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
+            // Draw portion of source image
+            Rectangle sourceRect = new Rectangle(0, 0, width, height);
+            e.Graphics.DrawImage(sourceImage, 0, 0, sourceRect, GraphicsUnit.Pixel);
         }
 
         private void ProjectileDrawer(object o, PaintEventArgs e)
         {
             Projectile p = o as Projectile;
+
+            int width = 30;
+            int height = 30;
+
         }
 
         private void WallDrawer(object o, PaintEventArgs e)
         {
             Wall w = o as Wall;
+
+            int width = 50;
+            int height = 50;
+
         }
     }
 }
