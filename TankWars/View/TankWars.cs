@@ -1,20 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using View.Properties;
 
 namespace TankWars
 {
     public partial class TankWars : Form
     {
         private GameController theController;
-
 
         public TankWars(GameController ctl)
         {
@@ -36,23 +28,21 @@ namespace TankWars
         }
 
         // A delegate for DrawObjectWithTransform
-        // Methods matching this delegate can draw whatever they want using e  
+        // Methods matching this delegate can draw whatever they want using e
         public delegate void ObjectDrawer(object o, PaintEventArgs e);
 
         public void drawBackground(bool errorOccured, string errorMessage)
         {
-            if(errorOccured)
+            if (errorOccured)
             {
                 //dialog box
             }
-
             else
             {
                 ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.jpg");
                 //ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.jpg");
             }
         }
-
 
         /// <summary>
         /// This method performs a translation and rotation to drawn an object in the world.
@@ -94,7 +84,7 @@ namespace TankWars
                 // Draw the players
                 foreach (Tank tank in theController.TheWorld.Tanks.Values)
                 {
-                    DrawObjectWithTransform(e, tank, this.Size.Width, tank.location.GetX(), tank.location.GetY(), tank.orientation.ToAngle(), 
+                    DrawObjectWithTransform(e, tank, this.Size.Width, tank.location.GetX(), tank.location.GetY(), tank.orientation.ToAngle(),
                         TankDrawer);
                 }
 
@@ -121,7 +111,7 @@ namespace TankWars
                 {
                     //if x is same for p1 and p2 is same then vertically long
                     //if y is same for p1 and p2 is same then horizontally long
-                    DrawObjectWithTransform(e, wall, this.Size.Width, (wall.endPoint1.GetX() + wall.endPoint2.GetX())/2, 
+                    DrawObjectWithTransform(e, wall, this.Size.Width, (wall.endPoint1.GetX() + wall.endPoint2.GetX()) / 2,
                         (wall.endPoint1.GetY() + wall.endPoint2.GetY()) / 2, 0, WallDrawer);
                 }
             }
@@ -156,4 +146,3 @@ namespace TankWars
         }
     }
 }
-
