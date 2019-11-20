@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using View.Properties;
 
 namespace TankWars
 {
@@ -50,23 +43,21 @@ namespace TankWars
         }
 
         // A delegate for DrawObjectWithTransform
-        // Methods matching this delegate can draw whatever they want using e  
+        // Methods matching this delegate can draw whatever they want using e
         public delegate void ObjectDrawer(object o, PaintEventArgs e);
 
         private void DrawBackground(bool errorOccured, string errorMessage)
         {
-            if(errorOccured)
+            if (errorOccured)
             {
                 //dialog box
             }
-
             else
             {
-                //ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.jpg");
-                //ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.jpg");
+                //ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.png");
+                ViewPanel.BackgroundImage = Image.FromFile(@"..\\..\\..\\Resources\Images\Background.png");
             }
         }
-
 
         /// <summary>
         /// This method performs a translation and rotation to drawn an object in the world.
@@ -101,9 +92,20 @@ namespace TankWars
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
-            //do the player location stuff here TODO
+            ////do the player location stuff here TODO
+            //double playerx = ...;
+            //double playery = ...;
 
-            lock (TheController.TheWorld.Tanks)
+            //// calculate view/world size ratio
+            //double ratio = (double)viewSize / (double)theController.TheWorld.worldSize;
+            //int halfSizeScaled = (int)(theController.TheWorld.worldSize / 2.0 * ratio);
+
+            //double inverseTranslateX = -WorldSpaceToImageSpace(theController.TheWorld.worldSize, playerX) + halfSizeScaled;
+            //double inverseTranslateY = -WorldSpaceToImageSpace(theController.TheWorld.worldSize, playerY) + halfSizeScaled;
+
+            //e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
+
+            lock (theController.TheWorld.Tanks)
             {
                 // Draw the players
                 foreach (Tank tank in TheController.TheWorld.Tanks.Values)
@@ -159,26 +161,63 @@ namespace TankWars
         private void TankDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
+
+            int tankWidth = 60;
+            int tankHeight = 60;
+            int turretWidth = 50;
+            int turretHeight = 50;
+
+            using (System.Drawing.SolidBrush blueBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Blue))
+            {
+                Rectangle r = new Rectangle(-(tankWidth / 2), -(tankWidth / 2), tankWidth, tankWidth);
+                e.Graphics.FillRectangle(blueBrush, r);
+            }
         }
 
         private void PowerUpDrawer(object o, PaintEventArgs e)
         {
             PowerUp p = o as PowerUp;
+
+            int width = 8;
+            int height = 8;
+
+            // Creat Bitmap object of image
+            Image sourceImage = Image.FromFile(@"..\\..\\..\\Resources\Images\RedTurret.png");
+            // Draw portion of source image
+            Rectangle sourceRect = new Rectangle(0, 0, width, height);
+            e.Graphics.DrawImage(sourceImage, 0, 0, sourceRect, GraphicsUnit.Pixel);
         }
 
         private void BeamDrawer(object o, PaintEventArgs e)
         {
             Beam b = o as Beam;
+
+            int width = 30;
+            int height = 30;
+
+            // Creat Bitmap object of image
+            Image sourceImage = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
+            // Draw portion of source image
+            Rectangle sourceRect = new Rectangle(0, 0, width, height);
+            e.Graphics.DrawImage(sourceImage, 0, 0, sourceRect, GraphicsUnit.Pixel);
         }
 
         private void ProjectileDrawer(object o, PaintEventArgs e)
         {
             Projectile p = o as Projectile;
+
+            int width = 30;
+            int height = 30;
+
         }
 
         private void WallDrawer(object o, PaintEventArgs e)
         {
             Wall w = o as Wall;
+
+            int width = 50;
+            int height = 50;
+
         }
 
         private void TankWars_KeyDown(object sender, KeyEventArgs e)
@@ -199,4 +238,3 @@ namespace TankWars
         }
     }
 }
-
