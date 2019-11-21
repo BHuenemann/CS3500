@@ -86,7 +86,7 @@ namespace TankWars
 
         private void TankWars_MouseMove(object sender, MouseEventArgs e)
         {
-            TheController.commands.aiming = new Vector2D(e.Location.X, e.Location.Y);
+            //TheController.commands.aiming = new Vector2D(e.Location.X, e.Location.Y);
         }
     }
 }
