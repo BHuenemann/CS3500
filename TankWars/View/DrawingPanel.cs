@@ -156,6 +156,7 @@ namespace TankWars
                 // Draw the projectiles
                 foreach (Projectile proj in TheController.TheWorld.Projectiles.Values)
                 {
+                    proj.orientation.Normalize();
                     DrawObjectWithTransform(e, proj, TheController.TheWorld.worldSize, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
                 }
             }
@@ -263,6 +264,7 @@ namespace TankWars
 
             int width = 30;
             int height = 30;
+
 
             int colorID = TheController.GetColor(p.ownerID);
 

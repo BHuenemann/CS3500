@@ -23,8 +23,11 @@ namespace TankWars
             drawingPanel.Size = new Size(ClientSize.Width, ClientSize.Height);
             Controls.Add(drawingPanel);
 
-            this.drawingPanel.MouseDown += new MouseEventHandler(this.TankWars_MouseDown);
-            this.drawingPanel.MouseUp += new MouseEventHandler(this.TankWars_MouseUp);
+
+            drawingPanel.MouseDown += TankWars_MouseDown;
+            drawingPanel.MouseUp += TankWars_MouseUp;
+            drawingPanel.MouseMove += TankWars_MouseMove;
+
 
         }
 
@@ -62,7 +65,10 @@ namespace TankWars
         private void TankWars_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button.Equals(MouseButtons.Left))
+            {
                 TheController.commands.fire = "main";
+
+            }
             else if (e.Button.Equals(MouseButtons.Right))
                 TheController.commands.fire = "alt";
         }
@@ -70,6 +76,11 @@ namespace TankWars
         private void TankWars_MouseUp(object sender, MouseEventArgs e)
         {
             TheController.commands.fire = "none";
+        }
+
+        private void TankWars_MouseMove(object sender, MouseEventArgs e)
+        {
+            //TheController.commands.aiming = new Vector2D(e.Location.X, e.Location.Y);
         }
     }
 }
