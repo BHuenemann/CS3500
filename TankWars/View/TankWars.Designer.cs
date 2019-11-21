@@ -93,6 +93,7 @@
             this.Controls.Add(this.NameText);
             this.Controls.Add(this.ServerInput);
             this.Controls.Add(this.ServerText);
+            this.KeyPreview = true;
             this.Name = "TankWars";
             this.Text = "TankWars";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TankWars_KeyDown);

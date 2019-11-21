@@ -20,8 +20,8 @@ namespace TankWars
 
         public ControlCommands commands;
 
-        public delegate void ConnectEventHandler(bool errorOccurred = false, string errorMessage = "");
-        public event ConnectEventHandler OnConnectEvent;
+        public delegate void ErrorHandler(string errorMessage = "");
+        public event ErrorHandler ErrorEvent;
 
         public delegate void OnFrameHandler();
         public event OnFrameHandler OnFrameEvent;
@@ -37,6 +37,7 @@ namespace TankWars
         public GameController()
         {
             TheWorld = new World();
+            commands = new ControlCommands();
         }
 
         public Tank GetPlayerTank()
@@ -49,27 +50,25 @@ namespace TankWars
             if (name.Length <= 16)
                 tankName = name;
             else
-                OnConnectEvent(true, "Name is longer than 16 characters");
+                ErrorEvent("Name is longer than 16 characters");
 
             Networking.ConnectToServer(SendName, server, port);
         }
 
-        /// <summary>
-        /// This is trash. Only here as backup.
-        /// </summary>
-        /// <param name="obj"></param>
         private void SendName(SocketState ss)
         {
             if(ss.ErrorOccured == true)
             {
-                OnConnectEvent(true, "Unable to connect to server");
-                ss.TheSocket.Close();
+                ErrorEvent("Unable to connect to server");
+                if(ss.TheSocket.Connected)
+                    ss.TheSocket.Close();
                 return;
             }
 
             if (!Networking.Send(ss.TheSocket, tankName + "\n")) {
-                OnConnectEvent(true, "Couldn't send player name since socket was closed");
-                ss.TheSocket.Close();
+                ErrorEvent("Couldn't send player name since socket was closed");
+                if (ss.TheSocket.Connected)
+                    ss.TheSocket.Close();
                 return;
             }
 
@@ -81,8 +80,9 @@ namespace TankWars
         {
             if (ss.ErrorOccured == true)
             {
-                OnConnectEvent(true, "Unable to receive tank ID and world size");
-                ss.TheSocket.Close();
+                ErrorEvent("Unable to receive tank ID and world size");
+                if (ss.TheSocket.Connected)
+                    ss.TheSocket.Close();
                 return;
             }
 
@@ -97,8 +97,6 @@ namespace TankWars
 
             ss.ClearData();
 
-            OnConnectEvent(false);
-
             ss.OnNetworkAction = ReceiveFrameData;
             Networking.GetData(ss);
         }
@@ -107,8 +105,9 @@ namespace TankWars
         {
             if (ss.ErrorOccured == true)
             {
-                OnConnectEvent(true, "Error occured while receiving data from the server");
-                ss.TheSocket.Close();
+                ErrorEvent("Error occured while receiving data from the server");
+                if (ss.TheSocket.Connected)
+                    ss.TheSocket.Close();
                 return;
             }
 

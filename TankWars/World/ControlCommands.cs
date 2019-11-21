@@ -9,7 +9,7 @@ namespace TankWars
     public class ControlCommands
     {
         [JsonProperty(PropertyName = "moving")]
-        public string direction;
+        public string direction = "none";
 
         [JsonProperty(PropertyName = "fire")]
         public string fire = "none";

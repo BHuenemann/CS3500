@@ -17,7 +17,7 @@ namespace TankWars
             DoubleBuffered = true;
             TheController = controller;
 
-            TheController.OnConnectEvent += DrawBackground;
+            TheController.ErrorEvent += DrawBackground;
         }
 
         /// <summary>
@@ -35,21 +35,9 @@ namespace TankWars
         // Methods matching this delegate can draw whatever they want using e  
         public delegate void ObjectDrawer(object o, PaintEventArgs e);
 
-        private void DrawBackground(bool errorOccured, string errorMessage)
+        private void DrawBackground(string errorMessage)
         {
-            if (errorOccured)
-            {
-                //dialog box
-            }
-            else
-            {
-                //ViewPanel.BackgroundImage = Image.FromFile(@"C:\Users\Jonathan Wigderson\source\repos\u11903382\TankWars\Resources\Images\Background.png");
-                Image background = Image.FromFile(@"..\\..\\..\\Resources\Images\Background.png");
-                Bitmap resized = new Bitmap(background, new Size(TheController.TheWorld.worldSize, TheController.TheWorld.worldSize));
-
-                BackgroundImage = resized;
-                BackgroundImageLayout = ImageLayout.None;
-            }
+            //dialog box
         }
 
         /// <summary>
@@ -96,12 +84,17 @@ namespace TankWars
 
             e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
 
+            Image background = Image.FromFile(@"..\\..\\..\\Resources\Images\Background.png");
+            Bitmap resized = new Bitmap(background, new Size(TheController.TheWorld.worldSize, TheController.TheWorld.worldSize));
+
+            e.Graphics.DrawImage(resized, new Point(0, 0));
+
             lock (TheController.TheWorld.Tanks)
             {
                 // Draw the players
                 foreach (Tank tank in TheController.TheWorld.Tanks.Values)
                 {
-                    DrawObjectWithTransform(e, tank, this.Size.Width, tank.location.GetX(), tank.location.GetY(), tank.orientation.ToAngle(),
+                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), tank.orientation.ToAngle(),
                         TankDrawer);
                 }
             }
@@ -111,7 +104,7 @@ namespace TankWars
                 // Draw the powerups
                 foreach (PowerUp pow in TheController.TheWorld.PowerUps.Values)
                 {
-                    DrawObjectWithTransform(e, pow, this.Size.Width, pow.location.GetX(), pow.location.GetY(), 0, PowerUpDrawer);
+                    DrawObjectWithTransform(e, pow, TheController.TheWorld.worldSize, pow.location.GetX(), pow.location.GetY(), 0, PowerUpDrawer);
                 }
             }
 
@@ -120,7 +113,7 @@ namespace TankWars
                 // Draw the beams
                 foreach (Beam beam in TheController.TheWorld.Beams.Values)
                 {
-                    DrawObjectWithTransform(e, beam, this.Size.Width, beam.origin.GetX(), beam.origin.GetY(), beam.origin.ToAngle(), BeamDrawer);
+                    DrawObjectWithTransform(e, beam, TheController.TheWorld.worldSize, beam.origin.GetX(), beam.origin.GetY(), beam.origin.ToAngle(), BeamDrawer);
                 }
             }
 
@@ -129,7 +122,7 @@ namespace TankWars
                 // Draw the projectiles
                 foreach (Projectile proj in TheController.TheWorld.Projectiles.Values)
                 {
-                    DrawObjectWithTransform(e, proj, this.Size.Width, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
+                    DrawObjectWithTransform(e, proj, TheController.TheWorld.worldSize, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
                 }
             }
 
@@ -140,7 +133,7 @@ namespace TankWars
                 {
                     //if x is same for p1 and p2 is same then vertically long
                     //if y is same for p1 and p2 is same then horizontally long
-                    DrawObjectWithTransform(e, wall, this.Size.Width, (wall.endPoint1.GetX() + wall.endPoint2.GetX()) / 2,
+                    DrawObjectWithTransform(e, wall, TheController.TheWorld.worldSize, (wall.endPoint1.GetX() + wall.endPoint2.GetX()) / 2,
                         (wall.endPoint1.GetY() + wall.endPoint2.GetY()) / 2, 0, WallDrawer);
                 }
             }
@@ -158,11 +151,11 @@ namespace TankWars
             int turretWidth = 50;
             int turretHeight = 50;
 
-            using (System.Drawing.SolidBrush blueBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Blue))
-            {
-                Rectangle r = new Rectangle(-(tankWidth / 2), -(tankWidth / 2), tankWidth, tankWidth);
-                e.Graphics.FillRectangle(blueBrush, r);
-            }
+            //using (System.Drawing.SolidBrush blueBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Blue))
+            //{
+            //    Rectangle r = new Rectangle(-(tankWidth / 2), -(tankWidth / 2), tankWidth, tankWidth);
+            //    e.Graphics.FillRectangle(blueBrush, r);
+            //}
 
             int colorID = TheController.GetColor(t.ID);
 
@@ -273,6 +266,14 @@ namespace TankWars
             int width = 50;
             int height = 50;
 
+            Vector2D center = new Vector2D(Math.Abs(w.endPoint1.GetX() - w.endPoint2.GetX()),
+                Math.Abs(w.endPoint1.GetY() - w.endPoint2.GetY()));
+
+            // Creat Bitmap object of image
+            Image sourceImage = Image.FromFile(@"..\\..\\..\\Resources\Images\WallSprite.png");
+            // Draw portion of source image
+            Rectangle sourceRect = new Rectangle(0, 0, width, height);
+            e.Graphics.DrawImage(sourceImage, 0, 0, sourceRect, GraphicsUnit.Pixel);
         }
     }
 }
