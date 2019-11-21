@@ -25,7 +25,23 @@ namespace TankWars
         private Image sourceImageRedTank = Image.FromFile(@"..\\..\\..\\Resources\Images\RedTank.png");
         private Image sourceImageYellowTank = Image.FromFile(@"..\\..\\..\\Resources\Images\YellowTank.png");
 
+        private Image sourceImageBlueTurret = Image.FromFile(@"..\\..\\..\\Resources\Images\BlueTurret.png");
+        private Image sourceImageDarkTurret = Image.FromFile(@"..\\..\\..\\Resources\Images\DarkTurret.png");
+        private Image sourceImageGreenTurret = Image.FromFile(@"..\\..\\..\\Resources\Images\GreenTurret.png");
+        private Image sourceImageLightGreenTurret = Image.FromFile(@"..\\..\\..\\Resources\Images\LightGreenTurret.png");
+        private Image sourceImageOrangeTurret = Image.FromFile(@"..\\..\\..\\Resources\Images\OrangeTurret.png");
+        private Image sourceImagePurpleTurret = Image.FromFile(@"..\\..\\..\\Resources\Images\PurpleTurret.png");
+        private Image sourceImageRedTurret = Image.FromFile(@"..\\..\\..\\Resources\Images\RedTurret.png");
+        private Image sourceImageYellowTurret = Image.FromFile(@"..\\..\\..\\Resources\Images\YellowTurret.png");
 
+        private Image sourceImageBlueShot = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-blue.png");
+        private Image sourceImageDarkShot = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-grey.png");
+        private Image sourceImageGreenShot = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-green.png");
+        private Image sourceImageLightGreenShot = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
+        private Image sourceImageOrangeShot = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-brown.png");
+        private Image sourceImagePurpleShot = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-violet.png");
+        private Image sourceImageRedShot = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-red.png");
+        private Image sourceImageYellowShot = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-yellow.png");
 
 
 
@@ -163,47 +179,49 @@ namespace TankWars
         private void TankDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
-            t.orientation.Normalize();
 
             int tankWidth = 60;
             int tankHeight = 60;
             int turretWidth = 50;
             int turretHeight = 50;
 
-            //using (System.Drawing.SolidBrush blueBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Blue))
-            //{
-            //    Rectangle r = new Rectangle(-(tankWidth / 2), -(tankWidth / 2), tankWidth, tankWidth);
-            //    e.Graphics.FillRectangle(blueBrush, r);
-            //}
-
             int colorID = TheController.GetColor(t.ID);
-
 
             switch(colorID)
             {
                 case 0:
                     e.Graphics.DrawImage(sourceImageBlueTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageBlueTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
                 case 1:
                     e.Graphics.DrawImage(sourceImageDarkTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageDarkTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
                 case 2:
                     e.Graphics.DrawImage(sourceImageGreenTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageGreenTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
+
                     break;
                 case 3:
                     e.Graphics.DrawImage(sourceImageLightGreenTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageLightGreenTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
+
                     break;
                 case 4:
                     e.Graphics.DrawImage(sourceImageOrangeTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageOrangeTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
                 case 5:
                     e.Graphics.DrawImage(sourceImagePurpleTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImagePurpleTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
                 case 6:
                     e.Graphics.DrawImage(sourceImageRedTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageRedTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
                 case 7:
                     e.Graphics.DrawImage(sourceImageYellowTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageYellowTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
 
             }
@@ -245,6 +263,35 @@ namespace TankWars
             int width = 30;
             int height = 30;
 
+            int colorID = TheController.GetColor(p.ownerID);
+
+            switch (colorID)
+            {
+                case 0:
+                    e.Graphics.DrawImage(sourceImageBlueShot, -(width / 2), -(height / 2), width, height);
+                    break;
+                case 1:
+                    e.Graphics.DrawImage(sourceImageDarkShot, -(width / 2), -(height / 2), width, height);
+                    break;
+                case 2:
+                    e.Graphics.DrawImage(sourceImageGreenShot, -(width / 2), -(height / 2), width, height);
+                    break;
+                case 3:
+                    e.Graphics.DrawImage(sourceImageLightGreenShot, -(width / 2), -(height / 2), width, height);
+                    break;
+                case 4:
+                    e.Graphics.DrawImage(sourceImageOrangeShot, -(width / 2), -(height / 2), width, height);
+                    break;
+                case 5:
+                    e.Graphics.DrawImage(sourceImagePurpleShot, -(width / 2), -(height / 2), width, height);
+                    break;
+                case 6:
+                    e.Graphics.DrawImage(sourceImageRedShot, -(width / 2), -(height / 2), width, height);
+                    break;
+                case 7:
+                    e.Graphics.DrawImage(sourceImageYellowShot, -(width / 2), -(height / 2), width, height);
+                    break;
+            }
         }
 
         private void WallDrawer(object o, PaintEventArgs e)
