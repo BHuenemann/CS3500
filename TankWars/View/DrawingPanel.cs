@@ -163,6 +163,70 @@ namespace TankWars
                 Rectangle r = new Rectangle(-(tankWidth / 2), -(tankWidth / 2), tankWidth, tankWidth);
                 e.Graphics.FillRectangle(blueBrush, r);
             }
+
+            int colorID = TheController.GetColor(t.ID);
+
+            switch (colorID)
+            {
+                case 0:
+                    // Creat Bitmap object of image
+                    Image sourceImageBlueTank = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
+                    // Draw portion of source image
+                    Rectangle sourceRectBlueTank = new Rectangle(0, 0, tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageBlueTank, 0, 0, sourceRectBlueTank, GraphicsUnit.Pixel);
+                    break;
+                case 1:
+                    // Creat Bitmap object of image
+                    Image sourceImageDarkTank = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
+                    // Draw portion of source image
+                    Rectangle sourceRectDarkTank = new Rectangle(0, 0, tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageDarkTank, 0, 0, sourceRectDarkTank, GraphicsUnit.Pixel);
+                    break;
+                case 2:
+                    // Creat Bitmap object of image
+                    Image sourceImageGreenTank = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
+                    // Draw portion of source image
+                    Rectangle sourceRectGreenTank = new Rectangle(0, 0, tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageGreenTank, 0, 0, sourceRectGreenTank, GraphicsUnit.Pixel);
+                    break;
+                case 3:
+                    // Creat Bitmap object of image
+                    Image sourceImageLightGreenTank = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
+                    // Draw portion of source image
+                    Rectangle sourceRectLightGreenTank = new Rectangle(0, 0, tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageLightGreenTank, 0, 0, sourceRectLightGreenTank, GraphicsUnit.Pixel);
+                    break;
+                case 4:
+                    // Creat Bitmap object of image
+                    Image sourceImageOrangeTank = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
+                    // Draw portion of source image
+                    Rectangle sourceRectOrangeTank = new Rectangle(0, 0, tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageOrangeTank, 0, 0, sourceRectOrangeTank, GraphicsUnit.Pixel);
+                    break;
+                case 5:
+                    // Creat Bitmap object of image
+                    Image sourceImagePurpleTank = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
+                    // Draw portion of source image
+                    Rectangle sourceRectPurpleTank = new Rectangle(0, 0, tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImagePurpleTank, 0, 0, sourceRectPurpleTank, GraphicsUnit.Pixel);
+                    break;
+                case 6:
+                    // Creat Bitmap object of image
+                    Image sourceImageRedTank = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
+                    // Draw portion of source image
+                    Rectangle sourceRectRedTank = new Rectangle(0, 0, tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageRedTank, 0, 0, sourceRectRedTank, GraphicsUnit.Pixel);
+                    break;
+                case 7:
+                    // Creat Bitmap object of image
+                    Image sourceImageYellowTank = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
+                    // Draw portion of source image
+                    Rectangle sourceRectYellowTank = new Rectangle(0, 0, tankWidth, tankHeight);
+                    e.Graphics.DrawImage(sourceImageYellowTank, 0, 0, sourceRectYellowTank, GraphicsUnit.Pixel);
+                    break;
+
+            }
+
         }
 
         private void PowerUpDrawer(object o, PaintEventArgs e)
