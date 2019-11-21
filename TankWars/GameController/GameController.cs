@@ -19,7 +19,6 @@ namespace TankWars
         }
 
         public ControlCommands commands;
-        private string tankName;
 
         public delegate void ConnectEventHandler(bool errorOccurred = false, string errorMessage = "");
         public event ConnectEventHandler OnConnectEvent;
@@ -27,12 +26,19 @@ namespace TankWars
         public delegate void OnFrameHandler();
         public event OnFrameHandler OnFrameEvent;
 
-        private bool wallsDone = false;
+        public bool wallsDone = false;
 
+        private string tankName;
+        private int tankID;
 
         public GameController()
         {
             TheWorld = new World();
+        }
+
+        public Tank GetPlayerTank()
+        {
+            return TheWorld.Tanks[tankID];
         }
 
         public void TryConnect(string name, string server, int port)
@@ -81,7 +87,8 @@ namespace TankWars
 
             lock(TheWorld.Tanks)
             {
-                TheWorld.Tanks[Int32.Parse(startingInfo[0])] = new Tank(tankName, Int32.Parse(startingInfo[0]));
+                tankID = Int32.Parse(startingInfo[0]);
+                TheWorld.Tanks[Int32.Parse(startingInfo[0])] = new Tank(tankName, tankID);
             }
             TheWorld.worldSize = Int32.Parse(startingInfo[1]);
 
