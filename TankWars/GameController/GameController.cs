@@ -116,7 +116,7 @@ namespace TankWars
             OnFrameEvent();
 
             if (wallsDone)
-                Networking.Send(ss.TheSocket, JsonConvert.SerializeObject(commands));
+                Networking.Send(ss.TheSocket, JsonConvert.SerializeObject(commands) + "\n");
 
             Networking.GetData(ss);
         }

@@ -10,6 +10,8 @@ namespace TankWars
 {
     public class DrawingPanel : Panel
     {
+        Image sourceImageWall = Image.FromFile(@"..\\..\\..\\Resources\Images\WallSprite.png");
+
         private GameController TheController;
 
         public DrawingPanel(GameController controller)
@@ -296,11 +298,8 @@ namespace TankWars
             Vector2D center = new Vector2D(Math.Abs(w.endPoint1.GetX() - w.endPoint2.GetX()),
                 Math.Abs(w.endPoint1.GetY() - w.endPoint2.GetY()));
 
-            // Creat Bitmap object of image
-            Image sourceImage = Image.FromFile(@"..\\..\\..\\Resources\Images\WallSprite.png");
             // Draw portion of source image
-            Rectangle sourceRect = new Rectangle(0, 0, width, height);
-            e.Graphics.DrawImage(sourceImage, 0, 0, sourceRect, GraphicsUnit.Pixel);
+            //e.Graphics.DrawImage(sourceImageWall, 0, 0, i, j, x, y);
         }
     }
 }
