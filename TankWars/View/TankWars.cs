@@ -50,19 +50,13 @@ namespace TankWars
 
         private void TankWars_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode.Equals(Keys.W))
-                TheController.commands.direction = "up";
-            else if (e.KeyCode.Equals(Keys.S))
-                TheController.commands.direction = "down";
-            else if (e.KeyCode.Equals(Keys.A))
-                TheController.commands.direction = "left";
-            else if (e.KeyCode.Equals(Keys.D))
-                TheController.commands.direction = "right";
+            TheController.ProcessKeyDown(e.KeyCode);
+
         }
 
         private void TankWars_KeyUp(object sender, KeyEventArgs e)
         {
-            TheController.commands.direction = "none";
+            TheController.ProcessKeyUp(e.KeyCode);
         }
 
         private void TankWars_MouseDown(object sender, MouseEventArgs e)

@@ -121,6 +121,7 @@ namespace TankWars
 
             e.Graphics.DrawImage(background, 0, 0, TheController.TheWorld.worldSize, TheController.TheWorld.worldSize);
 
+
             lock (TheController.TheWorld.Tanks)
             {
                 // Draw the players

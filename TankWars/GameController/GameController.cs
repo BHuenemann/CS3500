@@ -33,6 +33,12 @@ namespace TankWars
         private string tankName;
         private int tankID;
 
+        private bool upKey = false;
+        private bool downKey = false;
+        private bool leftKey = false;
+        private bool rightKey = false;
+
+
 
         public GameController()
         {
@@ -44,6 +50,67 @@ namespace TankWars
         {
             return TheWorld.Tanks[tankID];
         }
+
+
+        public void ProcessKeyDown(Keys key)
+        {
+            CalculateMovement();
+            switch (key)
+            {
+                case Keys.W:
+                    upKey = true;
+                    commands.direction = "up";
+                    break;
+                case Keys.S:
+                    downKey = true;
+                    commands.direction = "down";
+                    break;
+                case Keys.A:
+                    leftKey = true;
+                    commands.direction = "left";
+                    break;
+                case Keys.D:
+                    rightKey = true;
+                    commands.direction = "right";
+                    break;
+            }
+        }
+
+
+        public void ProcessKeyUp(Keys key)
+        {
+            switch (key)
+            {
+                case Keys.W:
+                    upKey = false;
+                    commands.direction = "none";
+                    break;
+                case Keys.S:
+                    downKey = false;
+                    commands.direction = "none";
+                    break;
+                case Keys.A:
+                    leftKey = false;
+                    commands.direction = "none";
+                    break;
+                case Keys.D:
+                    rightKey = false;
+                    commands.direction = "none";
+                    break;
+            }
+            CalculateMovement();
+        }
+
+
+        private void CalculateMovement()
+        {
+            if(upKey != downKey)
+                commands.direction = (upKey) ? "up" : "down";
+            if(leftKey != rightKey)
+                commands.direction = (leftKey) ? "left" : "right";
+        }
+
+
 
         public void TryConnect(string name, string server, int port)
         {
@@ -115,10 +182,10 @@ namespace TankWars
 
             ProcessData(ss);
 
-            OnFrameEvent();
-
             if (wallsDone)
                 Networking.Send(ss.TheSocket, JsonConvert.SerializeObject(commands) + "\n");
+
+            OnFrameEvent();
 
             Networking.GetData(ss);
         }
