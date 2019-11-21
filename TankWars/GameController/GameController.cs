@@ -95,7 +95,9 @@ namespace TankWars
             }
             TheWorld.worldSize = Int32.Parse(startingInfo[1]);
 
-            ss.ClearData();
+            ss.RemoveData(0, tankID.ToString().Length + TheWorld.worldSize.ToString().Length + 2);
+
+            ProcessData(ss);
 
             ss.OnNetworkAction = ReceiveFrameData;
             Networking.GetData(ss);

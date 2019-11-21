@@ -10,7 +10,7 @@ namespace TankWars
 {
     public class DrawingPanel : Panel
     {
-        Image sourceImageWall = Image.FromFile(@"..\\..\\..\\Resources\Images\WallSprite.png");
+        private Image sourceImageWall = Image.FromFile(@"..\\..\\..\\Resources\Images\WallSprite.png");
 
         private GameController TheController;
 
@@ -103,9 +103,7 @@ namespace TankWars
 
             e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
 
-            Bitmap resized = new Bitmap(background, new Size(TheController.TheWorld.worldSize, TheController.TheWorld.worldSize));
-
-            e.Graphics.DrawImage(resized, new Point(0, 0));
+            e.Graphics.DrawImage(background, 0, 0, TheController.TheWorld.worldSize, TheController.TheWorld.worldSize);
 
             lock (TheController.TheWorld.Tanks)
             {
@@ -253,14 +251,20 @@ namespace TankWars
         {
             Wall w = o as Wall;
 
-            int width = 50;
-            int height = 50;
+            int SingleWidth = 50;
+            int SingleHeight = 50;
 
-            Vector2D center = new Vector2D(Math.Abs(w.endPoint1.GetX() - w.endPoint2.GetX()),
-                Math.Abs(w.endPoint1.GetY() - w.endPoint2.GetY()));
+            int Width = (int)Math.Abs(w.endPoint1.GetX() - w.endPoint2.GetX());
+            int Height = (int)Math.Abs(w.endPoint1.GetY() - w.endPoint2.GetY());
 
             // Draw portion of source image
-            //e.Graphics.DrawImage(sourceImageWall, 0, 0, i, j, x, y);
+            for (int i = 0; i <= Width; i += SingleWidth)
+            {
+                for (int j = 0; j <= Height; j += SingleHeight)
+                {
+                    e.Graphics.DrawImage(sourceImageWall, -(Width/2) - (SingleWidth/2) + i, -(Height/2) - (SingleHeight/2) + j, SingleWidth, SingleHeight);
+                }
+            }
         }
     }
 }

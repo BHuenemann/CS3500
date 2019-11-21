@@ -26,6 +26,7 @@ namespace TankWars
 
         private void OnFrame()
         {
+
             // Don't try to redraw if the window doesn't exist yet.
             // This might happen if the controller sends an update
             // before the Form has started.
@@ -45,7 +46,7 @@ namespace TankWars
 
         private void TankWars_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode.Equals(Keys.W))
+            if (e.KeyCode.Equals(Keys.W))
                 TheController.commands.direction = "up";
             else if (e.KeyCode.Equals(Keys.S))
                 TheController.commands.direction = "down";
