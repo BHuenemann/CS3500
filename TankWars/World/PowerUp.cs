@@ -15,7 +15,7 @@ namespace TankWars
         public Vector2D location { get; private set; }
 
         [JsonProperty(PropertyName = "died")]
-        private bool died = false;
+        public bool died = false;
 
 
         public PowerUp()

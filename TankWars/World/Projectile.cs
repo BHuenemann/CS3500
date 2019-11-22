@@ -18,7 +18,7 @@ namespace TankWars
         public Vector2D orientation { get; private set; }
 
         [JsonProperty(PropertyName = "died")]
-        private bool died = false;
+        public bool died = false;
 
         [JsonProperty(PropertyName = "owner")]
         public int ownerID { get; private set; }

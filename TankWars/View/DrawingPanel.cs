@@ -51,8 +51,6 @@ namespace TankWars
         {
             DoubleBuffered = true;
             TheController = controller;
-
-            TheController.ErrorEvent += DrawBackground;
         }
 
         /// <summary>
@@ -69,11 +67,6 @@ namespace TankWars
         // A delegate for DrawObjectWithTransform
         // Methods matching this delegate can draw whatever they want using e  
         public delegate void ObjectDrawer(object o, PaintEventArgs e);
-
-        private void DrawBackground(string errorMessage)
-        {
-            //dialog box
-        }
 
         /// <summary>
         /// This method performs a translation and rotation to drawn an object in the world.

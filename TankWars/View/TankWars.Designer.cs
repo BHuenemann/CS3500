@@ -38,18 +38,18 @@
             // ServerText
             // 
             this.ServerText.AutoSize = true;
-            this.ServerText.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ServerText.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ServerText.Location = new System.Drawing.Point(17, 16);
             this.ServerText.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.ServerText.Name = "ServerText";
-            this.ServerText.Size = new System.Drawing.Size(63, 20);
+            this.ServerText.Size = new System.Drawing.Size(54, 17);
             this.ServerText.TabIndex = 0;
             this.ServerText.Text = "Server:";
             // 
             // ServerInput
             // 
-            this.ServerInput.Location = new System.Drawing.Point(145, 22);
-            this.ServerInput.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.ServerInput.Location = new System.Drawing.Point(70, 15);
+            this.ServerInput.Margin = new System.Windows.Forms.Padding(5);
             this.ServerInput.Name = "ServerInput";
             this.ServerInput.Size = new System.Drawing.Size(201, 22);
             this.ServerInput.TabIndex = 1;
@@ -58,18 +58,18 @@
             // NameText
             // 
             this.NameText.AutoSize = true;
-            this.NameText.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.NameText.Location = new System.Drawing.Point(445, 22);
+            this.NameText.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.2F);
+            this.NameText.Location = new System.Drawing.Point(330, 16);
             this.NameText.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.NameText.Name = "NameText";
-            this.NameText.Size = new System.Drawing.Size(58, 20);
+            this.NameText.Size = new System.Drawing.Size(49, 17);
             this.NameText.TabIndex = 2;
             this.NameText.Text = "Name:";
             // 
             // NameInput
             // 
-            this.NameInput.Location = new System.Drawing.Point(556, 22);
-            this.NameInput.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.NameInput.Location = new System.Drawing.Point(377, 16);
+            this.NameInput.Margin = new System.Windows.Forms.Padding(5);
             this.NameInput.Name = "NameInput";
             this.NameInput.Size = new System.Drawing.Size(201, 22);
             this.NameInput.TabIndex = 3;
@@ -79,7 +79,7 @@
             // 
             this.ConnectButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ConnectButton.Location = new System.Drawing.Point(896, 15);
-            this.ConnectButton.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.ConnectButton.Margin = new System.Windows.Forms.Padding(5);
             this.ConnectButton.Name = "ConnectButton";
             this.ConnectButton.Size = new System.Drawing.Size(176, 32);
             this.ConnectButton.TabIndex = 4;
@@ -100,14 +100,11 @@
             this.Controls.Add(this.ServerInput);
             this.Controls.Add(this.ServerText);
             this.KeyPreview = true;
-            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "TankWars";
             this.Text = "TankWars";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TankWars_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TankWars_KeyUp);
-            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TankWars_MouseDown);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.TankWars_MouseMove);
-            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TankWars_MouseUp);
             this.ResumeLayout(false);
             this.PerformLayout();
 

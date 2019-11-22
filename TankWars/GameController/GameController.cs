@@ -23,9 +23,10 @@ namespace TankWars
 
         public delegate void ErrorHandler(string errorMessage = "");
         public event ErrorHandler ErrorEvent;
+        public event ErrorHandler NameErrorEvent;
 
-        public delegate void OnFrameHandler();
-        public event OnFrameHandler OnFrameEvent;
+        public delegate void OnActionHandler();
+        public event OnActionHandler OnFrameEvent;
 
         public bool wallsDone = false;
 
@@ -130,12 +131,21 @@ namespace TankWars
         }
 
 
+        public void ProcessMouseMove(int x, int y)
+        {
+            commands.aiming = new Vector2D(x, y);
+        }
+
+
         public void TryConnect(string name, string server, int port)
         {
             if (name.Length <= 16)
                 tankName = name;
             else
-                ErrorEvent("Name is longer than 16 characters");
+            {
+                NameErrorEvent("Name is longer than 16 characters");
+                return;
+            }
 
             Networking.ConnectToServer(SendName, server, port);
         }
@@ -186,7 +196,6 @@ namespace TankWars
             ProcessData(ss);
 
             ss.OnNetworkAction = ReceiveFrameData;
-
             Networking.GetData(ss);
         }
 
@@ -249,6 +258,8 @@ namespace TankWars
                     TankColorRecord.Add(tank.ID, SeenPlayers % 8);
                     SeenPlayers++;
                 }
+                if (tank.died)
+                    TheWorld.Projectiles.Remove(tank.ID);
                 wallsDone = true;
                 return;
             }
@@ -258,7 +269,8 @@ namespace TankWars
             {
                 Projectile proj = JsonConvert.DeserializeObject<Projectile>(serializedObject);
                 TheWorld.Projectiles[proj.ID] = proj;
-                wallsDone = true;
+                if (proj.died)
+                    TheWorld.Projectiles.Remove(proj.ID);
                 return;
             }
 
@@ -267,7 +279,8 @@ namespace TankWars
             {
                 PowerUp power = JsonConvert.DeserializeObject<PowerUp>(serializedObject);
                 TheWorld.PowerUps[power.ID] = power;
-                wallsDone = true;
+                if (power.died)
+                    TheWorld.Projectiles.Remove(power.ID);
                 return;
             }
 
@@ -276,7 +289,6 @@ namespace TankWars
             {
                 Beam beam = JsonConvert.DeserializeObject<Beam>(serializedObject);
                 TheWorld.Beams[beam.ID] = beam;
-                wallsDone = true;
                 return;
             }
 

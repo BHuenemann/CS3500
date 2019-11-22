@@ -31,7 +31,7 @@ namespace TankWars
         private int score = 0;
 
         [JsonProperty(PropertyName = "died")]
-        private bool died = false;
+        public bool died = false;
 
         [JsonProperty(PropertyName = "dc")]
         private bool disconnected = false;

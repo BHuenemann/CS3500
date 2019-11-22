@@ -15,6 +15,8 @@ namespace TankWars
             TheController = ctl;
 
             TheController.OnFrameEvent += OnFrame;
+            TheController.NameErrorEvent += DisplayNameError;
+            TheController.ErrorEvent += DisplayError;
 
             ClientSize = new Size(Constants.ViewSize, Constants.ViewSize);
             drawingPanel = new DrawingPanel(TheController);
@@ -23,12 +25,9 @@ namespace TankWars
             drawingPanel.Size = new Size(ClientSize.Width, ClientSize.Height);
             Controls.Add(drawingPanel);
 
-
             drawingPanel.MouseDown += TankWars_MouseDown;
             drawingPanel.MouseUp += TankWars_MouseUp;
             drawingPanel.MouseMove += TankWars_MouseMove;
-
-
         }
 
         private void OnFrame()
@@ -46,8 +45,20 @@ namespace TankWars
             this.Invoke(m);
         }
 
+        private void DisplayNameError(string errorMessage)
+        {
+            ConnectButton.Enabled = true;
+            MessageBox.Show(errorMessage, "Connection Error", MessageBoxButtons.OK);
+        }
+
+        private void DisplayError(string errorMessage)
+        {
+            MessageBox.Show(errorMessage, "Connection Error", MessageBoxButtons.OK);
+        }
+
         private void ConnectButton_Click(object sender, EventArgs e)
         {
+            ConnectButton.Enabled = false;
             TheController.TryConnect(NameInput.Text, ServerInput.Text, 11000);
         }
 
@@ -74,7 +85,7 @@ namespace TankWars
 
         private void TankWars_MouseMove(object sender, MouseEventArgs e)
         {
-            //TheController.commands.aiming = new Vector2D(e.Location.X, e.Location.Y);
+            TheController.ProcessMouseMove(e.Location.X, e.Location.Y);
         }
     }
 }
