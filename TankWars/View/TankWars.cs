@@ -73,6 +73,7 @@ namespace TankWars
             TheController.ProcessKeyUp(e.KeyCode);
         }
 
+
         private void TankWars_MouseDown(object sender, MouseEventArgs e)
         {
             TheController.ProcessMouseDown(e.Button);
@@ -85,7 +86,8 @@ namespace TankWars
 
         private void TankWars_MouseMove(object sender, MouseEventArgs e)
         {
-            TheController.ProcessMouseMove(e.Location.X, e.Location.Y);
+            if(TheController.wallsDone)
+                TheController.ProcessMouseMove(e.X - Constants.ViewSize/2, e.Y - Constants.ViewSize / 2);
         }
     }
 }
