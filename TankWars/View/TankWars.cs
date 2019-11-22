@@ -64,18 +64,12 @@ namespace TankWars
 
         private void TankWars_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button.Equals(MouseButtons.Left))
-            {
-                TheController.commands.fire = "main";
-
-            }
-            else if (e.Button.Equals(MouseButtons.Right))
-                TheController.commands.fire = "alt";
+            TheController.ProcessMouseDown(e.Button);
         }
 
         private void TankWars_MouseUp(object sender, MouseEventArgs e)
         {
-            TheController.commands.fire = "none";
+            TheController.ProcessMouseUp();
         }
 
         private void TankWars_MouseMove(object sender, MouseEventArgs e)

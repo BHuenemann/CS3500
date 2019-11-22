@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Timers;
 using System.Windows.Forms;
 using NetworkUtil;
 using Newtonsoft.Json;
@@ -17,6 +18,8 @@ namespace TankWars
             get;
             private set;
         }
+
+        private SocketState theSocketState;
 
         public ControlCommands commands;
 
@@ -111,6 +114,23 @@ namespace TankWars
         }
 
 
+        public void ProcessMouseDown(MouseButtons button)
+        {
+            if (button.Equals(MouseButtons.Left))
+            {
+                commands.fire = "main";
+
+            }
+            else if (button.Equals(MouseButtons.Right))
+                commands.fire = "alt";
+        }
+
+
+        public void ProcessMouseUp()
+        {
+            commands.fire = "none";
+        }
+
 
         public void TryConnect(string name, string server, int port)
         {
@@ -166,28 +186,43 @@ namespace TankWars
 
             ProcessData(ss);
 
-            ss.OnNetworkAction = ReceiveFrameData;
+            ss.OnNetworkAction = DataLoop;
+
+            // Start a new timer that will simulate updates coming from the server
+            // every 15 millisecoonds
+            System.Timers.Timer serverTimer = new System.Timers.Timer();
+            serverTimer.Interval = 15;
+            serverTimer.Elapsed += ReceiveFrameData;
+            serverTimer.Start();
+
             Networking.GetData(ss);
         }
 
-        private void ReceiveFrameData(SocketState ss)
+        private void DataLoop(SocketState ss)
         {
-            if (ss.ErrorOccured == true)
+            theSocketState = ss;
+            Networking.GetData(ss);
+        }
+
+        private void ReceiveFrameData(object sender, ElapsedEventArgs e)
+        {
+            if (theSocketState.ErrorOccured == true)
             {
                 ErrorEvent("Error occured while receiving data from the server");
-                if (ss.TheSocket.Connected)
-                    ss.TheSocket.Close();
+                if (theSocketState.TheSocket.Connected)
+                    theSocketState.TheSocket.Close();
                 return;
             }
 
-            ProcessData(ss);
+            ProcessData(theSocketState);
 
             if (wallsDone)
-                Networking.Send(ss.TheSocket, JsonConvert.SerializeObject(commands) + "\n");
+                Networking.Send(theSocketState.TheSocket, JsonConvert.SerializeObject(commands) + "\n");
 
             OnFrameEvent();
 
-            Networking.GetData(ss);
+            //Networking.GetData(theSocketState);
+
         }
 
         private void ProcessData(SocketState ss)
@@ -204,7 +239,7 @@ namespace TankWars
                 if (p[p.Length - 1] != '\n')
                     break;
 
-                UpdateObject(p.Substring(0, p.Length - 1));
+                UpdateObject(p);
 
                 // Then remove it from the SocketState's growable buffer
                 ss.RemoveData(0, p.Length);
@@ -219,10 +254,10 @@ namespace TankWars
             if (token != null)
             {
                 Tank tank = JsonConvert.DeserializeObject<Tank>(serializedObject);
-                lock(TheWorld.Tanks)
+                lock (TheWorld)
                 {
                     TheWorld.Tanks[tank.ID] = tank;
-                    if(!TankColorRecord.ContainsKey(tank.ID))
+                    if (!TankColorRecord.ContainsKey(tank.ID))
                     {
                         TankColorRecord.Add(tank.ID, SeenPlayers % 8);
                         SeenPlayers++;
@@ -236,7 +271,7 @@ namespace TankWars
             if (token != null)
             {
                 Projectile proj = JsonConvert.DeserializeObject<Projectile>(serializedObject);
-                lock (TheWorld.Projectiles)
+                lock (TheWorld)
                 {
                     TheWorld.Projectiles[proj.ID] = proj;
                 }
@@ -248,7 +283,7 @@ namespace TankWars
             if (token != null)
             {
                 PowerUp power = JsonConvert.DeserializeObject<PowerUp>(serializedObject);
-                lock (TheWorld.PowerUps)
+                lock (TheWorld)
                 {
                     TheWorld.PowerUps[power.ID] = power;
                 }
@@ -260,7 +295,7 @@ namespace TankWars
             if (token != null)
             {
                 Beam beam = JsonConvert.DeserializeObject<Beam>(serializedObject);
-                lock (TheWorld.Beams)
+                lock (TheWorld)
                 {
                     TheWorld.Beams[beam.ID] = beam;
                 }
@@ -272,7 +307,7 @@ namespace TankWars
             if (token != null)
             {
                 Wall wall = JsonConvert.DeserializeObject<Wall>(serializedObject);
-                lock (TheWorld.Walls)
+                lock (TheWorld)
                 {
                     TheWorld.Walls[wall.ID] = wall;
                 }

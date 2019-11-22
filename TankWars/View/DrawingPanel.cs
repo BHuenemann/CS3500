@@ -122,7 +122,7 @@ namespace TankWars
             e.Graphics.DrawImage(background, 0, 0, TheController.TheWorld.worldSize, TheController.TheWorld.worldSize);
 
 
-            lock (TheController.TheWorld.Tanks)
+            lock (TheController.TheWorld)
             {
                 // Draw the players
                 foreach (Tank tank in TheController.TheWorld.Tanks.Values)
@@ -131,43 +131,29 @@ namespace TankWars
                     DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), tank.orientation.ToAngle(),
                         TankDrawer);
                 }
-            }
 
-            lock (TheController.TheWorld.PowerUps)
-            {
                 // Draw the powerups
                 foreach (PowerUp pow in TheController.TheWorld.PowerUps.Values)
                 {
                     DrawObjectWithTransform(e, pow, TheController.TheWorld.worldSize, pow.location.GetX(), pow.location.GetY(), 0, PowerUpDrawer);
                 }
-            }
 
-            lock (TheController.TheWorld.Beams)
-            {
                 // Draw the beams
                 foreach (Beam beam in TheController.TheWorld.Beams.Values)
                 {
                     DrawObjectWithTransform(e, beam, TheController.TheWorld.worldSize, beam.origin.GetX(), beam.origin.GetY(), beam.origin.ToAngle(), BeamDrawer);
                 }
-            }
 
-            lock (TheController.TheWorld.Projectiles)
-            {
                 // Draw the projectiles
                 foreach (Projectile proj in TheController.TheWorld.Projectiles.Values)
                 {
                     proj.orientation.Normalize();
                     DrawObjectWithTransform(e, proj, TheController.TheWorld.worldSize, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
                 }
-            }
 
-            lock (TheController.TheWorld.Walls)
-            {
                 // Draw the walls
                 foreach (Wall wall in TheController.TheWorld.Walls.Values)
                 {
-                    //if x is same for p1 and p2 is same then vertically long
-                    //if y is same for p1 and p2 is same then horizontally long
                     DrawObjectWithTransform(e, wall, TheController.TheWorld.worldSize, (wall.endPoint1.GetX() + wall.endPoint2.GetX()) / 2,
                         (wall.endPoint1.GetY() + wall.endPoint2.GetY()) / 2, 0, WallDrawer);
                 }
