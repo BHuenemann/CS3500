@@ -52,6 +52,7 @@ namespace TankWars
             DoubleBuffered = true;
             TheController = controller;
 
+
             TheController.ErrorEvent += DrawBackground;
         }
 
@@ -128,8 +129,11 @@ namespace TankWars
                 foreach (Tank tank in TheController.TheWorld.Tanks.Values)
                 {
                     tank.orientation.Normalize();
+                    tank.aiming.Normalize();
                     DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), tank.orientation.ToAngle(),
                         TankDrawer);
+                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), tank.aiming.ToAngle(),
+                        TurretDrawer);
                 }
 
                 // Draw the powerups
@@ -170,8 +174,6 @@ namespace TankWars
 
             int tankWidth = 60;
             int tankHeight = 60;
-            int turretWidth = 50;
-            int turretHeight = 50;
 
             int colorID = TheController.GetColor(t.ID);
 
@@ -179,41 +181,68 @@ namespace TankWars
             {
                 case 0:
                     e.Graphics.DrawImage(sourceImageBlueTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
-                    e.Graphics.DrawImage(sourceImageBlueTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
                 case 1:
                     e.Graphics.DrawImage(sourceImageDarkTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
-                    e.Graphics.DrawImage(sourceImageDarkTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
                 case 2:
                     e.Graphics.DrawImage(sourceImageGreenTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
-                    e.Graphics.DrawImage(sourceImageGreenTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
-
                     break;
                 case 3:
                     e.Graphics.DrawImage(sourceImageLightGreenTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
-                    e.Graphics.DrawImage(sourceImageLightGreenTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
-
                     break;
                 case 4:
                     e.Graphics.DrawImage(sourceImageOrangeTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
-                    e.Graphics.DrawImage(sourceImageOrangeTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
                 case 5:
                     e.Graphics.DrawImage(sourceImagePurpleTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
-                    e.Graphics.DrawImage(sourceImagePurpleTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
                 case 6:
                     e.Graphics.DrawImage(sourceImageRedTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
-                    e.Graphics.DrawImage(sourceImageRedTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
                 case 7:
                     e.Graphics.DrawImage(sourceImageYellowTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
-                    e.Graphics.DrawImage(sourceImageYellowTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
-
             }
 
+        }
+
+        private void TurretDrawer(object o, PaintEventArgs e)
+        {
+            Tank t = o as Tank;
+
+            int turretWidth = 50;
+            int turretHeight = 50;
+
+            int colorID = TheController.GetColor(t.ID);
+
+            switch (colorID)
+            {
+                case 0:
+                    e.Graphics.DrawImage(sourceImageBlueTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
+                    break;
+                case 1:
+                    e.Graphics.DrawImage(sourceImageDarkTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
+                    break;
+                case 2:
+                    e.Graphics.DrawImage(sourceImageGreenTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
+                    break;
+                case 3:
+                    e.Graphics.DrawImage(sourceImageLightGreenTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
+                    break;
+                case 4:
+                    e.Graphics.DrawImage(sourceImageOrangeTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
+                    break;
+                case 5:
+                    e.Graphics.DrawImage(sourceImagePurpleTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
+                    break;
+                case 6:
+                    e.Graphics.DrawImage(sourceImageRedTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
+                    break;
+                case 7:
+                    e.Graphics.DrawImage(sourceImageYellowTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
+                    break;
+            }
         }
 
         private void PowerUpDrawer(object o, PaintEventArgs e)
@@ -303,6 +332,14 @@ namespace TankWars
                 }
             }
         }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            this.ResumeLayout(false);
+
+        }
+
     }
 }
 

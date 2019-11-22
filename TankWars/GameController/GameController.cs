@@ -103,6 +103,7 @@ namespace TankWars
         }
 
 
+
         private void CalculateMovement()
         {
             if (upKey != downKey)
@@ -127,6 +128,16 @@ namespace TankWars
         public void ProcessMouseUp()
         {
             commands.fire = "none";
+        }
+
+        public void ProcessMouseMove(double x, double y)
+        {
+            Vector2D loc = new Vector2D(x, y);
+            loc.Normalize();
+
+            commands.aiming = new Vector2D(loc.GetX(), loc.GetY());
+            GetPlayerTank().aiming = new Vector2D(loc.GetX(), loc.GetY());
+
         }
 
 
