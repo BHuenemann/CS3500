@@ -146,7 +146,7 @@ namespace TankWars
                 // Draw the beams
                 foreach (Beam beam in TheController.TheWorld.Beams.Values)
                 {
-                    DrawObjectWithTransform(e, beam, TheController.TheWorld.worldSize, beam.origin.GetX(), beam.origin.GetY(), TheController.GetPlayerTank().aiming.ToAngle(), BeamDrawer);
+                    DrawObjectWithTransform(e, beam, TheController.TheWorld.worldSize, beam.origin.GetX(), beam.origin.GetY(), beam.orientation.ToAngle(), BeamDrawer);
                 }
 
                 // Draw the projectiles
@@ -156,13 +156,6 @@ namespace TankWars
                     DrawObjectWithTransform(e, proj, TheController.TheWorld.worldSize, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
                 }
 
-                // Draw the walls
-                foreach (Wall wall in TheController.TheWorld.Walls.Values)
-                {
-                    DrawObjectWithTransform(e, wall, TheController.TheWorld.worldSize, (wall.endPoint1.GetX() + wall.endPoint2.GetX()) / 2,
-                        (wall.endPoint1.GetY() + wall.endPoint2.GetY()) / 2, 0, WallDrawer);
-                }
-
                 if(TheController.TheWorld.Beams.Count != 0)
                 {
                     foreach(Beam b in TheController.TheWorld.Beams.Values.ToList())
@@ -170,7 +163,6 @@ namespace TankWars
                         if (b.beamFrames == Constants.BeamFrameLength)
                         {
                             TheController.TheWorld.Beams.Remove(b.ID);
-                            return;
                         }
                     }
                 }
@@ -184,6 +176,9 @@ namespace TankWars
         private void TankDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
+
+            if (t.hitPoints == 0)
+                return;
 
             int tankWidth = 60;
             int tankHeight = 60;
@@ -223,6 +218,9 @@ namespace TankWars
         private void TurretDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
+
+            if (t.hitPoints == 0)
+                return;
 
             int turretWidth = 50;
             int turretHeight = 50;
@@ -371,14 +369,6 @@ namespace TankWars
                 }
             }
         }
-
-        private void InitializeComponent()
-        {
-            this.SuspendLayout();
-            this.ResumeLayout(false);
-
-        }
-
     }
 }
 

@@ -266,7 +266,7 @@ namespace TankWars
                     TankColorRecord.Add(tank.ID, SeenPlayers % 8);
                     SeenPlayers++;
                 }
-                if (tank.died)
+                if (tank.died || tank.disconnected)
                     TheWorld.Tanks.Remove(tank.ID);
                 wallsDone = true;
                 return;

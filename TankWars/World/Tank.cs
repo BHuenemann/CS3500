@@ -25,7 +25,7 @@ namespace TankWars
         public string name { get; private set; }
 
         [JsonProperty(PropertyName = "hp")]
-        private int hitPoints = Constants.MaxHP;
+        public int hitPoints = Constants.MaxHP;
 
         [JsonProperty(PropertyName = "score")]
         public int score = 0;
@@ -34,7 +34,7 @@ namespace TankWars
         public bool died = false;
 
         [JsonProperty(PropertyName = "dc")]
-        private bool disconnected = false;
+        public bool disconnected = false;
 
         [JsonProperty(PropertyName = "join")]
         private bool joined = false;
