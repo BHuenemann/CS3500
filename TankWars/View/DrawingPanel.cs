@@ -117,6 +117,14 @@ namespace TankWars
 
             lock (TheController.TheWorld)
             {
+
+                // Draw the walls
+                foreach (Wall wall in TheController.TheWorld.Walls.Values)
+                {
+                    DrawObjectWithTransform(e, wall, TheController.TheWorld.worldSize, (wall.endPoint1.GetX() + wall.endPoint2.GetX()) / 2,
+                        (wall.endPoint1.GetY() + wall.endPoint2.GetY()) / 2, 0, WallDrawer);
+                }
+
                 // Draw the players
                 foreach (Tank tank in TheController.TheWorld.Tanks.Values)
                 {
@@ -126,6 +134,9 @@ namespace TankWars
                         TankDrawer);
                     DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), tank.aiming.ToAngle(),
                         TurretDrawer);
+                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), 0,
+                        NameDrawer);
+
                 }
 
                 // Draw the powerups
@@ -147,12 +158,7 @@ namespace TankWars
                     DrawObjectWithTransform(e, proj, TheController.TheWorld.worldSize, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
                 }
 
-                // Draw the walls
-                foreach (Wall wall in TheController.TheWorld.Walls.Values)
-                {
-                    DrawObjectWithTransform(e, wall, TheController.TheWorld.worldSize, (wall.endPoint1.GetX() + wall.endPoint2.GetX()) / 2,
-                        (wall.endPoint1.GetY() + wall.endPoint2.GetY()) / 2, 0, WallDrawer);
-                }
+                
             }
 
             // Do anything that Panel (from which we inherit) needs to do
@@ -237,6 +243,29 @@ namespace TankWars
             }
         }
 
+        private void NameDrawer(object o, PaintEventArgs e)
+        {
+            Tank t = o as Tank;
+
+            using (Font font1 = new Font("Times New Roman", 24, FontStyle.Bold, GraphicsUnit.Pixel))
+            {
+                PointF pointF1 = new PointF(-20 - t.name.Length * 5, 26);
+                e.Graphics.DrawString(t.name + ": " + t.score, font1, Brushes.Blue, pointF1);
+            }
+        }
+
+        private void HealthDrawer(object o, PaintEventArgs e)
+        {
+            Tank t = o as Tank;
+
+            using (System.Drawing.SolidBrush greenBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Green))
+            using (System.Drawing.SolidBrush yellowBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Yellow))
+            using (System.Drawing.SolidBrush redBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Red))
+            {
+
+            }
+        }
+
         private void PowerUpDrawer(object o, PaintEventArgs e)
         {
             PowerUp p = o as PowerUp;
@@ -245,9 +274,12 @@ namespace TankWars
             int height = 8;
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             using (System.Drawing.SolidBrush blackBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black))
+            using (System.Drawing.SolidBrush redBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Red))
             {
                 Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
                 e.Graphics.FillEllipse(blackBrush, r);
+                r = new Rectangle(-(width / 4), -(height / 4), width / 2, height / 2);
+                e.Graphics.FillEllipse(redBrush, r);
             }
 
         }

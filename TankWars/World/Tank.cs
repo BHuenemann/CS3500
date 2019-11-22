@@ -11,7 +11,7 @@ namespace TankWars
 
         [JsonProperty(PropertyName = "tank")]
         public int ID { get; private set; }
-        
+
         [JsonProperty(PropertyName = "loc")]
         public Vector2D location { get; private set; }
 
@@ -22,13 +22,13 @@ namespace TankWars
         public Vector2D aiming = new Vector2D(0, -1);
 
         [JsonProperty(PropertyName = "name")]
-        private string name;
+        public string name { get; private set; }
 
         [JsonProperty(PropertyName = "hp")]
         private int hitPoints = Constants.MaxHP;
 
         [JsonProperty(PropertyName = "score")]
-        private int score = 0;
+        public int score = 0;
 
         [JsonProperty(PropertyName = "died")]
         public bool died = false;

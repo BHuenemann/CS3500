@@ -264,7 +264,7 @@ namespace TankWars
                     SeenPlayers++;
                 }
                 if (tank.died)
-                    TheWorld.Projectiles.Remove(tank.ID);
+                    TheWorld.Tanks.Remove(tank.ID);
                 wallsDone = true;
                 return;
             }
@@ -285,7 +285,7 @@ namespace TankWars
                 PowerUp power = JsonConvert.DeserializeObject<PowerUp>(serializedObject);
                 TheWorld.PowerUps[power.ID] = power;
                 if (power.died)
-                    TheWorld.Projectiles.Remove(power.ID);
+                    TheWorld.PowerUps.Remove(power.ID);
                 return;
             }
 
