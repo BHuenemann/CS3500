@@ -25,7 +25,6 @@ namespace TankWars
 
         public delegate void ErrorHandler(string errorMessage = "");
         public event ErrorHandler ErrorEvent;
-        public event ErrorHandler NameErrorEvent;
 
         public delegate void OnActionHandler();
         public event OnActionHandler OnFrameEvent;
@@ -149,7 +148,7 @@ namespace TankWars
                 tankName = name;
             else
             {
-                NameErrorEvent("Name is longer than 16 characters");
+                ErrorEvent("Name is longer than 16 characters");
                 return;
             }
 

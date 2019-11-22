@@ -11,13 +11,14 @@ namespace TankWars
 
         DrawingPanel drawingPanel;
 
+        delegate void SetConnectButtonCallback(bool state);
+
         public TankWars(GameController ctl)
         {
             InitializeComponent();
             TheController = ctl;
 
             TheController.OnFrameEvent += OnFrame;
-            TheController.NameErrorEvent += DisplayNameError;
             TheController.ErrorEvent += DisplayError;
 
             ClientSize = new Size(Constants.ViewSize, Constants.ViewSize);
@@ -47,15 +48,27 @@ namespace TankWars
             this.Invoke(m);
         }
 
-        private void DisplayNameError(string errorMessage)
+        private void DisplayError(string errorMessage)
         {
-            ConnectButton.Enabled = true;
+            SetConnectButton(true);
             MessageBox.Show(errorMessage, "Connection Error", MessageBoxButtons.OK);
         }
 
-        private void DisplayError(string errorMessage)
+        private void SetConnectButton(bool state)
         {
-            MessageBox.Show(errorMessage, "Connection Error", MessageBoxButtons.OK);
+            /* InvokeRequired required compares the thread ID of the
+            calling thread to the thread ID of the creating thread.
+            If these threads are different, it returns true. This
+            code was found online since a method invoker wasn't working. */
+            if (ConnectButton.InvokeRequired)
+            {
+                SetConnectButtonCallback d = new SetConnectButtonCallback(SetConnectButton);
+                Invoke(d, new object[] { state });
+            }
+            else
+            {
+                ConnectButton.Enabled = state;
+            }
         }
 
         private void ConnectButton_Click(object sender, EventArgs e)
