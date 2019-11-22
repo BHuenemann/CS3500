@@ -87,7 +87,7 @@ namespace TankWars
         private void TankWars_MouseMove(object sender, MouseEventArgs e)
         {
             if(TheController.wallsDone)
-                TheController.ProcessMouseMove(e.X - Constants.ViewSize/2, e.Y - Constants.ViewSize / 2);
+                TheController.ProcessMouseMove(e.X, e.Y);
         }
     }
 }

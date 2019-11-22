@@ -53,6 +53,7 @@
             this.ServerInput.Name = "ServerInput";
             this.ServerInput.Size = new System.Drawing.Size(201, 22);
             this.ServerInput.TabIndex = 1;
+            this.ServerInput.TabStop = false;
             this.ServerInput.Text = "localhost";
             // 
             // NameText
@@ -73,6 +74,7 @@
             this.NameInput.Name = "NameInput";
             this.NameInput.Size = new System.Drawing.Size(201, 22);
             this.NameInput.TabIndex = 3;
+            this.NameInput.TabStop = false;
             this.NameInput.Text = "player";
             // 
             // ConnectButton

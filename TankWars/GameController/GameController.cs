@@ -119,7 +119,6 @@ namespace TankWars
             if (button.Equals(MouseButtons.Left))
             {
                 commands.fire = "main";
-
             }
             else if (button.Equals(MouseButtons.Right))
                 commands.fire = "alt";
@@ -133,7 +132,7 @@ namespace TankWars
 
         public void ProcessMouseMove(double x, double y)
         {
-            Vector2D loc = new Vector2D(x, y);
+            Vector2D loc = new Vector2D(x - Constants.ViewSize / 2, y - Constants.ViewSize / 2);
             loc.Normalize();
 
             commands.aiming = new Vector2D(loc.GetX(), loc.GetY());
@@ -217,7 +216,11 @@ namespace TankWars
             ProcessData(ss);
 
             if (wallsDone)
+            {
                 Networking.Send(ss.TheSocket, JsonConvert.SerializeObject(commands) + "\n");
+                if(commands.fire == "alt")
+                    commands.fire = "none";
+            }
 
             OnFrameEvent();
 
@@ -264,7 +267,7 @@ namespace TankWars
                     SeenPlayers++;
                 }
                 if (tank.died)
-                    TheWorld.Projectiles.Remove(tank.ID);
+                    TheWorld.Tanks.Remove(tank.ID);
                 wallsDone = true;
                 return;
             }
@@ -285,7 +288,7 @@ namespace TankWars
                 PowerUp power = JsonConvert.DeserializeObject<PowerUp>(serializedObject);
                 TheWorld.PowerUps[power.ID] = power;
                 if (power.died)
-                    TheWorld.Projectiles.Remove(power.ID);
+                    TheWorld.PowerUps.Remove(power.ID);
                 return;
             }
 

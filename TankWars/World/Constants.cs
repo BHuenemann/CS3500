@@ -8,6 +8,7 @@ namespace TankWars
     {
         public const int MaxHP = 3;
         public const int ViewSize = 800;
+        public const int BeamFrameLength = 5;
 
         public const int ViewLocationX = 10;
         public const int ViewLocationY = 45;

@@ -10,8 +10,6 @@ namespace TankWars
 {
     public class DrawingPanel : Panel
     {
-        private Image sourceImageWall = Image.FromFile(@"..\\..\\..\\Resources\Images\WallSprite.png");
-
         private GameController TheController;
 
         private Image background = Image.FromFile(@"..\\..\\..\\Resources\Images\Background.png");
@@ -43,7 +41,7 @@ namespace TankWars
         private Image sourceImageRedShot = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-red.png");
         private Image sourceImageYellowShot = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-yellow.png");
 
-
+        private Image sourceImageWall = Image.FromFile(@"..\\..\\..\\Resources\Images\WallSprite.png");
 
 
 
@@ -137,7 +135,7 @@ namespace TankWars
                 // Draw the beams
                 foreach (Beam beam in TheController.TheWorld.Beams.Values)
                 {
-                    DrawObjectWithTransform(e, beam, TheController.TheWorld.worldSize, beam.origin.GetX(), beam.origin.GetY(), beam.origin.ToAngle(), BeamDrawer);
+                    DrawObjectWithTransform(e, beam, TheController.TheWorld.worldSize, beam.origin.GetX(), beam.origin.GetY(), TheController.GetPlayerTank().aiming.ToAngle(), BeamDrawer);
                 }
 
                 // Draw the projectiles
@@ -152,6 +150,18 @@ namespace TankWars
                 {
                     DrawObjectWithTransform(e, wall, TheController.TheWorld.worldSize, (wall.endPoint1.GetX() + wall.endPoint2.GetX()) / 2,
                         (wall.endPoint1.GetY() + wall.endPoint2.GetY()) / 2, 0, WallDrawer);
+                }
+
+                if(TheController.TheWorld.Beams.Count != 0)
+                {
+                    foreach(Beam b in TheController.TheWorld.Beams.Values.ToList())
+                    {
+                        if (b.beamFrames == Constants.BeamFrameLength)
+                        {
+                            TheController.TheWorld.Beams.Remove(b.ID);
+                            return;
+                        }
+                    }
                 }
             }
 
@@ -256,14 +266,14 @@ namespace TankWars
         {
             Beam b = o as Beam;
 
-            int width = 30;
-            int height = 30;
+            int width = 10;
 
-            // Creat Bitmap object of image
-            Image sourceImage = Image.FromFile(@"..\\..\\..\\Resources\Images\shot-white.png");
             // Draw portion of source image
-            Rectangle sourceRect = new Rectangle(0, 0, width, height);
-            e.Graphics.DrawImage(sourceImage, 0, 0, sourceRect, GraphicsUnit.Pixel);
+            Pen pen = new Pen(new SolidBrush(Color.White), width);
+            e.Graphics.DrawLine(pen, 0, 0, 0, -Constants.ViewSize);
+
+
+            b.beamFrames++;
         }
 
         private void ProjectileDrawer(object o, PaintEventArgs e)

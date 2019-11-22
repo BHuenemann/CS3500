@@ -20,6 +20,9 @@ namespace TankWars
         [JsonProperty(PropertyName = "owner")]
         public int ownerID { get; private set; }
 
+        public int beamFrames = 0;
+
+
 
         public Beam()
         {
