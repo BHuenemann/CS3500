@@ -1,4 +1,6 @@
-﻿namespace TankWars
+﻿//Authors: Ben Huenemann and Jonathan Wigderson
+
+namespace TankWars
 {
     partial class TankWars
     {

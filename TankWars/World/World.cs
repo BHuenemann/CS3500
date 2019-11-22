@@ -1,4 +1,6 @@
-﻿using System;
+﻿//Authors: Ben Huenemann and Jonathan Wigderson
+
+using System;
 using System.Collections.Generic;
 
 namespace TankWars

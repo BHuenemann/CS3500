@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿//Authors: Ben Huenemann and Jonathan Wigderson
+
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -1,4 +1,6 @@
-﻿using System;
+﻿//Authors: Ben Huenemann and Jonathan Wigderson
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -260,6 +262,9 @@ namespace TankWars
         private void NameDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
+
+            if (t.hitPoints == 0)
+                return;
 
             using (Font font1 = new Font("Times New Roman", 24, FontStyle.Regular, GraphicsUnit.Pixel))
             {
