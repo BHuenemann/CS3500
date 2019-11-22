@@ -142,12 +142,6 @@ namespace TankWars
         }
 
 
-        public void ProcessMouseMove(int x, int y)
-        {
-            commands.aiming = new Vector2D(x, y);
-        }
-
-
         public void TryConnect(string name, string server, int port)
         {
             if (name.Length <= 16)
