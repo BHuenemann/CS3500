@@ -222,12 +222,13 @@ namespace TankWars
 
             int width = 8;
             int height = 8;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using (System.Drawing.SolidBrush blackBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black))
+            {
+                Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
+                e.Graphics.FillEllipse(blackBrush, r);
+            }
 
-            // Creat Bitmap object of image
-            Image sourceImage = Image.FromFile(@"..\\..\\..\\Resources\Images\RedTurret.png");
-            // Draw portion of source image
-            Rectangle sourceRect = new Rectangle(0, 0, width, height);
-            e.Graphics.DrawImage(sourceImage, 0, 0, sourceRect, GraphicsUnit.Pixel);
         }
 
         private void BeamDrawer(object o, PaintEventArgs e)
