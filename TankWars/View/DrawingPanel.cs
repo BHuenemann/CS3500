@@ -134,7 +134,8 @@ namespace TankWars
                         TurretDrawer);
                     DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), 0,
                         NameDrawer);
-
+                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), 0,
+                        HealthDrawer);
                 }
 
                 // Draw the powerups
@@ -154,13 +155,6 @@ namespace TankWars
                 {
                     proj.orientation.Normalize();
                     DrawObjectWithTransform(e, proj, TheController.TheWorld.worldSize, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
-                }
-
-                // Draw the walls
-                foreach (Wall wall in TheController.TheWorld.Walls.Values)
-                {
-                    DrawObjectWithTransform(e, wall, TheController.TheWorld.worldSize, (wall.endPoint1.GetX() + wall.endPoint2.GetX()) / 2,
-                        (wall.endPoint1.GetY() + wall.endPoint2.GetY()) / 2, 0, WallDrawer);
                 }
 
                 if(TheController.TheWorld.Beams.Count != 0)
@@ -262,10 +256,10 @@ namespace TankWars
         {
             Tank t = o as Tank;
 
-            using (Font font1 = new Font("Times New Roman", 24, FontStyle.Bold, GraphicsUnit.Pixel))
+            using (Font font1 = new Font("Times New Roman", 24, FontStyle.Regular, GraphicsUnit.Pixel))
             {
                 PointF pointF1 = new PointF(-20 - t.name.Length * 5, 26);
-                e.Graphics.DrawString(t.name + ": " + t.score, font1, Brushes.Blue, pointF1);
+                e.Graphics.DrawString(t.name + ": " + t.score, font1, Brushes.White, pointF1);
             }
         }
 
@@ -277,6 +271,23 @@ namespace TankWars
             using (System.Drawing.SolidBrush yellowBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Yellow))
             using (System.Drawing.SolidBrush redBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Red))
             {
+                if(t.hitPoints == 3)
+                {
+                    Rectangle r = new Rectangle(-20, -36, 40, 5);
+                    e.Graphics.FillRectangle(greenBrush, r);
+                }
+
+                if (t.hitPoints == 2)
+                {
+                    Rectangle r = new Rectangle(-20, -36, 25, 5);
+                    e.Graphics.FillRectangle(yellowBrush, r);
+                }
+
+                if (t.hitPoints == 1)
+                {
+                    Rectangle r = new Rectangle(-20, -36, 10, 5);
+                    e.Graphics.FillRectangle(redBrush, r);
+                }
 
             }
         }

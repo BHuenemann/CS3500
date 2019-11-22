@@ -25,7 +25,7 @@ namespace TankWars
         public string name { get; private set; }
 
         [JsonProperty(PropertyName = "hp")]
-        private int hitPoints = Constants.MaxHP;
+        public int hitPoints = Constants.MaxHP;
 
         [JsonProperty(PropertyName = "score")]
         public int score = 0;
