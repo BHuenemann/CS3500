@@ -183,8 +183,8 @@ namespace TankWars
             if (t.hitPoints == 0)
                 return;
 
-            int tankWidth = 60;
-            int tankHeight = 60;
+            int tankWidth = Constants.TankSize;
+            int tankHeight = Constants.TankSize;
 
             int colorID = TheController.GetColor(t.ID);
 
@@ -225,8 +225,8 @@ namespace TankWars
             if (t.hitPoints == 0)
                 return;
 
-            int turretWidth = 50;
-            int turretHeight = 50;
+            int turretWidth = Constants.TurretSize;
+            int turretHeight = Constants.TurretSize;
 
             int colorID = TheController.GetColor(t.ID);
 
@@ -306,8 +306,9 @@ namespace TankWars
         {
             PowerUp p = o as PowerUp;
 
-            int width = 8;
-            int height = 8;
+            int width = Constants.PowerUpSize;
+            int height = Constants.PowerUpSize;
+
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             using (System.Drawing.SolidBrush blackBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black))
             using (System.Drawing.SolidBrush redBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Red))
@@ -324,11 +325,33 @@ namespace TankWars
         {
             Beam b = o as Beam;
 
-            int width = 10;
+            int width = Constants.BeamWidth;
+
+            if (b.beamFrames > Constants.BeamFrameLength / 3)
+                width = Constants.BeamWidth / 3;
 
             // Draw portion of source image
-            Pen pen = new Pen(new SolidBrush(Color.White), width);
+            Pen pen = new Pen(new SolidBrush(Color.Gold), width);
             e.Graphics.DrawLine(pen, 0, 0, 0, -Constants.ViewSize);
+
+            Random rnd = new Random();
+
+            for(int i = 0; i < Constants.BeamParticleCount; i++)
+            {
+                if(b.beamParticles.ContainsKey(i))
+                {
+                    double Angle = rnd.NextDouble() * 2 * Math.PI;
+
+                    b.beamParticles[i] += new Vector2D(Constants.BeamParticleSpeed * Math.Cos(Angle), Constants.BeamParticleSpeed * Math.Sin(Angle));
+                }
+                else
+                {
+                    int LocationY = -i * (Constants.ViewSize / Constants.BeamParticleCount);
+                    b.beamParticles[i] = new Vector2D(0, LocationY);
+                }
+
+                e.Graphics.FillEllipse(new SolidBrush(Color.Red), (int) b.beamParticles[i].GetX(), (int) b.beamParticles[i].GetY(), Constants.BeamParticleRadius, Constants.BeamParticleRadius);
+            }
 
 
             b.beamFrames++;
@@ -338,8 +361,8 @@ namespace TankWars
         {
             Projectile p = o as Projectile;
 
-            int width = 30;
-            int height = 30;
+            int width = Constants.ProjectileSize;
+            int height = Constants.ProjectileSize;
 
 
             int colorID = TheController.GetColor(p.ownerID);
@@ -377,11 +400,14 @@ namespace TankWars
         {
             Wall w = o as Wall;
 
-            int SingleWidth = 50;
-            int SingleHeight = 50;
+            int SingleWidth = Constants.WallSize;
+            int SingleHeight = Constants.WallSize;
 
             int Width = (int)Math.Abs(w.endPoint1.GetX() - w.endPoint2.GetX());
             int Height = (int)Math.Abs(w.endPoint1.GetY() - w.endPoint2.GetY());
+
+            int MinX = (int)Math.Min(w.endPoint1.GetX(), w.endPoint2.GetX());
+            int MinY = (int)Math.Min(w.endPoint1.GetY(), w.endPoint2.GetY());
 
             // Draw portion of source image
             for (int i = 0; i <= Width; i += SingleWidth)

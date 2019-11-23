@@ -51,7 +51,10 @@ namespace TankWars
 
         public Tank GetPlayerTank()
         {
-            return TheWorld.Tanks[tankID];
+            lock(TheWorld)
+            {
+                return TheWorld.Tanks[tankID];
+            }
         }
 
 

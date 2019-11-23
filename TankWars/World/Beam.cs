@@ -22,6 +22,7 @@ namespace TankWars
         [JsonProperty(PropertyName = "owner")]
         public int ownerID { get; private set; }
 
+        public Dictionary<int, Vector2D> beamParticles = new Dictionary<int, Vector2D>();
         public int beamFrames = 0;
 
 
