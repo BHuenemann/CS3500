@@ -19,7 +19,9 @@ namespace TankWars
 
         public int worldSize;
 
-
+        /// <summary>
+        /// Constructor that contains dictionaries for tanks, powerups, beams, projectiles, and walls in the game
+        /// </summary>
         public World()
         {
             Tanks = new Dictionary<int, Tank>();

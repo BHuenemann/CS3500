@@ -10,12 +10,15 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class ControlCommands
     {
+        //Tells whether the tank is moving or not
         [JsonProperty(PropertyName = "moving")]
         public string direction;
 
+        //Tells if the tank is firing
         [JsonProperty(PropertyName = "fire")]
         public string fire;
 
+        //Tells where the player is aiming
         [JsonProperty(PropertyName = "tdir")]
         public Vector2D aiming;
 

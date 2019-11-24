@@ -14,7 +14,9 @@ namespace TankWars
     {
         private GameController TheController;
 
+        //Loads the images for various visuals in the game, such as tanks, backgrounds, walls, etc...
         private Image background = Image.FromFile(@"..\\..\\..\\Resources\Images\Background.png");
+
 
         private Image sourceImageBlueTank = Image.FromFile(@"..\\..\\..\\Resources\Images\BlueTank.png");
         private Image sourceImageDarkTank = Image.FromFile(@"..\\..\\..\\Resources\Images\DarkTank.png");
@@ -173,6 +175,7 @@ namespace TankWars
                     DrawObjectWithTransform(e, proj, TheController.TheWorld.worldSize, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
                 }
 
+                // Draw the beams
                 if(TheController.TheWorld.Beams.Count != 0)
                 {
                     foreach(Beam b in TheController.TheWorld.Beams.Values.ToList())
@@ -189,11 +192,16 @@ namespace TankWars
             base.OnPaint(e);
         }
 
-
+        /// <summary>
+        /// Delegate for drawing the tank
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="e"></param>
         private void TankDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
 
+            //Stops tank from updating anymore information if health equals zero
             if (t.hitPoints == 0)
             {
                 DrawExplosion(t, e);
@@ -203,31 +211,41 @@ namespace TankWars
             int tankWidth = Constants.TankSize;
             int tankHeight = Constants.TankSize;
 
+            // Gets color ID of the tank
             int colorID = TheController.GetColor(t.ID);
 
+            //Determines tank color based on the color ID of the tank
             switch(colorID)
             {
+                    //Blue
                 case 0:
                     e.Graphics.DrawImage(sourceImageBlueTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
+                    //Dark
                 case 1:
                     e.Graphics.DrawImage(sourceImageDarkTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
+                    //Green
                 case 2:
                     e.Graphics.DrawImage(sourceImageGreenTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
+                    //Light Green
                 case 3:
                     e.Graphics.DrawImage(sourceImageLightGreenTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
+                    //Orange
                 case 4:
                     e.Graphics.DrawImage(sourceImageOrangeTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
+                    //Purple
                 case 5:
                     e.Graphics.DrawImage(sourceImagePurpleTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
+                    //Red
                 case 6:
                     e.Graphics.DrawImage(sourceImageRedTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
+                    //Yellow
                 case 7:
                     e.Graphics.DrawImage(sourceImageYellowTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
@@ -235,51 +253,73 @@ namespace TankWars
 
         }
 
+        /// <summary>
+        /// Delegate for drawing the Tank Turret
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="e"></param>
         private void TurretDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
 
+            //Stops turret from updating anymore information if health equals zero
             if (t.hitPoints == 0)
                 return;
 
             int turretWidth = Constants.TurretSize;
             int turretHeight = Constants.TurretSize;
 
+            //Gets color ID of the turret
             int colorID = TheController.GetColor(t.ID);
 
+            //Determines color of the tank turret based on the color ID
             switch (colorID)
             {
+                    //Blue
                 case 0:
                     e.Graphics.DrawImage(sourceImageBlueTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
+                    //Dark
                 case 1:
                     e.Graphics.DrawImage(sourceImageDarkTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
+                    //Green
                 case 2:
                     e.Graphics.DrawImage(sourceImageGreenTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
+                    //Light Green
                 case 3:
                     e.Graphics.DrawImage(sourceImageLightGreenTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
+                    //Orange
                 case 4:
                     e.Graphics.DrawImage(sourceImageOrangeTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
+                    //Purple
                 case 5:
                     e.Graphics.DrawImage(sourceImagePurpleTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
+                    //Red
                 case 6:
                     e.Graphics.DrawImage(sourceImageRedTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
+                    //Orange
                 case 7:
                     e.Graphics.DrawImage(sourceImageYellowTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
             }
         }
 
+        /// <summary>
+        /// Delegate for drawing the players name below the tank
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="e"></param>
         private void NameDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
 
+            //Stops name from updating anymore information if health equals zero
             if (t.hitPoints == 0)
                 return;
 
@@ -290,6 +330,11 @@ namespace TankWars
             }
         }
 
+        /// <summary>
+        /// Delegate for drawing the health bar above the tank
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="e"></param>
         private void HealthDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
@@ -319,6 +364,11 @@ namespace TankWars
             }
         }
 
+        /// <summary>
+        /// Delegate for drawing the power-ups
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="e"></param>
         private void PowerUpDrawer(object o, PaintEventArgs e)
         {
             PowerUp p = o as PowerUp;
@@ -338,12 +388,18 @@ namespace TankWars
 
         }
 
+        /// <summary>
+        /// Delegate for drawing the beams
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="e"></param>
         private void BeamDrawer(object o, PaintEventArgs e)
         {
             Beam b = o as Beam;
 
             int width = Constants.BeamWidth;
 
+            //Draw the beam for "beamFrames" amount of frames
             if (b.beamFrames > Constants.BeamFrameLength / 3)
                 width = Constants.BeamWidth / 3;
 
@@ -374,6 +430,11 @@ namespace TankWars
             b.beamFrames++;
         }
 
+        /// <summary>
+        /// Delegate for drawing the projectiles of the tanks with their respective colors
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="e"></param>
         private void ProjectileDrawer(object o, PaintEventArgs e)
         {
             Projectile p = o as Projectile;
@@ -381,39 +442,52 @@ namespace TankWars
             int width = Constants.ProjectileSize;
             int height = Constants.ProjectileSize;
 
-
+            //Gets color ID of the projectile
             int colorID = TheController.GetColor(p.ownerID);
 
+            //Determines color of the projectile based on the color ID
             switch (colorID)
             {
+                    //Blue
                 case 0:
                     e.Graphics.DrawImage(sourceImageBlueShot, -(width / 2), -(height / 2), width, height);
                     break;
+                    //Dark
                 case 1:
                     e.Graphics.DrawImage(sourceImageDarkShot, -(width / 2), -(height / 2), width, height);
                     break;
+                    //Green
                 case 2:
                     e.Graphics.DrawImage(sourceImageGreenShot, -(width / 2), -(height / 2), width, height);
                     break;
+                    //Light Green
                 case 3:
                     e.Graphics.DrawImage(sourceImageLightGreenShot, -(width / 2), -(height / 2), width, height);
                     break;
+                    //Orange
                 case 4:
                     e.Graphics.DrawImage(sourceImageOrangeShot, -(width / 2), -(height / 2), width, height);
                     break;
+                    //Purple
                 case 5:
                     e.Graphics.DrawImage(sourceImagePurpleShot, -(width / 2), -(height / 2), width, height);
                     break;
+                    //Red
                 case 6:
                     e.Graphics.DrawImage(sourceImageRedShot, -(width / 2), -(height / 2), width, height);
                     break;
+                    //Yellow
                 case 7:
                     e.Graphics.DrawImage(sourceImageYellowShot, -(width / 2), -(height / 2), width, height);
                     break;
             }
         }
 
-
+        /// <summary>
+        /// Delegate for drawing the walls
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="e"></param>
         private void WallDrawer(object o, PaintEventArgs e)
         {
             e.Graphics.DrawImage(sourceImageWall, 0, 0, Constants.WallSize, Constants.WallSize);
