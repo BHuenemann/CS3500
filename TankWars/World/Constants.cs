@@ -40,10 +40,10 @@ namespace TankWars
 
         //Information for drawing the tank particles
         public const int TankParticleCount = 50;
-        public const int TankParticleSpeed = 3;
+        public const int TankParticleSpeed = 2;
         public const int TankParticleSpawnRadius = 5;
-        public const int TankParticleRadius = 10;
-        public const int TankParticleFrameLength = 20;
+        public const int TankParticleRadius = 7;
+        public const int TankParticleFrameLength = 30;
 
         //Sizes to draw each object
         public const int TankSize = 60;
