@@ -6,37 +6,51 @@ using System.Text;
 
 namespace TankWars
 {
+    /// <summary>
+    /// Static class that contains constants for various objects in the game so they can easily be changed
+    /// </summary>
     public static class Constants
     {
         //Tanks HP
         public const int MaxHP = 3;
         public const int ViewSize = 800;
 
+        //Health bar constants
+        public const int HealthBarX = -20;
+        public const int HealthBarY = -36;
+        public const int HealthBarFull = 40;
+        public const int HealthBarHigh = 25;
+        public const int HealthBarLow = 10;
+        public const int HealthBarHeight = 5;
+
+        //Name bar constants
+        public const int NameBarX = -20;
+        public const int NameBarY = 26;
+        public const int NameBarXMultiplier = 5;
+
+        //Location to put the drawing panel
         public const int ViewLocationX = 10;
         public const int ViewLocationY = 45;
 
-        //Information for the beam: width, particles count, speed, and radius
-        public const int BeamWidth = 6;
+        //Information for the beam particles
         public const int BeamParticleCount = 30;
         public const int BeamParticleSpeed = 5;
         public const int BeamParticleRadius = 3;
         public const int BeamFrameLength = 30;
 
+        //Information for drawing the tank particles
         public const int TankParticleCount = 50;
         public const int TankParticleSpeed = 3;
         public const int TankParticleSpawnRadius = 5;
         public const int TankParticleRadius = 10;
         public const int TankParticleFrameLength = 20;
 
-        //Size of Tanks
+        //Sizes to draw each object
         public const int TankSize = 60;
-        //Size of Turrets
         public const int TurretSize = 50;
-        //Size of Power Ups
-        public const int PowerUpSize = 8;
-        //Size of Projectiles
+        public const int PowerUpSize = 16;
         public const int ProjectileSize = 30;
-        //Size of Walls
         public const int WallSize = 50;
+        public const int BeamWidth = 6;
     }
 }

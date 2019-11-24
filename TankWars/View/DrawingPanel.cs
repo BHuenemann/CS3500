@@ -10,13 +10,16 @@ using System.Windows.Forms;
 
 namespace TankWars
 {
+    /// <summary>
+    /// Component class for drawing the game that extends the pannel class
+    /// </summary>
     public class DrawingPanel : Panel
     {
+        //Stores the controller that was inputted when the panel was created
         private GameController TheController;
 
         //Loads the images for various visuals in the game, such as tanks, backgrounds, walls, etc...
         private Image background = Image.FromFile(@"..\\..\\..\\Resources\Images\Background.png");
-
 
         private Image sourceImageBlueTank = Image.FromFile(@"..\\..\\..\\Resources\Images\BlueTank.png");
         private Image sourceImageDarkTank = Image.FromFile(@"..\\..\\..\\Resources\Images\DarkTank.png");
@@ -49,6 +52,10 @@ namespace TankWars
 
 
 
+        /// <summary>
+        /// This constructor saves the inputted controller for the drawing panel to use
+        /// </summary>
+        /// <param name="controller"></param>
         public DrawingPanel(GameController controller)
         {
             DoubleBuffered = true;
@@ -82,38 +89,44 @@ namespace TankWars
         /// <param name="drawer">The drawer delegate. After the transformation is applied, the delegate is invoked to draw whatever it wants</param>
         private void DrawObjectWithTransform(PaintEventArgs e, object o, int worldSize, double worldX, double worldY, double angle, ObjectDrawer drawer)
         {
-            // "push" the current transform
+            //"push" the current transform
             System.Drawing.Drawing2D.Matrix oldMatrix = e.Graphics.Transform.Clone();
 
+            //Transform the image and draw it
             int x = WorldSpaceToImageSpace(worldSize, worldX);
             int y = WorldSpaceToImageSpace(worldSize, worldY);
             e.Graphics.TranslateTransform(x, y);
             e.Graphics.RotateTransform((float)angle);
             drawer(o, e);
 
-            // "pop" the transform
+            //"pop" the transform
             e.Graphics.Transform = oldMatrix;
         }
 
-        // This method is invoked when the DrawingPanel needs to be re-drawn
+        /// <summary>
+        /// This method is invoked when the DrawingPanel is invalidated and needs to be redrawn
+        /// </summary>
+        /// <param name="e">Graphics for drawing objects</param>
         protected override void OnPaint(PaintEventArgs e)
         {
+            //If the walls aren't imported, it shouldn't try to draw anything so it just returns
             if (!TheController.wallsDone)
                 return;
 
-            //do the player location stuff here TODO
+            //Store the player tank location
             double playerX = TheController.GetPlayerTank().location.GetX();
             double playerY = TheController.GetPlayerTank().location.GetY();
 
-            // calculate view/world size ratio
+            //Calculate view/world size ratio
             double ratio = (double)Constants.ViewSize / (double)TheController.TheWorld.worldSize;
             int halfSizeScaled = (int)(TheController.TheWorld.worldSize / 2.0 * ratio);
 
+            //Amount to translate the x and y coordinates
             double inverseTranslateX = -WorldSpaceToImageSpace(TheController.TheWorld.worldSize, playerX) + halfSizeScaled;
             double inverseTranslateY = -WorldSpaceToImageSpace(TheController.TheWorld.worldSize, playerY) + halfSizeScaled;
 
+            //Translates the image and draws it
             e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
-
             e.Graphics.DrawImage(background, 0, 0, TheController.TheWorld.worldSize, TheController.TheWorld.worldSize);
 
 
@@ -123,20 +136,18 @@ namespace TankWars
                 // Draw the walls
                 foreach (Wall wall in TheController.TheWorld.Walls.Values)
                 {
-                    int SingleWidth = Constants.WallSize;
-                    int SingleHeight = Constants.WallSize;
-
                     int Width = (int)Math.Abs(wall.endPoint1.GetX() - wall.endPoint2.GetX());
                     int Height = (int)Math.Abs(wall.endPoint1.GetY() - wall.endPoint2.GetY());
 
-                    int MinX = (int)Math.Min(wall.endPoint1.GetX(), wall.endPoint2.GetX());
-                    int MinY = (int)Math.Min(wall.endPoint1.GetY(), wall.endPoint2.GetY());
+                    int MinX = (int)Math.Min(wall.endPoint1.GetX(), wall.endPoint2.GetX()) - Constants.WallSize/2;
+                    int MinY = (int)Math.Min(wall.endPoint1.GetY(), wall.endPoint2.GetY()) - Constants.WallSize/2;
 
-                    for (int i = 0; i <= Width; i += SingleWidth)
+                    //Call DrawObjectWithTransform on each individual portion of the wall
+                    for (int i = 0; i <= Width; i += Constants.WallSize)
                     {
-                        for (int j = 0; j <= Height; j += SingleHeight)
+                        for (int j = 0; j <= Height; j += Constants.WallSize)
                         {
-                            DrawObjectWithTransform(e, wall, TheController.TheWorld.worldSize, MinX - SingleWidth/2 + i, MinY - SingleHeight/2 + j, 0, WallDrawer);
+                            DrawObjectWithTransform(e, wall, TheController.TheWorld.worldSize, MinX + i, MinY + j, 0, WallDrawer);
                         }
                     }
                 }
@@ -174,8 +185,8 @@ namespace TankWars
                     proj.orientation.Normalize();
                     DrawObjectWithTransform(e, proj, TheController.TheWorld.worldSize, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
                 }
-
-                // Draw the beams
+                
+                // If the there are any beams that have been out for too long it removes them
                 if(TheController.TheWorld.Beams.Count != 0)
                 {
                     foreach(Beam b in TheController.TheWorld.Beams.Values.ToList())
@@ -193,7 +204,7 @@ namespace TankWars
         }
 
         /// <summary>
-        /// Delegate for drawing the tank
+        /// Method for drawing the tanks
         /// </summary>
         /// <param name="o"></param>
         /// <param name="e"></param>
@@ -207,6 +218,9 @@ namespace TankWars
                 DrawExplosion(t, e);
                 return;
             }
+            //Resets the tank frames when the tank isn't dead
+            else if(TheController.TheWorld.TankExplosions.ContainsKey(t.ID) && (TheController.TheWorld.TankExplosions[t.ID].tankFrames != 0 && !t.died))
+                TheController.TheWorld.TankExplosions[t.ID].tankFrames = 0;
 
             int tankWidth = Constants.TankSize;
             int tankHeight = Constants.TankSize;
@@ -217,35 +231,35 @@ namespace TankWars
             //Determines tank color based on the color ID of the tank
             switch(colorID)
             {
-                    //Blue
+                //Blue
                 case 0:
                     e.Graphics.DrawImage(sourceImageBlueTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
-                    //Dark
+                //Dark
                 case 1:
                     e.Graphics.DrawImage(sourceImageDarkTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
-                    //Green
+                //Green
                 case 2:
                     e.Graphics.DrawImage(sourceImageGreenTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
-                    //Light Green
+                //Light Green
                 case 3:
                     e.Graphics.DrawImage(sourceImageLightGreenTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
-                    //Orange
+                //Orange
                 case 4:
                     e.Graphics.DrawImage(sourceImageOrangeTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
-                    //Purple
+                //Purple
                 case 5:
                     e.Graphics.DrawImage(sourceImagePurpleTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
-                    //Red
+                //Red
                 case 6:
                     e.Graphics.DrawImage(sourceImageRedTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
-                    //Yellow
+                //Yellow
                 case 7:
                     e.Graphics.DrawImage(sourceImageYellowTank, -(tankWidth / 2), -(tankHeight / 2), tankWidth, tankHeight);
                     break;
@@ -254,7 +268,7 @@ namespace TankWars
         }
 
         /// <summary>
-        /// Delegate for drawing the Tank Turret
+        /// Method for drawing the Tank Turrets
         /// </summary>
         /// <param name="o"></param>
         /// <param name="e"></param>
@@ -275,35 +289,35 @@ namespace TankWars
             //Determines color of the tank turret based on the color ID
             switch (colorID)
             {
-                    //Blue
+                //Blue
                 case 0:
                     e.Graphics.DrawImage(sourceImageBlueTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
-                    //Dark
+                //Dark
                 case 1:
                     e.Graphics.DrawImage(sourceImageDarkTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
-                    //Green
+                //Green
                 case 2:
                     e.Graphics.DrawImage(sourceImageGreenTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
-                    //Light Green
+                //Light Green
                 case 3:
                     e.Graphics.DrawImage(sourceImageLightGreenTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
-                    //Orange
+                //Orange
                 case 4:
                     e.Graphics.DrawImage(sourceImageOrangeTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
-                    //Purple
+                //Purple
                 case 5:
                     e.Graphics.DrawImage(sourceImagePurpleTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
-                    //Red
+                //Red
                 case 6:
                     e.Graphics.DrawImage(sourceImageRedTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
-                    //Orange
+                //Orange
                 case 7:
                     e.Graphics.DrawImage(sourceImageYellowTurret, -(turretWidth / 2), -(turretHeight / 2), turretWidth, turretHeight);
                     break;
@@ -311,7 +325,7 @@ namespace TankWars
         }
 
         /// <summary>
-        /// Delegate for drawing the players name below the tank
+        /// Method for drawing the players names below the tanks
         /// </summary>
         /// <param name="o"></param>
         /// <param name="e"></param>
@@ -325,13 +339,13 @@ namespace TankWars
 
             using (Font font1 = new Font("Times New Roman", 24, FontStyle.Regular, GraphicsUnit.Pixel))
             {
-                PointF pointF1 = new PointF(-20 - t.name.Length * 5, 26);
+                PointF pointF1 = new PointF(Constants.NameBarX - t.name.Length * Constants.NameBarXMultiplier, Constants.NameBarY);
                 e.Graphics.DrawString(t.name + ": " + t.score, font1, Brushes.White, pointF1);
             }
         }
 
         /// <summary>
-        /// Delegate for drawing the health bar above the tank
+        /// Method for drawing the health bars above the tanks
         /// </summary>
         /// <param name="o"></param>
         /// <param name="e"></param>
@@ -339,33 +353,23 @@ namespace TankWars
         {
             Tank t = o as Tank;
 
-            using (System.Drawing.SolidBrush greenBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Green))
-            using (System.Drawing.SolidBrush yellowBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Yellow))
-            using (System.Drawing.SolidBrush redBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Red))
+            using (SolidBrush greenBrush = new SolidBrush(Color.Green))
+            using (SolidBrush yellowBrush = new SolidBrush(Color.Yellow))
+            using (SolidBrush redBrush = new SolidBrush(Color.Red))
             {
                 if(t.hitPoints == 3)
-                {
-                    Rectangle r = new Rectangle(-20, -36, 40, 5);
-                    e.Graphics.FillRectangle(greenBrush, r);
-                }
+                    e.Graphics.FillRectangle(greenBrush, Constants.HealthBarX, Constants.HealthBarY, Constants.HealthBarFull, Constants.HealthBarHeight);
 
                 if (t.hitPoints == 2)
-                {
-                    Rectangle r = new Rectangle(-20, -36, 25, 5);
-                    e.Graphics.FillRectangle(yellowBrush, r);
-                }
+                    e.Graphics.FillRectangle(yellowBrush, Constants.HealthBarX, Constants.HealthBarY, Constants.HealthBarHigh, Constants.HealthBarHeight);
 
                 if (t.hitPoints == 1)
-                {
-                    Rectangle r = new Rectangle(-20, -36, 10, 5);
-                    e.Graphics.FillRectangle(redBrush, r);
-                }
-
+                    e.Graphics.FillRectangle(redBrush, Constants.HealthBarX, Constants.HealthBarY, Constants.HealthBarLow, Constants.HealthBarHeight);
             }
         }
 
         /// <summary>
-        /// Delegate for drawing the power-ups
+        /// Method for drawing the power-ups
         /// </summary>
         /// <param name="o"></param>
         /// <param name="e"></param>
@@ -377,64 +381,44 @@ namespace TankWars
             int height = Constants.PowerUpSize;
 
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            using (System.Drawing.SolidBrush blackBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black))
-            using (System.Drawing.SolidBrush redBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Red))
+            using (SolidBrush blackBrush = new SolidBrush(Color.Black))
+            using (SolidBrush redBrush = new SolidBrush(Color.Red))
             {
-                Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
-                e.Graphics.FillEllipse(blackBrush, r);
-                r = new Rectangle(-(width / 4), -(height / 4), width / 2, height / 2);
-                e.Graphics.FillEllipse(redBrush, r);
+                e.Graphics.FillEllipse(blackBrush, -(width / 2), -(height / 2), width, height);
+                e.Graphics.FillEllipse(redBrush, -(width / 4), -(height / 4), width / 2, height / 2);
             }
-
         }
 
         /// <summary>
-        /// Delegate for drawing the beams
+        /// Method for drawing the beams
         /// </summary>
-        /// <param name="o"></param>
-        /// <param name="e"></param>
+        /// <param name="o">Beam to be drawn</param>
+        /// <param name="e">Graphics to draw the beam</param>
         private void BeamDrawer(object o, PaintEventArgs e)
         {
             Beam b = o as Beam;
 
             int width = Constants.BeamWidth;
 
-            //Draw the beam for "beamFrames" amount of frames
+            //After a certain amount of frames it divides the width by three
             if (b.beamFrames > Constants.BeamFrameLength / 3)
                 width = Constants.BeamWidth / 3;
 
             // Draw portion of source image
-            Pen pen = new Pen(new SolidBrush(Color.Gold), width);
-            e.Graphics.DrawLine(pen, 0, 0, 0, -Constants.ViewSize);
+            using (SolidBrush goldBrush = new SolidBrush(Color.Gold))
+            using (Pen pen = new Pen(goldBrush, width))
+                e.Graphics.DrawLine(pen, 0, 0, 0, -Constants.ViewSize);
 
-            Random rnd = new Random();
-
-            for(int i = 0; i < Constants.BeamParticleCount; i++)
-            {
-                if(b.beamParticles.ContainsKey(i))
-                {
-                    double Angle = rnd.NextDouble() * 2 * Math.PI;
-
-                    b.beamParticles[i] += new Vector2D(Constants.BeamParticleSpeed * Math.Cos(Angle), Constants.BeamParticleSpeed * Math.Sin(Angle));
-                }
-                else
-                {
-                    int LocationY = -i * (Constants.ViewSize / Constants.BeamParticleCount);
-                    b.beamParticles[i] = new Vector2D(0, LocationY);
-                }
-
-                e.Graphics.FillEllipse(new SolidBrush(Color.Red), (int) b.beamParticles[i].GetX(), (int) b.beamParticles[i].GetY(), Constants.BeamParticleRadius, Constants.BeamParticleRadius);
-            }
-
-
+            DrawBeamParticles(b, e);
+            
             b.beamFrames++;
         }
 
         /// <summary>
-        /// Delegate for drawing the projectiles of the tanks with their respective colors
+        /// Method for drawing the projectiles of the tanks with their respective colors
         /// </summary>
-        /// <param name="o"></param>
-        /// <param name="e"></param>
+        /// <param name="o">Projectile to be drawn</param>
+        /// <param name="e">Graphics for drawing the projectile</param>
         private void ProjectileDrawer(object o, PaintEventArgs e)
         {
             Projectile p = o as Projectile;
@@ -448,35 +432,35 @@ namespace TankWars
             //Determines color of the projectile based on the color ID
             switch (colorID)
             {
-                    //Blue
+                //Blue
                 case 0:
                     e.Graphics.DrawImage(sourceImageBlueShot, -(width / 2), -(height / 2), width, height);
                     break;
-                    //Dark
+                //Dark
                 case 1:
                     e.Graphics.DrawImage(sourceImageDarkShot, -(width / 2), -(height / 2), width, height);
                     break;
-                    //Green
+                //Green
                 case 2:
                     e.Graphics.DrawImage(sourceImageGreenShot, -(width / 2), -(height / 2), width, height);
                     break;
-                    //Light Green
+                //Light Green
                 case 3:
                     e.Graphics.DrawImage(sourceImageLightGreenShot, -(width / 2), -(height / 2), width, height);
                     break;
-                    //Orange
+                //Orange
                 case 4:
                     e.Graphics.DrawImage(sourceImageOrangeShot, -(width / 2), -(height / 2), width, height);
                     break;
-                    //Purple
+                //Purple
                 case 5:
                     e.Graphics.DrawImage(sourceImagePurpleShot, -(width / 2), -(height / 2), width, height);
                     break;
-                    //Red
+                //Red
                 case 6:
                     e.Graphics.DrawImage(sourceImageRedShot, -(width / 2), -(height / 2), width, height);
                     break;
-                    //Yellow
+                //Yellow
                 case 7:
                     e.Graphics.DrawImage(sourceImageYellowShot, -(width / 2), -(height / 2), width, height);
                     break;
@@ -484,24 +468,66 @@ namespace TankWars
         }
 
         /// <summary>
-        /// Delegate for drawing the walls
+        /// Method for drawing walls. This only draws a single wall since it is called multiple times in OnPaint for each
+        /// wall segment
         /// </summary>
-        /// <param name="o"></param>
-        /// <param name="e"></param>
+        /// <param name="o">Wall to be drawn</param>
+        /// <param name="e">Graphics for drawing wall</param>
         private void WallDrawer(object o, PaintEventArgs e)
         {
             e.Graphics.DrawImage(sourceImageWall, 0, 0, Constants.WallSize, Constants.WallSize);
         }
 
 
+        /// <summary>
+        /// Method for drawing the particles around the beam. If the particles don't exist yet, it spawns them at constant
+        /// spots along the length of the beam. If they do exist it generates a random angle and moves them in that direction.
+        /// </summary>
+        /// <param name="b">Beam that was spawned</param>
+        /// <param name="e">Graphics for drawing beam particles</param>
+        private void DrawBeamParticles(Beam b, PaintEventArgs e)
+        {
+            Random rnd = new Random();
+
+            for (int i = 0; i < Constants.BeamParticleCount; i++)
+            {
+                if (b.beamParticles.ContainsKey(i))
+                {
+                    double Angle = rnd.NextDouble() * 2 * Math.PI;
+
+                    b.beamParticles[i] += new Vector2D(Constants.BeamParticleSpeed * Math.Cos(Angle), Constants.BeamParticleSpeed * Math.Sin(Angle));
+                }
+                else
+                {
+                    int LocationY = -i * (Constants.ViewSize / Constants.BeamParticleCount);
+                    b.beamParticles[i] = new Vector2D(0, LocationY);
+                }
+
+                using(SolidBrush whiteBrush = new SolidBrush(Color.White))
+                    e.Graphics.FillEllipse(whiteBrush, (int)b.beamParticles[i].GetX(), (int)b.beamParticles[i].GetY(), Constants.BeamParticleRadius, Constants.BeamParticleRadius);
+            }
+        }
+
+
+        /// <summary>
+        /// Method for drawing a tank explosion for some tank t. If the particles haven't been created yet, it spawns them at
+        /// a random angle some distance away from the tank. Then when this method is called next it increases the distance so
+        /// those particles appear to move outward. It also keeps track of the amount of frames the particles have been out and
+        /// if that exceeds the tank frames constant it gets rid of the particles.
+        /// </summary>
+        /// <param name="t">Tank that died</param>
+        /// <param name="e">Graphics for drawing the particles</param>
         private void DrawExplosion(Tank t, PaintEventArgs e)
         {
             Dictionary<int, TankExplosion> explosionDictionary = TheController.TheWorld.TankExplosions;
 
             Random rnd = new Random();
+
+            //Creates a new explosion if it doesn't exist yet
             if (!explosionDictionary.ContainsKey(t.ID))
                 explosionDictionary[t.ID] = new TankExplosion();
 
+            //Gets rid of the particles after a certain amount of frames
             if (explosionDictionary[t.ID].tankFrames > Constants.TankParticleFrameLength)
             {
                 if (explosionDictionary[t.ID].tankParticles.Count > 0)
@@ -515,6 +541,7 @@ namespace TankWars
             {
                 if (TankParticlesDictionary.ContainsKey(i))
                 {
+                    //Creates a direction vector and moves the particle in that direction
                     Vector2D direction = new Vector2D(TankParticlesDictionary[i]);
                     direction.Normalize();
 
@@ -522,12 +549,14 @@ namespace TankWars
                 }
                 else
                 {
+                    //Creates a random angle and spawns the particle at that location
                     double Angle = rnd.NextDouble() * 2 * Math.PI;
 
                     TankParticlesDictionary[i] = new Vector2D(Constants.TankParticleSpawnRadius * Math.Cos(Angle), Constants.TankParticleSpawnRadius * Math.Sin(Angle));
                 }
 
-                e.Graphics.FillEllipse(new SolidBrush(Color.Red), (int)TankParticlesDictionary[i].GetX(), (int)TankParticlesDictionary[i].GetY(), Constants.TankParticleRadius, Constants.TankParticleRadius);
+                using (SolidBrush redBrush = new SolidBrush(Color.Red))
+                    e.Graphics.FillEllipse(redBrush, (int)TankParticlesDictionary[i].GetX(), (int)TankParticlesDictionary[i].GetY(), Constants.TankParticleRadius, Constants.TankParticleRadius);
             }
             TheController.TheWorld.TankExplosions[t.ID].tankFrames++;
         }

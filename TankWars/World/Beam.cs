@@ -7,6 +7,10 @@ using System.Text;
 
 namespace TankWars
 {
+    /// <summary>
+    /// Class that represents a beam object. It contains info about the beam that can be serialized
+    /// and sent to the server
+    /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class Beam
     {
@@ -26,13 +30,8 @@ namespace TankWars
         [JsonProperty(PropertyName = "owner")]
         public int ownerID { get; private set; }
 
+        //Dictionary containing the particles around the beam and the frames those particles have been out
         public Dictionary<int, Vector2D> beamParticles = new Dictionary<int, Vector2D>();
         public int beamFrames = 0;
-
-
-
-        public Beam()
-        {
-        }
     }
 }

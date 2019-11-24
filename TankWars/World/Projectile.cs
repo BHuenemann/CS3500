@@ -7,6 +7,10 @@ using System.Text;
 
 namespace TankWars
 {
+    /// <summary>
+    /// Class that represents a projectile object. It contains info about the projectile that can be serialized
+    /// and sent to the server
+    /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class Projectile
     {
@@ -26,14 +30,8 @@ namespace TankWars
         [JsonProperty(PropertyName = "died")]
         public bool died = false;
 
-        //Owner of the Projectile
+        //Owner tank ID of the Projectile
         [JsonProperty(PropertyName = "owner")]
         public int ownerID { get; private set; }
-
-
-        public Projectile()
-        {
-
-        }
     }
 }

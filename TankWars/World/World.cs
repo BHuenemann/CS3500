@@ -7,29 +7,15 @@ namespace TankWars
 {
     public class World
     {
-        // In reality, these should not be public,
-        // but for the purposes of this lab, the "World" 
-        // class is just a wrapper around these two fields.
-        public Dictionary<int, Tank> Tanks;
-        public Dictionary<int, PowerUp> PowerUps;
-        public Dictionary<int, Beam> Beams;
-        public Dictionary<int, Projectile> Projectiles;
-        public Dictionary<int, Wall> Walls;
-        public Dictionary<int, TankExplosion> TankExplosions;
+        //Dictionaries that contain the objects that are in the world. Their IDs are used as the keys
+        public Dictionary<int, Tank> Tanks = new Dictionary<int, Tank>();
+        public Dictionary<int, PowerUp> PowerUps = new Dictionary<int, PowerUp>();
+        public Dictionary<int, Beam> Beams = new Dictionary<int, Beam>();
+        public Dictionary<int, Projectile> Projectiles = new Dictionary<int, Projectile>();
+        public Dictionary<int, Wall> Walls = new Dictionary<int, Wall>();
+        public Dictionary<int, TankExplosion> TankExplosions = new Dictionary<int, TankExplosion>();
 
+        //Keeps track of the world size sent by the server
         public int worldSize;
-
-        /// <summary>
-        /// Constructor that contains dictionaries for tanks, powerups, beams, projectiles, and walls in the game
-        /// </summary>
-        public World()
-        {
-            Tanks = new Dictionary<int, Tank>();
-            PowerUps = new Dictionary<int, PowerUp>();
-            Beams = new Dictionary<int, Beam>();
-            Projectiles = new Dictionary<int, Projectile>();
-            Walls = new Dictionary<int, Wall>();
-            TankExplosions = new Dictionary<int, TankExplosion>();
-        }
     }
 }

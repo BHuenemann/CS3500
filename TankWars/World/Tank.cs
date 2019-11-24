@@ -7,6 +7,10 @@ using System.Text;
 
 namespace TankWars
 {
+    /// <summary>
+    /// Class that represents a tank object. It contains info about the tank that can be serialized
+    /// and sent to the server
+    /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class Tank
     {
@@ -49,17 +53,5 @@ namespace TankWars
         //Tells whether the tank has joined the game or not
         [JsonProperty(PropertyName = "join")]
         private bool joined = false;
-
-        public Tank()
-        {
-        
-        }
-
-        public Tank(string tankName, int tankID)
-        {
-            name = tankName;
-            ID = tankID;
-        }
-
     }
 }

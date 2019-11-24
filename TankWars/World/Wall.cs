@@ -7,6 +7,10 @@ using System.Text;
 
 namespace TankWars
 {
+    /// <summary>
+    /// Class that represents a wall object. It contains info about the wall that can be serialized
+    /// and sent to the server
+    /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class Wall
     {
@@ -21,9 +25,5 @@ namespace TankWars
         //Endpoint 2 of the wall
         [JsonProperty(PropertyName = "p2")]
         public Vector2D endPoint2 { get; private set; }
-
-        public Wall()
-        {
-        }
     }
 }
