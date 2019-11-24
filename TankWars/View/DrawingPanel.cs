@@ -121,8 +121,22 @@ namespace TankWars
                 // Draw the walls
                 foreach (Wall wall in TheController.TheWorld.Walls.Values)
                 {
-                    DrawObjectWithTransform(e, wall, TheController.TheWorld.worldSize, (wall.endPoint1.GetX() + wall.endPoint2.GetX()) / 2,
-                        (wall.endPoint1.GetY() + wall.endPoint2.GetY()) / 2, 0, WallDrawer);
+                    int SingleWidth = Constants.WallSize;
+                    int SingleHeight = Constants.WallSize;
+
+                    int Width = (int)Math.Abs(wall.endPoint1.GetX() - wall.endPoint2.GetX());
+                    int Height = (int)Math.Abs(wall.endPoint1.GetY() - wall.endPoint2.GetY());
+
+                    int MinX = (int)Math.Min(wall.endPoint1.GetX(), wall.endPoint2.GetX());
+                    int MinY = (int)Math.Min(wall.endPoint1.GetY(), wall.endPoint2.GetY());
+
+                    for (int i = 0; i <= Width; i += SingleWidth)
+                    {
+                        for (int j = 0; j <= Height; j += SingleHeight)
+                        {
+                            DrawObjectWithTransform(e, wall, TheController.TheWorld.worldSize, MinX - SingleWidth/2 + i, MinY - SingleHeight/2 + j, 0, WallDrawer);
+                        }
+                    }
                 }
 
                 // Draw the players
@@ -181,7 +195,10 @@ namespace TankWars
             Tank t = o as Tank;
 
             if (t.hitPoints == 0)
+            {
+                DrawExplosion(t, e);
                 return;
+            }
 
             int tankWidth = Constants.TankSize;
             int tankHeight = Constants.TankSize;
@@ -396,27 +413,49 @@ namespace TankWars
             }
         }
 
+
         private void WallDrawer(object o, PaintEventArgs e)
         {
-            Wall w = o as Wall;
+            e.Graphics.DrawImage(sourceImageWall, 0, 0, Constants.WallSize, Constants.WallSize);
+        }
 
-            int SingleWidth = Constants.WallSize;
-            int SingleHeight = Constants.WallSize;
 
-            int Width = (int)Math.Abs(w.endPoint1.GetX() - w.endPoint2.GetX());
-            int Height = (int)Math.Abs(w.endPoint1.GetY() - w.endPoint2.GetY());
+        private void DrawExplosion(Tank t, PaintEventArgs e)
+        {
+            Dictionary<int, TankExplosion> explosionDictionary = TheController.TheWorld.TankExplosions;
 
-            int MinX = (int)Math.Min(w.endPoint1.GetX(), w.endPoint2.GetX());
-            int MinY = (int)Math.Min(w.endPoint1.GetY(), w.endPoint2.GetY());
+            Random rnd = new Random();
+            if (!explosionDictionary.ContainsKey(t.ID))
+                explosionDictionary[t.ID] = new TankExplosion();
 
-            // Draw portion of source image
-            for (int i = 0; i <= Width; i += SingleWidth)
+            if (explosionDictionary[t.ID].tankFrames > Constants.TankParticleFrameLength)
             {
-                for (int j = 0; j <= Height; j += SingleHeight)
-                {
-                    e.Graphics.DrawImage(sourceImageWall, -(Width/2) - (SingleWidth/2) + i, -(Height/2) - (SingleHeight/2) + j, SingleWidth, SingleHeight);
-                }
+                if (explosionDictionary[t.ID].tankParticles.Count > 0)
+                    explosionDictionary[t.ID].tankParticles.Clear();
+                return;
             }
+
+            Dictionary<int, Vector2D> TankParticlesDictionary = explosionDictionary[t.ID].tankParticles;
+
+            for (int i = 0; i < Constants.TankParticleCount; i++)
+            {
+                if (TankParticlesDictionary.ContainsKey(i))
+                {
+                    Vector2D direction = new Vector2D(TankParticlesDictionary[i]);
+                    direction.Normalize();
+
+                    TankParticlesDictionary[i] += direction * Constants.TankParticleSpeed;
+                }
+                else
+                {
+                    double Angle = rnd.NextDouble() * 2 * Math.PI;
+
+                    TankParticlesDictionary[i] = new Vector2D(Constants.TankParticleSpawnRadius * Math.Cos(Angle), Constants.TankParticleSpawnRadius * Math.Sin(Angle));
+                }
+
+                e.Graphics.FillEllipse(new SolidBrush(Color.Red), (int)TankParticlesDictionary[i].GetX(), (int)TankParticlesDictionary[i].GetY(), Constants.TankParticleRadius, Constants.TankParticleRadius);
+            }
+            TheController.TheWorld.TankExplosions[t.ID].tankFrames++;
         }
     }
 }

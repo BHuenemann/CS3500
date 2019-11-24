@@ -10,7 +10,6 @@ namespace TankWars
     {
         public const int MaxHP = 3;
         public const int ViewSize = 800;
-        public const int BeamFrameLength = 30;
 
         public const int ViewLocationX = 10;
         public const int ViewLocationY = 45;
@@ -19,6 +18,13 @@ namespace TankWars
         public const int BeamParticleCount = 30;
         public const int BeamParticleSpeed = 5;
         public const int BeamParticleRadius = 3;
+        public const int BeamFrameLength = 30;
+
+        public const int TankParticleCount = 50;
+        public const int TankParticleSpeed = 3;
+        public const int TankParticleSpawnRadius = 5;
+        public const int TankParticleRadius = 10;
+        public const int TankParticleFrameLength = 20;
 
         public const int TankSize = 60;
         public const int TurretSize = 50;

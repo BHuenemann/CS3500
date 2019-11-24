@@ -15,6 +15,7 @@ namespace TankWars
         public Dictionary<int, Beam> Beams;
         public Dictionary<int, Projectile> Projectiles;
         public Dictionary<int, Wall> Walls;
+        public Dictionary<int, TankExplosion> TankExplosions;
 
         public int worldSize;
 
@@ -26,7 +27,7 @@ namespace TankWars
             Beams = new Dictionary<int, Beam>();
             Projectiles = new Dictionary<int, Projectile>();
             Walls = new Dictionary<int, Wall>();
-
+            TankExplosions = new Dictionary<int, TankExplosion>();
         }
     }
 }
