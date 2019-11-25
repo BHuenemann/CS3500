@@ -11,7 +11,7 @@ namespace Server
 {
     public class Server
     {
-        private World theWorld;
+        private World theWorld = new World();
 
         private int UniverseSize;
         private int MSPerFrame;
@@ -19,22 +19,27 @@ namespace Server
         private int RespawnRate;
 
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Networking.StartServer(ReceivePlayerName, 11000);
         }
 
 
-        private static void ReceivePlayerName(SocketState ss)
+        private void ReceivePlayerName(SocketState ss)
         {
             ss.OnNetworkAction = SendStartupInfo;
             Networking.GetData(ss);
         }
 
 
-        private static void SendStartupInfo(SocketState ss)
+        private void SendStartupInfo(SocketState ss)
         {
-            ss.GetData()
+            string tankName = ss.GetData();
+            int tankID = (int)ss.ID;
+
+            Tank t = new Tank(tankName.Substring(0, tankName.Length - 2), tankID);
+            theWorld.Tanks[tankID] = t;
+
             throw new NotImplementedException();
         }
 
