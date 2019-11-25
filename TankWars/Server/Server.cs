@@ -56,9 +56,42 @@ namespace Server
                         {
                             switch (reader.Name)
                             {
-                                case "test":
+                                case "UniverseSize":
+                                    reader.Read();
+                                    UniverseSize = Int32.Parse(reader.Value);
                                     break;
 
+                                case "MSPerFrame":
+                                    reader.Read();
+                                    MSPerFrame = Int32.Parse(reader.Value);
+                                    break;
+
+                                case "FramesPerShot":
+                                    reader.Read();
+                                    FramesPerShot = Int32.Parse(reader.Value);
+                                    break;
+
+                                case "RespawnRate":
+                                    reader.Read();
+                                    RespawnRate = Int32.Parse(reader.Value);
+                                    break;
+
+                                case "Wall":
+                                    reader.Read();
+
+                                    switch (reader.Name)
+                                    {
+                                        case "p1":
+                                            reader.Read(); //gets x
+                                            reader.Read(); //gets y
+                                            break;
+
+                                        case "p2":
+                                            reader.Read(); //gets x
+                                            reader.Read(); //gets y
+                                            break;
+                                    }
+                                    break;
                             }
                         }
                     }
@@ -67,7 +100,7 @@ namespace Server
 
             catch
             {
-
+                throw new Exception("There was a problem opening the saved file...");
             }
 
         }
