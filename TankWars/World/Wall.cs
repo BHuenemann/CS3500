@@ -25,5 +25,10 @@ namespace TankWars
         //Endpoint 2 of the wall
         [JsonProperty(PropertyName = "p2")]
         public Vector2D endPoint2 { get; private set; }
+
+        private Wall(Vector2D p1, Vector2D p2)
+        {
+
+        }
     }
 }
