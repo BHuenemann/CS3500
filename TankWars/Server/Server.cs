@@ -7,16 +7,26 @@ using NetworkUtil;
 
 namespace Server
 {
-    class Server
+    public class Server
     {
+        
+
         static void Main(string[] args)
         {
-            Networking.StartServer(SendStartupInfo, 11000);
+            Networking.StartServer(ReceivePlayerName, 11000);
         }
 
 
-        private static void SendStartupInfo(SocketState obj)
+        private static void ReceivePlayerName(SocketState ss)
         {
+            ss.OnNetworkAction = SendStartupInfo;
+            Networking.GetData(ss);
+        }
+
+
+        private static void SendStartupInfo(SocketState ss)
+        {
+            ss.GetData()
             throw new NotImplementedException();
         }
     }

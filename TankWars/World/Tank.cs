@@ -53,5 +53,12 @@ namespace TankWars
         //Tells whether the tank has joined the game or not
         [JsonProperty(PropertyName = "join")]
         private bool joined = false;
+
+
+        public Tank(string name, int ID)
+        {
+            this.name = name;
+            this.ID = ID;
+        }
     }
 }
