@@ -11,7 +11,7 @@ namespace Server
 {
     class Server
     {
-        private World theWorld;
+        private World theWorld = new World();
 
         private int UniverseSize;
         private int MSPerFrame;
@@ -43,9 +43,20 @@ namespace Server
                         {
                             switch (reader.Name)
                             {
-                                case "test":
+                                case "UniverseSize":
                                     break;
 
+                                case "MSPerFrame":
+                                    break;
+
+                                case "FramesPerShot":
+                                    break;
+
+                                case "RespawnRate":
+                                    break;
+
+                                case "Wall":
+                                    break;
                             }
                         }
                     }
@@ -54,7 +65,7 @@ namespace Server
 
             catch
             {
-
+                throw new Exception("There was a problem opening the saved file...");
             }
 
         }
