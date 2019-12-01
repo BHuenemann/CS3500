@@ -16,43 +16,43 @@ namespace TankWars
     {
         //ID of the tank
         [JsonProperty(PropertyName = "tank")]
-        public int ID { get; private set; }
+        public int ID { get; internal set; }
 
         //Location of the tank
         [JsonProperty(PropertyName = "loc")]
-        public Vector2D location { get; private set; }
+        public Vector2D location { get; internal set; }
 
         //Orientation of the tank
         [JsonProperty(PropertyName = "bdir")]
-        public Vector2D orientation { get; private set; }
+        public Vector2D orientation { get; internal set; }
 
         //Orientation of the turret
         [JsonProperty(PropertyName = "tdir")]
-        public Vector2D aiming = new Vector2D(0, -1);
+        public Vector2D aiming { get; internal set; } = new Vector2D(0, -1);
 
         //Tank's player name
         [JsonProperty(PropertyName = "name")]
-        public string name { get; private set; }
+        public string name { get; internal set; }
 
         //Tank HP
         [JsonProperty(PropertyName = "hp")]
-        public int hitPoints = Constants.MaxHP;
+        public int hitPoints { get; internal set; } = Constants.MaxHP;
 
         //Tank Score
         [JsonProperty(PropertyName = "score")]
-        public int score = 0;
+        public int score { get; internal set; } = 0;
 
         //Tells whether the Tank has died or niot
         [JsonProperty(PropertyName = "died")]
-        public bool died = false;
+        public bool died { get; internal set; } = false;
 
         //Tells whether the Tank has disconnected or not
         [JsonProperty(PropertyName = "dc")]
-        public bool disconnected = false;
+        public bool disconnected { get; internal set; } = false;
 
         //Tells whether the tank has joined the game or not
         [JsonProperty(PropertyName = "join")]
-        private bool joined = false;
+        public bool joined { get; internal set; } = false;
 
 
         public Tank(string name, int ID)

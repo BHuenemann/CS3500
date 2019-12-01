@@ -16,22 +16,22 @@ namespace TankWars
     {
         //Projectile ID
         [JsonProperty(PropertyName = "proj")]
-        public int ID { get; private set; }
+        public int ID { get; internal set; }
 
         //Location of Projectile
         [JsonProperty(PropertyName = "loc")]
-        public Vector2D location { get; private set; }
+        public Vector2D location { get; internal set; }
 
         //Direction of the Projectile
         [JsonProperty(PropertyName = "dir")]
-        public Vector2D orientation { get; private set; }
+        public Vector2D orientation { get; internal set; }
 
         //Tells whether the Projectile has collied with something or not
         [JsonProperty(PropertyName = "died")]
-        public bool died = false;
+        public bool died { get; internal set; } = false;
 
         //Owner tank ID of the Projectile
         [JsonProperty(PropertyName = "owner")]
-        public int ownerID { get; private set; }
+        public int ownerID { get; internal set; }
     }
 }

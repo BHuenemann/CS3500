@@ -26,6 +26,11 @@ namespace TankWars
         [JsonProperty(PropertyName = "p2")]
         public Vector2D endPoint2 { get; private set; }
 
+        public Wall()
+        {
+
+        }
+
         public Wall(Vector2D p1, Vector2D p2)
         {
 

@@ -16,14 +16,14 @@ namespace TankWars
     {
         //ID of the powerup
         [JsonProperty(PropertyName = "power")]
-        public int ID { get; private set; }
+        public int ID { get; internal set; }
 
         //Location of the powerup
         [JsonProperty(PropertyName = "loc")]
-        public Vector2D location { get; private set; }
+        public Vector2D location { get; internal set; }
 
         //Tells whether the powerup has been picked up or not
         [JsonProperty(PropertyName = "died")]
-        public bool died = false;
+        public bool died { get; internal set; } = false;
     }
 }

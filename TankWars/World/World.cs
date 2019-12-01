@@ -17,5 +17,17 @@ namespace TankWars
 
         //Keeps track of the world size sent by the server
         public int worldSize;
+
+
+
+        public void ExplosionIncrementFrames(TankExplosion e)
+        {
+            e.tankFrames++;
+        }
+
+        public void ExplosionClearFrames(TankExplosion e)
+        {
+            e.tankFrames = 0;
+        }
     }
 }

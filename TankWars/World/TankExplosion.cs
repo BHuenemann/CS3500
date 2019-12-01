@@ -13,6 +13,6 @@ namespace TankWars
         public Dictionary<int, Vector2D> tankParticles = new Dictionary<int, Vector2D>();
 
         //Frames that the explosion has existed for
-        public int tankFrames = 0;
+        public int tankFrames { get; internal set; } = 0;
     }
 }

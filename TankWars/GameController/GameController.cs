@@ -170,8 +170,6 @@ namespace TankWars
             loc.Normalize();
 
             commands.aiming = new Vector2D(loc.GetX(), loc.GetY());
-            GetPlayerTank().aiming = new Vector2D(loc.GetX(), loc.GetY());
-
         }
 
 

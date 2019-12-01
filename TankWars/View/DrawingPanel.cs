@@ -220,7 +220,7 @@ namespace TankWars
             }
             //Resets the tank frames when the tank isn't dead
             else if(TheController.TheWorld.TankExplosions.ContainsKey(t.ID) && (TheController.TheWorld.TankExplosions[t.ID].tankFrames != 0 && !t.died))
-                TheController.TheWorld.TankExplosions[t.ID].tankFrames = 0;
+                TheController.TheWorld.ExplosionClearFrames(TheController.TheWorld.TankExplosions[t.ID]);
 
             int tankWidth = Constants.TankSize;
             int tankHeight = Constants.TankSize;
@@ -558,7 +558,7 @@ namespace TankWars
                 using (SolidBrush redBrush = new SolidBrush(Color.Red))
                     e.Graphics.FillEllipse(redBrush, (int)TankParticlesDictionary[i].GetX(), (int)TankParticlesDictionary[i].GetY(), Constants.TankParticleRadius, Constants.TankParticleRadius);
             }
-            TheController.TheWorld.TankExplosions[t.ID].tankFrames++;
+            TheController.TheWorld.ExplosionIncrementFrames(explosionDictionary[t.ID]);
         }
     }
 }
