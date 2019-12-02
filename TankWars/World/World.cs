@@ -51,6 +51,37 @@ namespace TankWars
             }
         }
 
+
+        public static bool CollisionTankWall(Tank t, Wall w)
+        {
+            return false;
+        }
+
+
+        public static bool CollisionTankPowerUp(Tank t, PowerUp p)
+        {
+            return false;
+        }
+
+
+        public static bool CollisionProjectileTank(Projectile p, Tank t)
+        {
+            return false;
+        }
+
+
+        public static bool CollisionProjectileWall(Projectile p, Wall w)
+        {
+            return false;
+        }
+
+
+        public static bool CollisionBeamTank(Beam b, Tank t)
+        {
+            return false;
+        }
+
+
         public void ExplosionIncrementFrames(TankExplosion e)
         {
             e.tankFrames++;
