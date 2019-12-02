@@ -19,14 +19,16 @@ namespace Server
         private static World TheWorld = new World();
         private static HashSet<Socket> SocketConnections = new HashSet<Socket>();
 
-        static private int UniverseSize = 1200;
-        static private int MSPerFrame = 30;
+        static private int UniverseSize;
+        static private int MSPerFrame;
         static private int FramesPerShot;
         static private int RespawnRate;
 
 
         public static void Main(string[] args)
         {
+            ReadSettingFile(@"..\\..\\..\\Resources\settings.xml");
+
             Networking.StartServer(ReceivePlayerName, 11000);
 
             Stopwatch watch = new Stopwatch();
@@ -97,6 +99,8 @@ namespace Server
             }
             string tankName = ss.GetData();
             int tankID = (int)ss.ID;
+
+            ss.RemoveData(0, tankName.Length);
 
             Tank t = new Tank(tankName.Substring(0, tankName.Length - 2), tankID);
             TheWorld.Tanks[tankID] = t;
@@ -176,7 +180,7 @@ namespace Server
         }
 
 
-        private void readSettingFile(string fileName)
+        private static void ReadSettingFile(string fileName)
         {
             try
             {
