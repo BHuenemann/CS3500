@@ -14,6 +14,8 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class Beam
     {
+        static int NextID = 0;
+
         //ID of the beam
         [JsonProperty(PropertyName = "beam")]
         public int ID { get; internal set; }
@@ -33,5 +35,17 @@ namespace TankWars
         //Dictionary containing the particles around the beam and the frames those particles have been out
         public Dictionary<int, Vector2D> beamParticles = new Dictionary<int, Vector2D>();
         public int beamFrames = 0;
+
+        public Beam(Vector2D originPoint, Vector2D beamOrientation, int owner)
+        {
+            ID = NextID;
+            NextID++;
+
+            origin = originPoint;
+            orientation = beamOrientation;
+            ownerID = owner;
+        }
     }
+
+
 }

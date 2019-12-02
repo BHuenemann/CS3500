@@ -24,6 +24,8 @@ namespace Server
         static private int FramesPerShot;
         static private int RespawnRate;
 
+        Stopwatch FireRateStopWatch = new Stopwatch();
+
 
         public static void Main(string[] args)
         {
@@ -99,8 +101,15 @@ namespace Server
                 switch (TheWorld.PlayerCommands[t.ID].fire)
                 {
                     case "main":
+                        if(t.OnCooldown == false)
+                        {
+                            Projectile p = new Projectile(t.location, t.orientation, t.ID);
+                            TheWorld.Projectiles.Add(p.ID, p);
+                        }
                         break;
                     case "alt":
+                        Beam b = new Beam(t.location, t.orientation, t.ID);
+                        TheWorld.Beams.Add(b.ID, b);
                         break;
                     case "none":
                         break;

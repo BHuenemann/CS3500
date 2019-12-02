@@ -14,6 +14,8 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class Projectile
     {
+        static int NextID = 0;
+
         //Projectile ID
         [JsonProperty(PropertyName = "proj")]
         public int ID { get; internal set; }
@@ -33,5 +35,16 @@ namespace TankWars
         //Owner tank ID of the Projectile
         [JsonProperty(PropertyName = "owner")]
         public int ownerID { get; internal set; }
+
+        public Projectile(Vector2D currentLocation, Vector2D direction, int owner)
+        {
+            ID = NextID;
+            NextID++;
+
+            location = currentLocation;
+            orientation = direction;
+            ownerID = owner;
+
+        }
     }
 }
