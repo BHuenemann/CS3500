@@ -62,17 +62,20 @@ namespace Server
                 StringBuilder frameMessage = new StringBuilder();
 
 
-                foreach (Tank t in TheWorld.Tanks.Values)
-                    frameMessage.Append(JsonConvert.SerializeObject(t) + "\n");
+                lock (TheWorld)
+                {
+                    foreach (Tank t in TheWorld.Tanks.Values)
+                        frameMessage.Append(JsonConvert.SerializeObject(t) + "\n");
 
-                foreach (PowerUp p in TheWorld.PowerUps.Values)
-                    frameMessage.Append(JsonConvert.SerializeObject(p) + "\n");
+                    foreach (PowerUp p in TheWorld.PowerUps.Values)
+                        frameMessage.Append(JsonConvert.SerializeObject(p) + "\n");
 
-                foreach (Projectile p in TheWorld.Projectiles.Values)
-                    frameMessage.Append(JsonConvert.SerializeObject(p) + "\n");
+                    foreach (Projectile p in TheWorld.Projectiles.Values)
+                        frameMessage.Append(JsonConvert.SerializeObject(p) + "\n");
 
-                foreach (Beam b in TheWorld.Beams.Values)
-                    frameMessage.Append(JsonConvert.SerializeObject(b) + "\n");
+                    foreach (Beam b in TheWorld.Beams.Values)
+                        frameMessage.Append(JsonConvert.SerializeObject(b) + "\n");
+                }
 
 
                 Networking.Send(s, frameMessage.ToString());

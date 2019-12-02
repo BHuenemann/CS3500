@@ -11,6 +11,8 @@ namespace TankWars
     /// </summary>
     public static class Constants
     {
+        public const double TankSpeed = 2.9;
+
         //Tanks HP
         public const int MaxHP = 3;
         public const int ViewSize = 800;

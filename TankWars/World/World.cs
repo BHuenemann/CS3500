@@ -22,6 +22,35 @@ namespace TankWars
 
 
 
+        public void UpdateTanks()
+        {
+            foreach(Tank t in Tanks.Values)
+            {
+                switch(PlayerCommands[t.ID].direction)
+                {
+                    case "left":
+                        t.orientation = new Vector2D(-1, 0);
+                        t.velocity = t.orientation * Constants.TankSpeed;
+                        break;
+                    case "right":
+                        t.orientation = new Vector2D(1, 0);
+                        t.velocity = t.orientation * Constants.TankSpeed;
+                        break;
+                    case "up":
+                        t.orientation = new Vector2D(0, -1);
+                        t.velocity = t.orientation * Constants.TankSpeed;
+                        break;
+                    case "down":
+                        t.orientation = new Vector2D(0, 1);
+                        t.velocity = t.orientation * Constants.TankSpeed;
+                        break;
+                    case "none":
+                        t.velocity = new Vector2D(0, 0);
+                        break;
+                }
+            }
+        }
+
         public void ExplosionIncrementFrames(TankExplosion e)
         {
             e.tankFrames++;
