@@ -108,8 +108,11 @@ namespace Server
                         }
                         break;
                     case "alt":
-                        Beam b = new Beam(t.location, t.orientation, t.ID);
-                        TheWorld.Beams.Add(b.ID, b);
+                        if(t.OnCooldown == false)
+                        {
+                            Beam b = new Beam(t.location, t.orientation, t.ID);
+                            TheWorld.Beams.Add(b.ID, b);
+                        }
                         break;
                     case "none":
                         break;
