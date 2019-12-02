@@ -14,7 +14,7 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class Tank
     {
-        internal Vector2D velocity;
+        public Vector2D velocity { get; internal set; } = new Vector2D(0, 0);
 
         //ID of the tank
         [JsonProperty(PropertyName = "tank")]

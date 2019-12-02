@@ -22,33 +22,29 @@ namespace TankWars
 
 
 
-        public void UpdateTanks()
+
+        public void TankSetOrientation(Tank t, Vector2D orientation)
         {
-            foreach(Tank t in Tanks.Values)
-            {
-                switch(PlayerCommands[t.ID].direction)
-                {
-                    case "left":
-                        t.orientation = new Vector2D(-1, 0);
-                        t.velocity = t.orientation * Constants.TankSpeed;
-                        break;
-                    case "right":
-                        t.orientation = new Vector2D(1, 0);
-                        t.velocity = t.orientation * Constants.TankSpeed;
-                        break;
-                    case "up":
-                        t.orientation = new Vector2D(0, -1);
-                        t.velocity = t.orientation * Constants.TankSpeed;
-                        break;
-                    case "down":
-                        t.orientation = new Vector2D(0, 1);
-                        t.velocity = t.orientation * Constants.TankSpeed;
-                        break;
-                    case "none":
-                        t.velocity = new Vector2D(0, 0);
-                        break;
-                }
-            }
+            t.orientation = orientation;
+        }
+
+
+        public void TankSetVelocity(Tank t, Vector2D velocity)
+        {
+            t.velocity = velocity;
+        }
+
+
+        public void TankSetLocation(Tank t, Vector2D location)
+        {
+            t.location = location;
+        }
+
+
+        public void TankSetAiming(Tank t, Vector2D aiming)
+        {
+            t.aiming = aiming;
+            t.aiming.Normalize();
         }
 
 

@@ -55,6 +55,61 @@ namespace Server
         }
 
 
+
+        public void UpdateTanks()
+        {
+            foreach (Tank t in TheWorld.Tanks.Values)
+            {
+                //MOVEMENT
+                switch (TheWorld.PlayerCommands[t.ID].direction)
+                {
+                    case "left":
+                        TheWorld.TankSetOrientation(t, new Vector2D(-1, 0));
+                        TheWorld.TankSetVelocity(t, t.orientation * Constants.TankSpeed);
+                        break;
+                    case "right":
+                        TheWorld.TankSetOrientation(t, new Vector2D(1, 0));
+                        TheWorld.TankSetVelocity(t, t.orientation * Constants.TankSpeed);
+                        break;
+                    case "up":
+                        TheWorld.TankSetOrientation(t, new Vector2D(0, -1));
+                        TheWorld.TankSetVelocity(t, t.orientation * Constants.TankSpeed);
+                        break;
+                    case "down":
+                        TheWorld.TankSetOrientation(t, new Vector2D(0, 1));
+                        TheWorld.TankSetVelocity(t, t.orientation * Constants.TankSpeed);
+                        break;
+                    case "none":
+                        TheWorld.TankSetVelocity(t, new Vector2D(0, 0));
+                        break;
+                }
+
+                TheWorld.TankSetLocation(t, t.location + t.velocity);
+
+                foreach (Wall w in TheWorld.Walls.Values)
+                {
+                    if (World.CollisionTankWall(t, w))
+                        TheWorld.TankSetLocation(t, t.location - t.velocity);
+                }
+
+                //AIMING
+                TheWorld.TankSetAiming(t, TheWorld.PlayerCommands[t.ID].aiming);
+
+                //FIRING
+                switch (PlayerCommands[t.ID].fire)
+                {
+                    case "main":
+                        break;
+                    case "alt":
+                        break;
+                    case "none":
+                        break;
+                }
+            }
+        }
+
+
+
         private static void SendDataToSockets()
         {
             foreach (Socket s in SocketConnections)
