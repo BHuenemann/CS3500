@@ -37,6 +37,9 @@ namespace TankWars
         {
             ID = NextID;
             NextID++;
+
+            endPoint1 = p1;
+            endPoint2 = p2;
         }
     }
 }

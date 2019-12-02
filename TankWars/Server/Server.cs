@@ -214,17 +214,18 @@ namespace Server
                                     break;
 
                                 case "Wall":
-
-                                    reader.Read();
+                                    reader.ReadToFollowing("x");
                                     reader.Read(); //gets x
                                     double p1X = Double.Parse(reader.Value);
+                                    reader.ReadToFollowing("y");
                                     reader.Read(); //gets y
                                     double p1Y = Double.Parse(reader.Value);
                                     Vector2D p1V = new Vector2D(p1X, p1Y);
 
-                                    reader.Read();
+                                    reader.ReadToFollowing("x");
                                     reader.Read(); //gets x
                                     double p2X = Double.Parse(reader.Value);
+                                    reader.ReadToFollowing("y");
                                     reader.Read(); //gets y
                                     double p2Y = Double.Parse(reader.Value);
                                     Vector2D p2V = new Vector2D(p2X, p2Y);
