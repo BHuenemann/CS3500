@@ -36,7 +36,7 @@ namespace Server
 
             while (true)
             {
-                while(watch.ElapsedMilliseconds < MSPerFrame)
+                while (watch.ElapsedMilliseconds < MSPerFrame)
                 {
                     //Do Nothing
                 }
@@ -217,31 +217,24 @@ namespace Server
                                     break;
 
                                 case "Wall":
+                                    reader.ReadToFollowing("x");
+                                    reader.Read(); //gets x
+                                    double p1X = Double.Parse(reader.Value);
+                                    reader.ReadToFollowing("y");
+                                    reader.Read(); //gets y
+                                    double p1Y = Double.Parse(reader.Value);
+                                    Vector2D p1V = new Vector2D(p1X, p1Y);
 
-                                    Vector2D p1V = new Vector2D();
-                                    Vector2D p2V = new Vector2D();
-
-                                    reader.Read();
-                                    switch (reader.Name)
-                                    {
-                                        case "p1":
-                                            reader.Read(); //gets x
-                                            double p1X = Double.Parse(reader.Value);
-                                            reader.Read(); //gets y
-                                            double p1Y = Double.Parse(reader.Value);
-                                            p1V = new Vector2D(p1X, p1Y);
-                                            break;
-
-                                        case "p2":
-                                            reader.Read(); //gets x
-                                            double p2X = Double.Parse(reader.Value);
-                                            reader.Read(); //gets y
-                                            double p2Y = Double.Parse(reader.Value);
-                                            p2V = new Vector2D(p2X, p2Y);
-                                            break;
+                                    reader.ReadToFollowing("x");
+                                    reader.Read(); //gets x
+                                    double p2X = Double.Parse(reader.Value);
+                                    reader.ReadToFollowing("y");
+                                    reader.Read(); //gets y
+                                    double p2Y = Double.Parse(reader.Value);
+                                    Vector2D p2V = new Vector2D(p2X, p2Y);
 
 
-                                    }
+
                                     Wall w = new Wall(p1V, p2V);
                                     TheWorld.Walls.Add(w.ID, w);
                                     break;
