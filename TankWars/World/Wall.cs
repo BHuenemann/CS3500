@@ -35,7 +35,7 @@ namespace TankWars
 
         public Wall(Vector2D p1, Vector2D p2)
         {
-            ID =NextID;
+            ID = NextID;
             NextID++;
         }
     }
