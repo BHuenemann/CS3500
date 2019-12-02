@@ -4,10 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using NetworkUtil;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using TankWars;
 
 namespace Server
@@ -28,14 +30,15 @@ namespace Server
             Networking.StartServer(ReceivePlayerName, 11000);
 
             Stopwatch watch = new Stopwatch();
+            watch.Start();
 
-            while(true)
+            while (true)
             {
                 while(watch.ElapsedMilliseconds < MSPerFrame)
                 {
                     //Do Nothing
                 }
-                watch.Reset();
+                watch.Restart();
 
                 UpdateData();
 
@@ -98,17 +101,19 @@ namespace Server
             Tank t = new Tank(tankName.Substring(0, tankName.Length - 2), tankID);
             TheWorld.Tanks[tankID] = t;
 
+            ss.OnNetworkAction = ReceiveCommandData;
+
             string message = tankID + "\n" + UniverseSize.ToString() + "\n";
             Networking.Send(ss.TheSocket, message);
 
             StringBuilder wallMessage = new StringBuilder();
             foreach (Wall w in TheWorld.Walls.Values)
-                wallMessage.Append(JsonConvert.SerializeObject(t) + "\n");
+                wallMessage.Append(JsonConvert.SerializeObject(w) + "\n");
             Networking.Send(ss.TheSocket, wallMessage.ToString());
 
+            TheWorld.PlayerCommands.Add(tankID, new ControlCommands());
             SocketConnections.Add(ss.TheSocket);
 
-            ss.OnNetworkAction = ReceiveCommandData;
             Networking.GetData(ss);
         }
 
@@ -120,8 +125,56 @@ namespace Server
 
             }
 
+            ProcessData(ss);
+
             Networking.GetData(ss);
         }
+
+
+        private static void ProcessData(SocketState ss)
+        {
+            //Splits the string but keeps the '\n' characters
+            string totalData = ss.GetData();
+            string[] parts = Regex.Split(totalData, @"(?<=[\n])");
+
+            lock (TheWorld)
+            {
+                string lastCommand = null;
+
+                foreach (string p in parts)
+                {
+                    //This is to ignore empty strings
+                    if (p.Length == 0)
+                        continue;
+                    //This is so it ignores the last string if it doesn't end in '\n'
+                    if (p[p.Length - 1] != '\n')
+                        break;
+
+                    lastCommand = p;
+                    ss.RemoveData(0, p.Length);
+                }
+
+                if (lastCommand != null)
+                    //Calls a method to deserialize the data and then removes the data from the buffer
+                    UpdateObject(lastCommand, (int)ss.ID);
+            }
+        }
+
+
+        private static void UpdateObject(string serializedObject, int ID)
+        {
+            JObject obj = JObject.Parse(serializedObject);
+
+            //Command
+            JToken token = obj["moving"];
+            if (token != null)
+            {
+                ControlCommands com = JsonConvert.DeserializeObject<ControlCommands>(serializedObject);
+                TheWorld.PlayerCommands[ID] = com;
+                return;
+            }
+        }
+
 
         private void readSettingFile(string fileName)
         {

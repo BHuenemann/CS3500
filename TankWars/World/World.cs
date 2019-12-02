@@ -7,6 +7,8 @@ namespace TankWars
 {
     public class World
     {
+        public Dictionary<int, ControlCommands> PlayerCommands = new Dictionary<int, ControlCommands>();
+
         //Dictionaries that contain the objects that are in the world. Their IDs are used as the keys
         public Dictionary<int, Tank> Tanks = new Dictionary<int, Tank>();
         public Dictionary<int, PowerUp> PowerUps = new Dictionary<int, PowerUp>();
