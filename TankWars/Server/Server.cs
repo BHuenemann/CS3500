@@ -51,12 +51,12 @@ namespace Server
 
         private static void UpdateData()
         {
-
+            UpdateTanks();
         }
 
 
 
-        public void UpdateTanks()
+        public static void UpdateTanks()
         {
             foreach (Tank t in TheWorld.Tanks.Values)
             {
@@ -88,7 +88,7 @@ namespace Server
 
                 foreach (Wall w in TheWorld.Walls.Values)
                 {
-                    if (World.CollisionTankWall(t, w))
+                    if (CollisionTankWall(t, w))
                         TheWorld.TankSetLocation(t, t.location - t.velocity);
                 }
 
@@ -96,7 +96,7 @@ namespace Server
                 TheWorld.TankSetAiming(t, TheWorld.PlayerCommands[t.ID].aiming);
 
                 //FIRING
-                switch (PlayerCommands[t.ID].fire)
+                switch (TheWorld.PlayerCommands[t.ID].fire)
                 {
                     case "main":
                         break;
@@ -158,12 +158,18 @@ namespace Server
             string tankName = ss.GetData();
             int tankID = (int)ss.ID;
 
+
             ss.RemoveData(0, tankName.Length);
 
-            Tank t = new Tank(tankName.Substring(0, tankName.Length - 2), tankID);
+
+            Tank t = new Tank(tankName.Substring(0, tankName.Length - 1), tankID);
             TheWorld.Tanks[tankID] = t;
+            TheWorld.PlayerCommands.Add(tankID, new ControlCommands());
+            SpawnTank(t);
+
 
             ss.OnNetworkAction = ReceiveCommandData;
+
 
             string message = tankID + "\n" + UniverseSize.ToString() + "\n";
             Networking.Send(ss.TheSocket, message);
@@ -173,8 +179,9 @@ namespace Server
                 wallMessage.Append(JsonConvert.SerializeObject(w) + "\n");
             Networking.Send(ss.TheSocket, wallMessage.ToString());
 
-            TheWorld.PlayerCommands.Add(tankID, new ControlCommands());
+
             SocketConnections.Add(ss.TheSocket);
+
 
             Networking.GetData(ss);
         }
@@ -305,6 +312,142 @@ namespace Server
             }
 
 
+        }
+
+
+        public static void SpawnTank(Tank t)
+        {
+            Random random = new Random();
+
+            do
+            {
+                int xLocation = random.Next(-UniverseSize / 2, UniverseSize / 2);
+                int yLocation = random.Next(-UniverseSize / 2, UniverseSize / 2);
+
+                TheWorld.TankSetLocation(t, new Vector2D(xLocation, yLocation));
+            }
+            while (TankSpawnCollisions(t));
+        }
+
+
+        public static bool TankSpawnCollisions(Tank t)
+        {
+            foreach(Wall w in TheWorld.Walls.Values)
+            {
+                if (CollisionTankWall(t, w))
+                    return true;
+            }
+            foreach(Projectile p in TheWorld.Projectiles.Values)
+            {
+                if (CollisionProjectileTank(p, t))
+                    return true;
+            }
+            foreach(Beam b in TheWorld.Beams.Values)
+            {
+                if (CollisionBeamTank(b, t))
+                    return true;
+            }
+
+            return false;
+        }
+
+
+        public static bool CollisionTankWall(Tank t, Wall w)
+        {
+            double minX = Math.Min(w.endPoint1.GetX(), w.endPoint2.GetX());
+            double minY = Math.Min(w.endPoint1.GetY(), w.endPoint2.GetY());
+            double maxX = Math.Max(w.endPoint1.GetX(), w.endPoint2.GetX());
+            double maxY = Math.Max(w.endPoint1.GetY(), w.endPoint2.GetY());
+
+            bool xCollide = (t.location.GetX() >= minX - Constants.WallSize / 2 - Constants.TankSize / 2 &&
+                t.location.GetX() <= maxX + Constants.WallSize / 2 + Constants.TankSize / 2);
+            bool yCollide = (t.location.GetY() >= minY - Constants.WallSize / 2 - Constants.TankSize / 2 &&
+                t.location.GetY() <= maxY + Constants.WallSize / 2 + Constants.TankSize / 2);
+
+            if (xCollide && yCollide)
+                return true;
+
+            return false;
+        }
+
+
+        public static bool CollisionTankPowerUp(Tank t, PowerUp p)
+        {
+            if ((p.location - t.location).Length() <= Constants.TankSize / 2)
+                return true;
+            return false;
+        }
+
+
+        public static bool CollisionProjectileTank(Projectile p, Tank t)
+        {
+            if ((p.location - t.location).Length() <= Constants.TankSize / 2)
+                return true;
+            return false;
+        }
+
+
+        public static bool CollisionProjectileWall(Projectile p, Wall w)
+        {
+            double minX = Math.Min(w.endPoint1.GetX(), w.endPoint2.GetX());
+            double minY = Math.Min(w.endPoint1.GetY(), w.endPoint2.GetY());
+            double maxX = Math.Max(w.endPoint1.GetX(), w.endPoint2.GetX());
+            double maxY = Math.Min(w.endPoint1.GetY(), w.endPoint2.GetY());
+            if (p.location.GetX() >= minX - Constants.WallSize / 2 && p.location.GetX() <= maxX + Constants.WallSize / 2)
+            {
+                if (p.location.GetY() >= minY - Constants.WallSize / 2 && p.location.GetY() <= maxY + Constants.WallSize / 2)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        public static bool CollisionBeamTank(Beam b, Tank t)
+        {
+            return Intersects(b.origin, b.orientation, t.location, Constants.TankSize / 2);
+        }
+
+
+        /// <summary>
+        /// Determines if a ray interescts a circle
+        /// </summary>
+        /// <param name="rayOrig">The origin of the ray</param>
+        /// <param name="rayDir">The direction of the ray</param>
+        /// <param name="center">The center of the circle</param>
+        /// <param name="r">The radius of the circle</param>
+        /// <returns></returns>
+        public static bool Intersects(Vector2D rayOrig, Vector2D rayDir, Vector2D center, double r)
+        {
+            // ray-circle intersection test
+            // P: hit point
+            // ray: P = O + tV
+            // circle: (P-C)dot(P-C)-r^2 = 0
+            // substitute to solve for t gives a quadratic equation:
+            // a = VdotV
+            // b = 2(O-C)dotV
+            // c = (O-C)dot(O-C)-r^2
+            // if the discriminant is negative, miss (no solution for P)
+            // otherwise, if both roots are positive, hit
+
+            double a = rayDir.Dot(rayDir);
+            double b = ((rayOrig - center) * 2.0).Dot(rayDir);
+            double c = (rayOrig - center).Dot(rayOrig - center) - r * r;
+
+            // discriminant
+            double disc = b * b - 4.0 * a * c;
+
+            if (disc < 0.0)
+                return false;
+
+            // find the signs of the roots
+            // technically we should also divide by 2a
+            // but all we care about is the sign, not the magnitude
+            double root1 = -b + Math.Sqrt(disc);
+            double root2 = -b - Math.Sqrt(disc);
+
+            return (root1 > 0.0 && root2 > 0.0);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace TankWars
 
         //Orientation of the tank
         [JsonProperty(PropertyName = "bdir")]
-        public Vector2D orientation { get; internal set; }
+        public Vector2D orientation { get; internal set; } = new Vector2D(0, -1);
 
         //Orientation of the turret
         [JsonProperty(PropertyName = "tdir")]
