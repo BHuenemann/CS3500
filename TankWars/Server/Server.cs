@@ -210,20 +210,33 @@ namespace Server
                                     break;
 
                                 case "Wall":
-                                    reader.Read();
 
+                                    Vector2D p1V = new Vector2D();
+                                    Vector2D p2V = new Vector2D();
+
+                                    reader.Read();
                                     switch (reader.Name)
                                     {
                                         case "p1":
                                             reader.Read(); //gets x
+                                            double p1X = Double.Parse(reader.Value);
                                             reader.Read(); //gets y
+                                            double p1Y = Double.Parse(reader.Value);
+                                            p1V = new Vector2D(p1X, p1Y);
                                             break;
 
                                         case "p2":
                                             reader.Read(); //gets x
+                                            double p2X = Double.Parse(reader.Value);
                                             reader.Read(); //gets y
+                                            double p2Y = Double.Parse(reader.Value);
+                                            p2V = new Vector2D(p2X, p2Y);
                                             break;
+
+
                                     }
+                                    Wall w = new Wall(p1V, p2V);
+                                    TheWorld.Walls.Add(w.ID, w);
                                     break;
                             }
                         }
@@ -235,6 +248,7 @@ namespace Server
             {
                 throw new Exception("There was a problem opening the saved file...");
             }
+
 
         }
     }
