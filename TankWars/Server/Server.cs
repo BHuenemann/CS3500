@@ -33,6 +33,8 @@ namespace Server
 
             Networking.StartServer(ReceivePlayerName, 11000);
 
+            Console.WriteLine("Server is running. Accepting clients.");
+
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
@@ -53,9 +55,12 @@ namespace Server
 
         private static void UpdateData()
         {
-            UpdateTanks();
+            lock(TheWorld)
+            {
+                UpdateTanks();
+                UpdateProjectiles();
+            }
         }
-
 
 
         public static void UpdateTanks()
@@ -66,53 +71,55 @@ namespace Server
                 switch (TheWorld.PlayerCommands[t.ID].direction)
                 {
                     case "left":
-                        TheWorld.TankSetOrientation(t, new Vector2D(-1, 0));
-                        TheWorld.TankSetVelocity(t, t.orientation * Constants.TankSpeed);
+                        TheWorld.TankSetOrientation(t.ID, new Vector2D(-1, 0));
+                        TheWorld.TankSetVelocity(t.ID, t.orientation * Constants.TankSpeed);
                         break;
                     case "right":
-                        TheWorld.TankSetOrientation(t, new Vector2D(1, 0));
-                        TheWorld.TankSetVelocity(t, t.orientation * Constants.TankSpeed);
+                        TheWorld.TankSetOrientation(t.ID, new Vector2D(1, 0));
+                        TheWorld.TankSetVelocity(t.ID, t.orientation * Constants.TankSpeed);
                         break;
                     case "up":
-                        TheWorld.TankSetOrientation(t, new Vector2D(0, -1));
-                        TheWorld.TankSetVelocity(t, t.orientation * Constants.TankSpeed);
+                        TheWorld.TankSetOrientation(t.ID, new Vector2D(0, -1));
+                        TheWorld.TankSetVelocity(t.ID, t.orientation * Constants.TankSpeed);
                         break;
                     case "down":
-                        TheWorld.TankSetOrientation(t, new Vector2D(0, 1));
-                        TheWorld.TankSetVelocity(t, t.orientation * Constants.TankSpeed);
+                        TheWorld.TankSetOrientation(t.ID, new Vector2D(0, 1));
+                        TheWorld.TankSetVelocity(t.ID, t.orientation * Constants.TankSpeed);
                         break;
                     case "none":
-                        TheWorld.TankSetVelocity(t, new Vector2D(0, 0));
+                        TheWorld.TankSetVelocity(t.ID, new Vector2D(0, 0));
                         break;
                 }
 
-                TheWorld.TankSetLocation(t, t.location + t.velocity);
+                TheWorld.TankSetLocation(t.ID, t.location + t.velocity);
 
                 foreach (Wall w in TheWorld.Walls.Values)
                 {
                     if (CollisionTankWall(t, w))
-                        TheWorld.TankSetLocation(t, t.location - t.velocity);
+                        TheWorld.TankSetLocation(t.ID, t.location - t.velocity);
                 }
 
                 //AIMING
-                TheWorld.TankSetAiming(t, TheWorld.PlayerCommands[t.ID].aiming);
+                TheWorld.TankSetAiming(t.ID, TheWorld.PlayerCommands[t.ID].aiming);
 
                 //FIRING
+                if (t.cooldownFrames < FramesPerShot)
+                    TheWorld.TankIncrementCooldownFrames(t.ID);
+
                 switch (TheWorld.PlayerCommands[t.ID].fire)
                 {
                     case "main":
-                        if(t.OnCooldown == false)
+                        if(t.cooldownFrames == FramesPerShot)
                         {
-                            Projectile p = new Projectile(t.location, t.orientation, t.ID);
-                            TheWorld.Projectiles.Add(p.ID, p);
+                            Projectile p = new Projectile(t.location, t.aiming, t.ID);
+                            TheWorld.UpdateProjectile(p);
+
+                            TheWorld.TankSetCooldownFrames(t.ID, 0);
                         }
                         break;
                     case "alt":
-                        if(t.OnCooldown == false)
-                        {
-                            Beam b = new Beam(t.location, t.orientation, t.ID);
-                            TheWorld.Beams.Add(b.ID, b);
-                        }
+                        Beam b = new Beam(t.location, t.orientation, t.ID);
+                        TheWorld.UpdateBeam(b);
                         break;
                     case "none":
                         break;
@@ -120,6 +127,36 @@ namespace Server
             }
         }
 
+
+        public static void UpdateProjectiles()
+        {
+            foreach (Projectile p in TheWorld.Projectiles.Values.ToList())
+            {
+                if (p.died)
+                {
+                    TheWorld.ProjectileRemove(p.ID);
+                    continue;
+                }
+
+                TheWorld.ProjectileSetLocation(p.ID, p.location + p.velocity);
+
+                if (Math.Abs(p.location.GetX()) > UniverseSize / 2 || Math.Abs(p.location.GetY()) > UniverseSize / 2)
+                    TheWorld.ProjectileSetDied(p.ID);
+
+                foreach (Tank t in TheWorld.Tanks.Values)
+                {
+                    if(CollisionProjectileTank(p, t) && p.ownerID != t.ID)
+                    {
+                        TheWorld.ProjectileSetDied(p.ID);
+                    }
+                }
+                foreach (Wall w in TheWorld.Walls.Values)
+                {
+                    if (CollisionProjectileWall(p, w))
+                        TheWorld.ProjectileSetDied(p.ID);
+                }
+            }
+        }
 
 
         private static void SendDataToSockets()
@@ -156,6 +193,7 @@ namespace Server
             {
 
             }
+            Console.WriteLine("Accepted new client");
             ss.OnNetworkAction = SendStartupInfo;
             Networking.GetData(ss);
         }
@@ -165,8 +203,10 @@ namespace Server
         {
             if (ss.ErrorOccured == true)
             {
-
+                Console.WriteLine("Error occured while accepting- " + ss.ErrorMessage);
+                return;
             }
+
             string tankName = ss.GetData();
             int tankID = (int)ss.ID;
 
@@ -174,10 +214,17 @@ namespace Server
             ss.RemoveData(0, tankName.Length);
 
 
-            Tank t = new Tank(tankName.Substring(0, tankName.Length - 1), tankID);
-            TheWorld.Tanks[tankID] = t;
-            TheWorld.PlayerCommands.Add(tankID, new ControlCommands());
-            SpawnTank(t);
+            lock(TheWorld)
+            {
+                Tank t = new Tank(tankName.Substring(0, tankName.Length - 1), tankID);
+                TheWorld.UpdateTank(t);
+                TheWorld.TankSetCooldownFrames(t.ID, FramesPerShot);
+                TheWorld.UpdateCommand(tankID, new ControlCommands());
+                SpawnTank(t);
+
+                Console.WriteLine("Player(" + tankID + ") " + "\"" + t.name + "\" joined");
+
+            }
 
 
             ss.OnNetworkAction = ReceiveCommandData;
@@ -186,10 +233,13 @@ namespace Server
             string message = tankID + "\n" + UniverseSize.ToString() + "\n";
             Networking.Send(ss.TheSocket, message);
 
-            StringBuilder wallMessage = new StringBuilder();
-            foreach (Wall w in TheWorld.Walls.Values)
-                wallMessage.Append(JsonConvert.SerializeObject(w) + "\n");
-            Networking.Send(ss.TheSocket, wallMessage.ToString());
+            lock(TheWorld)
+            {
+                StringBuilder wallMessage = new StringBuilder();
+                foreach (Wall w in TheWorld.Walls.Values)
+                    wallMessage.Append(JsonConvert.SerializeObject(w) + "\n");
+                Networking.Send(ss.TheSocket, wallMessage.ToString());
+            }
 
 
             SocketConnections.Add(ss.TheSocket);
@@ -251,7 +301,7 @@ namespace Server
             if (token != null)
             {
                 ControlCommands com = JsonConvert.DeserializeObject<ControlCommands>(serializedObject);
-                TheWorld.PlayerCommands[ID] = com;
+                TheWorld.UpdateCommand(ID, com);
                 return;
             }
         }
@@ -310,7 +360,7 @@ namespace Server
 
 
                                     Wall w = new Wall(p1V, p2V);
-                                    TheWorld.Walls.Add(w.ID, w);
+                                    TheWorld.UpdateWall(w);
                                     break;
                             }
                         }
@@ -336,7 +386,7 @@ namespace Server
                 int xLocation = random.Next(-UniverseSize / 2, UniverseSize / 2);
                 int yLocation = random.Next(-UniverseSize / 2, UniverseSize / 2);
 
-                TheWorld.TankSetLocation(t, new Vector2D(xLocation, yLocation));
+                TheWorld.TankSetLocation(t.ID, new Vector2D(xLocation, yLocation));
             }
             while (TankSpawnCollisions(t));
         }
@@ -393,9 +443,7 @@ namespace Server
 
         public static bool CollisionProjectileTank(Projectile p, Tank t)
         {
-            if ((p.location - t.location).Length() <= Constants.TankSize / 2)
-                return true;
-            return false;
+            return (p.location - t.location).Length() < Constants.TankSize / 2;
         }
 
 
@@ -404,7 +452,7 @@ namespace Server
             double minX = Math.Min(w.endPoint1.GetX(), w.endPoint2.GetX());
             double minY = Math.Min(w.endPoint1.GetY(), w.endPoint2.GetY());
             double maxX = Math.Max(w.endPoint1.GetX(), w.endPoint2.GetX());
-            double maxY = Math.Min(w.endPoint1.GetY(), w.endPoint2.GetY());
+            double maxY = Math.Max(w.endPoint1.GetY(), w.endPoint2.GetY());
             if (p.location.GetX() >= minX - Constants.WallSize / 2 && p.location.GetX() <= maxX + Constants.WallSize / 2)
             {
                 if (p.location.GetY() >= minY - Constants.WallSize / 2 && p.location.GetY() <= maxY + Constants.WallSize / 2)

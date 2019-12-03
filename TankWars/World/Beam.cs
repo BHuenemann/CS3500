@@ -36,6 +36,13 @@ namespace TankWars
         public Dictionary<int, Vector2D> beamParticles = new Dictionary<int, Vector2D>();
         public int beamFrames = 0;
 
+
+        Beam()
+        {
+
+        }
+
+
         public Beam(Vector2D originPoint, Vector2D beamOrientation, int owner)
         {
             ID = NextID;

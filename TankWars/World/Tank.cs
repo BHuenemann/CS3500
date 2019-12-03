@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace TankWars
@@ -14,8 +15,7 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class Tank
     {
-
-        public bool OnCooldown = false;
+        public int cooldownFrames { get; internal set; } = 0;
 
         public Vector2D velocity { get; internal set; } = new Vector2D(0, 0);
 
@@ -58,6 +58,12 @@ namespace TankWars
         //Tells whether the tank has joined the game or not
         [JsonProperty(PropertyName = "join")]
         public bool joined { get; internal set; } = false;
+
+
+        public Tank()
+        {
+
+        }
 
 
         public Tank(string name, int ID)

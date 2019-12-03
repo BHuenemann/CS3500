@@ -25,5 +25,12 @@ namespace TankWars
         //Tells whether the powerup has been picked up or not
         [JsonProperty(PropertyName = "died")]
         public bool died { get; internal set; } = false;
+
+
+
+        public PowerUp()
+        {
+
+        }
     }
 }

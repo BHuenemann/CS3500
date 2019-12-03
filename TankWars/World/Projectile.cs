@@ -16,6 +16,8 @@ namespace TankWars
     {
         static int NextID = 0;
 
+        public Vector2D velocity { get; private set; }
+
         //Projectile ID
         [JsonProperty(PropertyName = "proj")]
         public int ID { get; internal set; }
@@ -36,13 +38,26 @@ namespace TankWars
         [JsonProperty(PropertyName = "owner")]
         public int ownerID { get; internal set; }
 
+
+
+        public Projectile()
+        {
+
+        }
+
+
         public Projectile(Vector2D currentLocation, Vector2D direction, int owner)
         {
             ID = NextID;
             NextID++;
 
             location = currentLocation;
+
             orientation = direction;
+            orientation.Normalize();
+
+            velocity = orientation * Constants.ProjectileSpeed;
+
             ownerID = owner;
 
         }

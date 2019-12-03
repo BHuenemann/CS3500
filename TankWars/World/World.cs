@@ -10,11 +10,12 @@ namespace TankWars
         public Dictionary<int, ControlCommands> PlayerCommands = new Dictionary<int, ControlCommands>();
 
         //Dictionaries that contain the objects that are in the world. Their IDs are used as the keys
-        public Dictionary<int, Tank> Tanks = new Dictionary<int, Tank>();
-        public Dictionary<int, PowerUp> PowerUps = new Dictionary<int, PowerUp>();
-        public Dictionary<int, Beam> Beams = new Dictionary<int, Beam>();
-        public Dictionary<int, Projectile> Projectiles = new Dictionary<int, Projectile>();
-        public Dictionary<int, Wall> Walls = new Dictionary<int, Wall>();
+        public Dictionary<int, Tank> Tanks { get; private set; } = new Dictionary<int, Tank>();
+        public Dictionary<int, PowerUp> PowerUps { get; private set; } = new Dictionary<int, PowerUp>();
+        public Dictionary<int, Beam> Beams { get; private set; } = new Dictionary<int, Beam>();
+        public Dictionary<int, Projectile> Projectiles { get; private set; } = new Dictionary<int, Projectile>();
+        public Dictionary<int, Wall> Walls { get; private set; } = new Dictionary<int, Wall>();
+
         public Dictionary<int, TankExplosion> TankExplosions = new Dictionary<int, TankExplosion>();
 
         //Keeps track of the world size sent by the server
@@ -22,30 +23,99 @@ namespace TankWars
 
 
 
-        public void TankSetOrientation(Tank t, Vector2D orientation)
+        public void UpdateCommand(int ID, ControlCommands c)
         {
-            t.orientation = orientation;
-            t.orientation.Normalize();
+            PlayerCommands[ID] = c;
         }
 
 
-        public void TankSetVelocity(Tank t, Vector2D velocity)
+        public void UpdateTank(Tank t)
         {
-            t.velocity = velocity;
+            Tanks[t.ID] = t;
         }
 
 
-        public void TankSetLocation(Tank t, Vector2D location)
+        public void UpdatePowerUp(PowerUp p)
         {
-            t.location = location;
+            PowerUps[p.ID] = p;
         }
 
 
-        public void TankSetAiming(Tank t, Vector2D aiming)
+        public void UpdateBeam(Beam b)
         {
-            t.aiming = aiming;
-            t.aiming.Normalize();
+            Beams[b.ID] = b;
         }
+
+
+        public void UpdateProjectile(Projectile p)
+        {
+            Projectiles[p.ID] = p;
+        }
+
+
+        public void UpdateWall(Wall w)
+        {
+            Walls[w.ID] = w;
+        }
+
+
+
+        public void TankSetOrientation(int ID, Vector2D orientation)
+        {
+            Tanks[ID].orientation = orientation;
+            Tanks[ID].orientation.Normalize();
+        }
+
+
+        public void TankSetVelocity(int ID, Vector2D velocity)
+        {
+            Tanks[ID].velocity = velocity;
+        }
+
+
+        public void TankSetLocation(int ID, Vector2D location)
+        {
+            Tanks[ID].location = location;
+        }
+
+
+        public void TankSetAiming(int ID, Vector2D aiming)
+        {
+            Tanks[ID].aiming = aiming;
+            Tanks[ID].aiming.Normalize();
+        }
+
+
+        public void TankIncrementCooldownFrames(int ID)
+        {
+            Tanks[ID].cooldownFrames++;
+        }
+
+
+        public void TankSetCooldownFrames(int ID, int value)
+        {
+            Tanks[ID].cooldownFrames = value;
+        }
+
+
+
+        public void ProjectileSetLocation(int ID, Vector2D location)
+        {
+            Projectiles[ID].location = location;
+        }
+
+
+        public void ProjectileSetDied(int ID)
+        {
+            Projectiles[ID].died = true;
+        }
+
+
+        public void ProjectileRemove(int ID)
+        {
+            Projectiles.Remove(ID);
+        }
+
 
 
         public void ExplosionIncrementFrames(TankExplosion e)
