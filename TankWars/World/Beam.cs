@@ -16,6 +16,8 @@ namespace TankWars
     {
         static int NextID = 0;
 
+        public bool Spawned { get; internal set; } = false;
+
         //ID of the beam
         [JsonProperty(PropertyName = "beam")]
         public int ID { get; internal set; }

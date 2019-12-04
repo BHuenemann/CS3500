@@ -151,11 +151,6 @@ namespace TankWars
         }
 
 
-        public void TankIncrementScore(int ID)
-        {
-        }
-
-
 
         public void ProjectileSetLocation(int ID, Vector2D location)
         {
@@ -172,6 +167,19 @@ namespace TankWars
         public void ProjectileRemove(int ID)
         {
             Projectiles.Remove(ID);
+        }
+
+
+
+        public void BeamSetSpawnedTrue(int ID)
+        {
+            Beams[ID].Spawned = true;
+        }
+
+
+        public void BeamRemove(int ID)
+        {
+            Beams.Remove(ID);
         }
 
 

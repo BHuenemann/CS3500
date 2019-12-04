@@ -59,6 +59,7 @@ namespace Server
             {
                 UpdateTanks();
                 UpdateProjectiles();
+                UpdateBeams();
             }
         }
 
@@ -160,7 +161,7 @@ namespace Server
                 if (Math.Abs(p.location.GetX()) > UniverseSize / 2 || Math.Abs(p.location.GetY()) > UniverseSize / 2)
                     TheWorld.ProjectileSetDied(p.ID);
 
-                foreach (Tank t in TheWorld.Tanks.Values.ToList())
+                foreach (Tank t in TheWorld.Tanks.Values)
                 {
                     if(CollisionProjectileTank(p, t) && p.ownerID != t.ID)
                     {
@@ -172,6 +173,42 @@ namespace Server
                 {
                     if (CollisionProjectileWall(p, w))
                         TheWorld.ProjectileSetDied(p.ID);
+                }
+            }
+        }
+
+
+        public static void UpdateBeams()
+        {
+            foreach(Beam b in TheWorld.Beams.Values.ToList())
+            {
+                foreach(Tank t in TheWorld.Tanks.Values)
+                {
+                    if (CollisionBeamTank(b, t))
+                        TheWorld.TankBeamDamage(t.ID, b.ID);
+
+                    if (!b.Spawned)
+                        TheWorld.BeamSetSpawnedTrue(b.ID);
+                    else
+                        TheWorld.BeamRemove(b.ID);
+                }
+            }
+        }
+
+
+        public static void UpdatePowerUps()
+        {
+            foreach(PowerUp p in TheWorld.PowerUps.Values.ToList())
+            {
+                if (p.died)
+                    TheWorld.PowerUpRemove(p.ID);
+
+                foreach(Tank t in TheWorld.Tanks.Values)
+                {
+                    if(CollisionPowerUpTank(p, t))
+                    {
+                        TheWorld.PowerUpSetDied(p.ID);
+                    }
                 }
             }
         }
@@ -497,7 +534,7 @@ namespace Server
 
         public static bool CollisionPowerUpTank(PowerUp p, Tank t)
         {
-            return (p.location - t.location).Length() < Constants.TankSize / 2;
+            return (p.location - t.Location).Length() < Constants.TankSize / 2;
         }
 
 
