@@ -346,7 +346,7 @@ namespace TankWars
                 }
 
                 //If it disconnected the tank is removed
-                if (tank.disconnected)
+                if (tank.Disconnected)
                     TheWorld.Tanks.Remove(tank.ID);
 
                 //It also notes that the walls must be done if it's importing a tank

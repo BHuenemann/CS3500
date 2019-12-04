@@ -16,6 +16,8 @@ namespace TankWars
         public Dictionary<int, Projectile> Projectiles { get; private set; } = new Dictionary<int, Projectile>();
         public Dictionary<int, Wall> Walls { get; private set; } = new Dictionary<int, Wall>();
 
+        public Dictionary<int, Tank> DeadTanks { get; private set; } = new Dictionary<int, Tank>();
+
         public Dictionary<int, TankExplosion> TankExplosions = new Dictionary<int, TankExplosion>();
 
         //Keeps track of the world size sent by the server
@@ -62,39 +64,95 @@ namespace TankWars
 
         public void TankSetOrientation(int ID, Vector2D orientation)
         {
-            Tanks[ID].orientation = orientation;
-            Tanks[ID].orientation.Normalize();
+            Tanks[ID].Orientation = orientation;
+            Tanks[ID].Orientation.Normalize();
         }
 
 
         public void TankSetVelocity(int ID, Vector2D velocity)
         {
-            Tanks[ID].velocity = velocity;
+            Tanks[ID].Velocity = velocity;
         }
 
 
         public void TankSetLocation(int ID, Vector2D location)
         {
-            Tanks[ID].location = location;
+            Tanks[ID].Location = location;
         }
 
 
         public void TankSetAiming(int ID, Vector2D aiming)
         {
-            Tanks[ID].aiming = aiming;
-            Tanks[ID].aiming.Normalize();
+            Tanks[ID].Aiming = aiming;
+            Tanks[ID].Aiming.Normalize();
         }
 
 
         public void TankIncrementCooldownFrames(int ID)
         {
-            Tanks[ID].cooldownFrames++;
+            Tanks[ID].CooldownFrames++;
         }
 
 
         public void TankSetCooldownFrames(int ID, int value)
         {
-            Tanks[ID].cooldownFrames = value;
+            Tanks[ID].CooldownFrames = value;
+        }
+
+
+        public void TankIncrementRespawnFrames(int ID)
+        {
+            DeadTanks[ID].RespawnFrames++;
+        }
+
+
+        public void TankSetRespawnFrames(int ID, int value)
+        {
+            Tanks[ID].RespawnFrames = value;
+        }
+
+
+        public void TankProjectileDamage(int tankID, int ProjID)
+        {
+            if(Tanks[tankID].HitPoints > 1)
+                Tanks[tankID].HitPoints--;
+            else
+            {
+                Tanks[Projectiles[ProjID].ownerID].Score++;
+                Tanks[tankID].HitPoints = 0;
+                Tanks[tankID].Died = true;
+                DeadTanks[tankID] = Tanks[tankID];
+            }
+        }
+
+
+        public void TankBeamDamage(int tankID, int BeamID)
+        {
+            Tanks[Beams[BeamID].ownerID].Score++;
+            Tanks[tankID].HitPoints = 0;
+            Tanks[tankID].Died = true;
+            DeadTanks[tankID] = Tanks[tankID];
+        }
+
+
+        public void TankRestoreHealth(int ID)
+        {
+            Tanks[ID] = DeadTanks[ID];
+            DeadTanks.Remove(ID);
+
+            Tanks[ID].HitPoints = Constants.MaxHP;
+            Tanks[ID].Died = false;
+        }
+
+
+        public void TankRemove(int ID)
+        {
+            Tanks.Remove(ID);
+        }
+
+
+        public void TankIncrementScore(int ID)
+        {
         }
 
 

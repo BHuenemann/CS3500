@@ -114,8 +114,8 @@ namespace TankWars
                 return;
 
             //Store the player tank location
-            double playerX = TheController.GetPlayerTank().location.GetX();
-            double playerY = TheController.GetPlayerTank().location.GetY();
+            double playerX = TheController.GetPlayerTank().Location.GetX();
+            double playerY = TheController.GetPlayerTank().Location.GetY();
 
             //Calculate view/world size ratio
             double ratio = (double)Constants.ViewSize / (double)TheController.TheWorld.worldSize;
@@ -155,15 +155,15 @@ namespace TankWars
                 // Draw the players
                 foreach (Tank tank in TheController.TheWorld.Tanks.Values)
                 {
-                    tank.orientation.Normalize();
-                    tank.aiming.Normalize();
-                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), tank.orientation.ToAngle(),
+                    tank.Orientation.Normalize();
+                    tank.Aiming.Normalize();
+                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.Location.GetX(), tank.Location.GetY(), tank.Orientation.ToAngle(),
                         TankDrawer);
-                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), tank.aiming.ToAngle(),
+                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.Location.GetX(), tank.Location.GetY(), tank.Aiming.ToAngle(),
                         TurretDrawer);
-                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), 0,
+                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.Location.GetX(), tank.Location.GetY(), 0,
                         NameDrawer);
-                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.location.GetX(), tank.location.GetY(), 0,
+                    DrawObjectWithTransform(e, tank, TheController.TheWorld.worldSize, tank.Location.GetX(), tank.Location.GetY(), 0,
                         HealthDrawer);
                 }
 
@@ -213,13 +213,13 @@ namespace TankWars
             Tank t = o as Tank;
 
             //Stops tank from updating anymore information if health equals zero
-            if (t.hitPoints == 0)
+            if (t.HitPoints == 0)
             {
                 DrawExplosion(t, e);
                 return;
             }
             //Resets the tank frames when the tank isn't dead
-            else if(TheController.TheWorld.TankExplosions.ContainsKey(t.ID) && (TheController.TheWorld.TankExplosions[t.ID].tankFrames != 0 && !t.died))
+            else if(TheController.TheWorld.TankExplosions.ContainsKey(t.ID) && (TheController.TheWorld.TankExplosions[t.ID].tankFrames != 0 && !t.Died))
                 TheController.TheWorld.ExplosionClearFrames(TheController.TheWorld.TankExplosions[t.ID]);
 
             int tankWidth = Constants.TankSize;
@@ -277,7 +277,7 @@ namespace TankWars
             Tank t = o as Tank;
 
             //Stops turret from updating anymore information if health equals zero
-            if (t.hitPoints == 0)
+            if (t.HitPoints == 0)
                 return;
 
             int turretWidth = Constants.TurretSize;
@@ -334,13 +334,13 @@ namespace TankWars
             Tank t = o as Tank;
 
             //Stops name from updating anymore information if health equals zero
-            if (t.hitPoints == 0)
+            if (t.HitPoints == 0)
                 return;
 
             using (Font font1 = new Font("Times New Roman", 24, FontStyle.Regular, GraphicsUnit.Pixel))
             {
-                PointF pointF1 = new PointF(Constants.NameBarX - t.name.Length * Constants.NameBarXMultiplier, Constants.NameBarY);
-                e.Graphics.DrawString(t.name + ": " + t.score, font1, Brushes.White, pointF1);
+                PointF pointF1 = new PointF(Constants.NameBarX - t.Name.Length * Constants.NameBarXMultiplier, Constants.NameBarY);
+                e.Graphics.DrawString(t.Name + ": " + t.Score, font1, Brushes.White, pointF1);
             }
         }
 
@@ -357,13 +357,13 @@ namespace TankWars
             using (SolidBrush yellowBrush = new SolidBrush(Color.Yellow))
             using (SolidBrush redBrush = new SolidBrush(Color.Red))
             {
-                if(t.hitPoints == 3)
+                if(t.HitPoints == 3)
                     e.Graphics.FillRectangle(greenBrush, Constants.HealthBarX, Constants.HealthBarY, Constants.HealthBarFull, Constants.HealthBarHeight);
 
-                if (t.hitPoints == 2)
+                if (t.HitPoints == 2)
                     e.Graphics.FillRectangle(yellowBrush, Constants.HealthBarX, Constants.HealthBarY, Constants.HealthBarHigh, Constants.HealthBarHeight);
 
-                if (t.hitPoints == 1)
+                if (t.HitPoints == 1)
                     e.Graphics.FillRectangle(redBrush, Constants.HealthBarX, Constants.HealthBarY, Constants.HealthBarLow, Constants.HealthBarHeight);
             }
         }

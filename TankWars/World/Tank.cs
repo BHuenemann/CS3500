@@ -15,9 +15,11 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class Tank
     {
-        public int cooldownFrames { get; internal set; } = 0;
+        public int CooldownFrames { get; internal set; } = 0;
 
-        public Vector2D velocity { get; internal set; } = new Vector2D(0, 0);
+        public int RespawnFrames { get; internal set; } = 0;
+
+        public Vector2D Velocity { get; internal set; } = new Vector2D(0, 0);
 
         //ID of the tank
         [JsonProperty(PropertyName = "tank")]
@@ -25,39 +27,39 @@ namespace TankWars
 
         //Location of the tank
         [JsonProperty(PropertyName = "loc")]
-        public Vector2D location { get; internal set; }
+        public Vector2D Location { get; internal set; }
 
         //Orientation of the tank
         [JsonProperty(PropertyName = "bdir")]
-        public Vector2D orientation { get; internal set; } = new Vector2D(0, -1);
+        public Vector2D Orientation { get; internal set; } = new Vector2D(0, -1);
 
         //Orientation of the turret
         [JsonProperty(PropertyName = "tdir")]
-        public Vector2D aiming { get; internal set; } = new Vector2D(0, -1);
+        public Vector2D Aiming { get; internal set; } = new Vector2D(0, -1);
 
         //Tank's player name
         [JsonProperty(PropertyName = "name")]
-        public string name { get; internal set; }
+        public string Name { get; internal set; }
 
         //Tank HP
         [JsonProperty(PropertyName = "hp")]
-        public int hitPoints { get; internal set; } = Constants.MaxHP;
+        public int HitPoints { get; internal set; } = Constants.MaxHP;
 
         //Tank Score
         [JsonProperty(PropertyName = "score")]
-        public int score { get; internal set; } = 0;
+        public int Score { get; internal set; } = 0;
 
         //Tells whether the Tank has died or niot
         [JsonProperty(PropertyName = "died")]
-        public bool died { get; internal set; } = false;
+        public bool Died { get; internal set; } = false;
 
         //Tells whether the Tank has disconnected or not
         [JsonProperty(PropertyName = "dc")]
-        public bool disconnected { get; internal set; } = false;
+        public bool Disconnected { get; internal set; } = false;
 
         //Tells whether the tank has joined the game or not
         [JsonProperty(PropertyName = "join")]
-        public bool joined { get; internal set; } = false;
+        public bool Joined { get; internal set; } = false;
 
 
         public Tank()
@@ -68,7 +70,7 @@ namespace TankWars
 
         public Tank(string name, int ID)
         {
-            this.name = name;
+            this.Name = name;
             this.ID = ID;
         }
     }

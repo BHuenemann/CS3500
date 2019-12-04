@@ -65,64 +65,81 @@ namespace Server
 
         public static void UpdateTanks()
         {
-            foreach (Tank t in TheWorld.Tanks.Values)
+            foreach (Tank t in TheWorld.Tanks.Values.ToList())
             {
+                if (t.Died)
+                {
+                    TheWorld.TankRemove(t.ID);
+                    continue;
+                }
+
                 //MOVEMENT
                 switch (TheWorld.PlayerCommands[t.ID].direction)
                 {
                     case "left":
                         TheWorld.TankSetOrientation(t.ID, new Vector2D(-1, 0));
-                        TheWorld.TankSetVelocity(t.ID, t.orientation * Constants.TankSpeed);
+                        TheWorld.TankSetVelocity(t.ID, t.Orientation * Constants.TankSpeed);
                         break;
                     case "right":
                         TheWorld.TankSetOrientation(t.ID, new Vector2D(1, 0));
-                        TheWorld.TankSetVelocity(t.ID, t.orientation * Constants.TankSpeed);
+                        TheWorld.TankSetVelocity(t.ID, t.Orientation * Constants.TankSpeed);
                         break;
                     case "up":
                         TheWorld.TankSetOrientation(t.ID, new Vector2D(0, -1));
-                        TheWorld.TankSetVelocity(t.ID, t.orientation * Constants.TankSpeed);
+                        TheWorld.TankSetVelocity(t.ID, t.Orientation * Constants.TankSpeed);
                         break;
                     case "down":
                         TheWorld.TankSetOrientation(t.ID, new Vector2D(0, 1));
-                        TheWorld.TankSetVelocity(t.ID, t.orientation * Constants.TankSpeed);
+                        TheWorld.TankSetVelocity(t.ID, t.Orientation * Constants.TankSpeed);
                         break;
                     case "none":
                         TheWorld.TankSetVelocity(t.ID, new Vector2D(0, 0));
                         break;
                 }
 
-                TheWorld.TankSetLocation(t.ID, t.location + t.velocity);
+                TheWorld.TankSetLocation(t.ID, t.Location + t.Velocity);
 
                 foreach (Wall w in TheWorld.Walls.Values)
                 {
                     if (CollisionTankWall(t, w))
-                        TheWorld.TankSetLocation(t.ID, t.location - t.velocity);
+                        TheWorld.TankSetLocation(t.ID, t.Location - t.Velocity);
                 }
 
                 //AIMING
                 TheWorld.TankSetAiming(t.ID, TheWorld.PlayerCommands[t.ID].aiming);
 
                 //FIRING
-                if (t.cooldownFrames < FramesPerShot)
+                if (t.CooldownFrames < FramesPerShot)
                     TheWorld.TankIncrementCooldownFrames(t.ID);
 
                 switch (TheWorld.PlayerCommands[t.ID].fire)
                 {
                     case "main":
-                        if(t.cooldownFrames == FramesPerShot)
+                        if(t.CooldownFrames == FramesPerShot)
                         {
-                            Projectile p = new Projectile(t.location, t.aiming, t.ID);
+                            Projectile p = new Projectile(t.Location, t.Aiming, t.ID);
                             TheWorld.UpdateProjectile(p);
 
                             TheWorld.TankSetCooldownFrames(t.ID, 0);
                         }
                         break;
                     case "alt":
-                        Beam b = new Beam(t.location, t.orientation, t.ID);
+                        Beam b = new Beam(t.Location, t.Orientation, t.ID);
                         TheWorld.UpdateBeam(b);
                         break;
                     case "none":
                         break;
+                }
+            }
+            foreach (Tank t in TheWorld.DeadTanks.Values.ToList())
+            {
+                TheWorld.TankIncrementRespawnFrames(t.ID);
+
+                if (t.RespawnFrames == RespawnRate)
+                {
+                    TheWorld.TankRestoreHealth(t.ID);
+                    TheWorld.TankSetRespawnFrames(t.ID, 0);
+                    SpawnTank(t);
                 }
             }
         }
@@ -143,11 +160,12 @@ namespace Server
                 if (Math.Abs(p.location.GetX()) > UniverseSize / 2 || Math.Abs(p.location.GetY()) > UniverseSize / 2)
                     TheWorld.ProjectileSetDied(p.ID);
 
-                foreach (Tank t in TheWorld.Tanks.Values)
+                foreach (Tank t in TheWorld.Tanks.Values.ToList())
                 {
                     if(CollisionProjectileTank(p, t) && p.ownerID != t.ID)
                     {
                         TheWorld.ProjectileSetDied(p.ID);
+                        TheWorld.TankProjectileDamage(t.ID, p.ID);
                     }
                 }
                 foreach (Wall w in TheWorld.Walls.Values)
@@ -222,7 +240,7 @@ namespace Server
                 TheWorld.UpdateCommand(tankID, new ControlCommands());
                 SpawnTank(t);
 
-                Console.WriteLine("Player(" + tankID + ") " + "\"" + t.name + "\" joined");
+                Console.WriteLine("Player(" + tankID + ") " + "\"" + t.Name + "\" joined");
 
             }
 
@@ -421,10 +439,10 @@ namespace Server
             double maxX = Math.Max(w.endPoint1.GetX(), w.endPoint2.GetX());
             double maxY = Math.Max(w.endPoint1.GetY(), w.endPoint2.GetY());
 
-            bool xCollide = (t.location.GetX() >= minX - Constants.WallSize / 2 - Constants.TankSize / 2 &&
-                t.location.GetX() <= maxX + Constants.WallSize / 2 + Constants.TankSize / 2);
-            bool yCollide = (t.location.GetY() >= minY - Constants.WallSize / 2 - Constants.TankSize / 2 &&
-                t.location.GetY() <= maxY + Constants.WallSize / 2 + Constants.TankSize / 2);
+            bool xCollide = (t.Location.GetX() >= minX - Constants.WallSize / 2 - Constants.TankSize / 2 &&
+                t.Location.GetX() <= maxX + Constants.WallSize / 2 + Constants.TankSize / 2);
+            bool yCollide = (t.Location.GetY() >= minY - Constants.WallSize / 2 - Constants.TankSize / 2 &&
+                t.Location.GetY() <= maxY + Constants.WallSize / 2 + Constants.TankSize / 2);
 
             if (xCollide && yCollide)
                 return true;
@@ -435,7 +453,7 @@ namespace Server
 
         public static bool CollisionTankPowerUp(Tank t, PowerUp p)
         {
-            if ((p.location - t.location).Length() <= Constants.TankSize / 2)
+            if ((p.location - t.Location).Length() <= Constants.TankSize / 2)
                 return true;
             return false;
         }
@@ -443,7 +461,7 @@ namespace Server
 
         public static bool CollisionProjectileTank(Projectile p, Tank t)
         {
-            return (p.location - t.location).Length() < Constants.TankSize / 2;
+            return (p.location - t.Location).Length() < Constants.TankSize / 2;
         }
 
 
@@ -466,7 +484,7 @@ namespace Server
 
         public static bool CollisionBeamTank(Beam b, Tank t)
         {
-            return Intersects(b.origin, b.orientation, t.location, Constants.TankSize / 2);
+            return Intersects(b.origin, b.orientation, t.Location, Constants.TankSize / 2);
         }
 
 
