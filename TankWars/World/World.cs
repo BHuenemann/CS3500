@@ -2,12 +2,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace TankWars
 {
     public class World
     {
+        Stopwatch Duration = new Stopwatch();
+
         public Dictionary<int, ControlCommands> PlayerCommands = new Dictionary<int, ControlCommands>();
+
+        public Dictionary<int, Tank> Players = new Dictionary<int, Tank>();
 
         //Dictionaries that contain the objects that are in the world. Their IDs are used as the keys
         public Dictionary<int, Tank> Tanks { get; private set; } = new Dictionary<int, Tank>();
@@ -27,6 +32,13 @@ namespace TankWars
 
 
 
+        public World()
+        {
+            Duration.Start();
+        }
+
+        
+        
         public void UpdateCommand(int ID, ControlCommands c)
         {
             PlayerCommands[ID] = c;
@@ -35,6 +47,7 @@ namespace TankWars
 
         public void UpdateTank(Tank t)
         {
+            Players[t.ID] = t;
             Tanks[t.ID] = t;
         }
 
@@ -176,6 +189,18 @@ namespace TankWars
         {
             Tanks[ID].Died = true;
             Tanks[ID].HitPoints = 0;
+        }
+
+
+        public void TankIncrementShotsFired(int ID)
+        {
+            Tanks[ID].ShotsFired++;
+        }
+
+
+        public void TankIncrementShotsHit(int ID)
+        {
+            Tanks[ID].ShotsHit++;
         }
 
 

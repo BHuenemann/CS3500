@@ -42,7 +42,10 @@ namespace Server
             MainThread.Start();
 
             Console.Read();
+
+            DatabaseController.SaveGameToDatabase(TheWorld);
         }
+
 
         private static void FrameLoop()
         {
@@ -137,6 +140,7 @@ namespace Server
                         {
                             Projectile p = new Projectile(t.Location, t.Aiming, t.ID);
                             TheWorld.UpdateProjectile(p);
+                            TheWorld.TankIncrementShotsFired(t.ID);
 
                             TheWorld.TankSetCooldownFrames(t.ID, 0);
                         }
@@ -185,6 +189,8 @@ namespace Server
                 {
                     if(CollisionProjectileTank(p, t) && p.ownerID != t.ID)
                     {
+                        TheWorld.TankIncrementShotsHit(p.ownerID);
+
                         TheWorld.ProjectileSetDied(p.ID);
                         TheWorld.TankProjectileDamage(t.ID, p.ID);
                     }
