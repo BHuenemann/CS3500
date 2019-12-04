@@ -15,6 +15,8 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class Tank
     {
+        public int PowerUps { get; internal set; } = 0;
+
         public int CooldownFrames { get; internal set; } = 0;
 
         public int RespawnFrames { get; internal set; } = 0;

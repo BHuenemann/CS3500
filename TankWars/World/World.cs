@@ -23,6 +23,8 @@ namespace TankWars
         //Keeps track of the world size sent by the server
         public int worldSize;
 
+        public int powerUpFrames = 0;
+
 
 
         public void UpdateCommand(int ID, ControlCommands c)
@@ -148,6 +150,19 @@ namespace TankWars
         public void TankRemove(int ID)
         {
             Tanks.Remove(ID);
+        }
+
+
+        public void TankIncrementPowerUps(int ID)
+        {
+            Tanks[ID].PowerUps++;
+        }
+
+
+        public void TankDecrementPowerUps(int ID)
+        {
+            if(Tanks[ID].PowerUps > 0)
+                Tanks[ID].PowerUps--;
         }
 
 

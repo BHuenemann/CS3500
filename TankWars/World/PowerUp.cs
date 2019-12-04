@@ -33,15 +33,8 @@ namespace TankWars
 
         public PowerUp()
         {
-
-        }
-
-        public PowerUp(Vector2D PowerUpLocation)
-        {
             ID = NextID;
             NextID++;
-
-            location = PowerUpLocation;
         }
     }
 }

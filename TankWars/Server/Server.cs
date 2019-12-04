@@ -24,6 +24,8 @@ namespace Server
         static private int FramesPerShot;
         static private int RespawnRate;
 
+        static private int PowerUpRespawnRate = 0;
+
         Stopwatch FireRateStopWatch = new Stopwatch();
 
 
@@ -37,6 +39,9 @@ namespace Server
 
             Stopwatch watch = new Stopwatch();
             watch.Start();
+
+            Random r = new Random();
+            PowerUpRespawnRate = r.Next(1, Constants.MaxPowerUpDelay);
 
             while (true)
             {
@@ -60,6 +65,7 @@ namespace Server
                 UpdateTanks();
                 UpdateProjectiles();
                 UpdateBeams();
+                UpdatePowerUps();
             }
         }
 
@@ -125,8 +131,11 @@ namespace Server
                         }
                         break;
                     case "alt":
-                        Beam b = new Beam(t.Location, t.Orientation, t.ID);
-                        TheWorld.UpdateBeam(b);
+                        if(t.PowerUps > 0)
+                        {
+                            Beam b = new Beam(t.Location, t.Aiming, t.ID);
+                            TheWorld.UpdateBeam(b);
+                        }
                         break;
                     case "none":
                         break;
@@ -190,7 +199,11 @@ namespace Server
                     if (!b.Spawned)
                         TheWorld.BeamSetSpawnedTrue(b.ID);
                     else
+                    {
                         TheWorld.BeamRemove(b.ID);
+                        TheWorld.TankDecrementPowerUps(b.ownerID);
+                    }
+
                 }
             }
         }
@@ -198,16 +211,34 @@ namespace Server
 
         public static void UpdatePowerUps()
         {
+            if (TheWorld.powerUpFrames >= PowerUpRespawnRate)
+            {
+                PowerUp p = new PowerUp();
+                TheWorld.UpdatePowerUp(p);
+                SpawnPowerUp(p);
+                TheWorld.powerUpFrames = 0;
+            }
+
+            if (TheWorld.PowerUps.Count < 2)
+                TheWorld.powerUpFrames++;
+
             foreach(PowerUp p in TheWorld.PowerUps.Values.ToList())
             {
                 if (p.died)
+                {
                     TheWorld.PowerUpRemove(p.ID);
+                    continue;
+                }
 
-                foreach(Tank t in TheWorld.Tanks.Values)
+                foreach (Tank t in TheWorld.Tanks.Values)
                 {
                     if(CollisionPowerUpTank(p, t))
                     {
+                        Random r = new Random();
+
                         TheWorld.PowerUpSetDied(p.ID);
+                        TheWorld.TankIncrementPowerUps(t.ID);
+                        PowerUpRespawnRate = r.Next(1, Constants.MaxPowerUpDelay);
                     }
                 }
             }
