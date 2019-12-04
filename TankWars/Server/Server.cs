@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using NetworkUtil;
@@ -17,7 +18,7 @@ namespace Server
     public class Server
     {
         private static World TheWorld = new World();
-        private static HashSet<Socket> SocketConnections = new HashSet<Socket>();
+        private static HashSet<SocketState> SocketConnections = new HashSet<SocketState>();
 
         static private int UniverseSize;
         static private int MSPerFrame;
@@ -37,6 +38,14 @@ namespace Server
 
             Console.WriteLine("Server is running. Accepting clients.");
 
+            Thread MainThread = new Thread(FrameLoop);
+            MainThread.Start();
+
+            Console.Read();
+        }
+
+        private static void FrameLoop()
+        {
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
@@ -105,13 +114,14 @@ namespace Server
                 }
 
                 TheWorld.TankSetLocation(t.ID, t.Location + t.Velocity);
-                WrapAround(t);
 
                 foreach (Wall w in TheWorld.Walls.Values)
                 {
                     if (CollisionTankWall(t, w))
                         TheWorld.TankSetLocation(t.ID, t.Location - t.Velocity);
                 }
+
+                WrapAround(t);
 
                 //AIMING
                 TheWorld.TankSetAiming(t.ID, TheWorld.PlayerCommands[t.ID].aiming);
@@ -196,15 +206,15 @@ namespace Server
                 {
                     if (CollisionBeamTank(b, t))
                         TheWorld.TankBeamDamage(t.ID, b.ID);
+                }
 
-                    if (!b.Spawned)
-                        TheWorld.BeamSetSpawnedTrue(b.ID);
-                    else
-                    {
-                        TheWorld.BeamRemove(b.ID);
-                        TheWorld.TankDecrementPowerUps(b.ownerID);
-                    }
 
+                if (!b.Spawned)
+                    TheWorld.BeamSetSpawnedTrue(b.ID);
+                else
+                {
+                    TheWorld.BeamRemove(b.ID);
+                    TheWorld.TankDecrementPowerUps(b.ownerID);
                 }
             }
         }
@@ -248,7 +258,19 @@ namespace Server
 
         private static void SendDataToSockets()
         {
-            foreach (Socket s in SocketConnections)
+            foreach (SocketState s in SocketConnections.ToList())
+            {
+                if (!s.TheSocket.Connected)
+                {
+                    Console.WriteLine("Player(" + (int)s.ID + ") " + "\"" + TheWorld.Tanks[(int)s.ID].Name + "\" disconnected");
+
+                    TheWorld.TankDisconnect((int)s.ID);
+                    TheWorld.TankKill((int)s.ID);
+                    SocketConnections.Remove(s);
+                }
+            }
+
+            foreach (SocketState s in SocketConnections)
             {
                 StringBuilder frameMessage = new StringBuilder();
 
@@ -268,8 +290,8 @@ namespace Server
                         frameMessage.Append(JsonConvert.SerializeObject(b) + "\n");
                 }
 
-
-                Networking.Send(s, frameMessage.ToString());
+                if(!Networking.Send(s.TheSocket, frameMessage.ToString()))
+                    Console.WriteLine("Error occured while sending data");
             }
         }
 
@@ -278,7 +300,8 @@ namespace Server
         {
             if (ss.ErrorOccured == true)
             {
-
+                Console.WriteLine("Error occured while accepting: \"" + ss.ErrorMessage + "\"");
+                return;
             }
             Console.WriteLine("Accepted new client");
             ss.OnNetworkAction = SendStartupInfo;
@@ -290,7 +313,7 @@ namespace Server
         {
             if (ss.ErrorOccured == true)
             {
-                Console.WriteLine("Error occured while accepting- " + ss.ErrorMessage);
+                Console.WriteLine("Error occured while accepting: \"" + ss.ErrorMessage + "\"");
                 return;
             }
 
@@ -318,18 +341,20 @@ namespace Server
 
 
             string message = tankID + "\n" + UniverseSize.ToString() + "\n";
-            Networking.Send(ss.TheSocket, message);
+            if(!Networking.Send(ss.TheSocket, message))
+                Console.WriteLine("Error occured while sending data");
 
-            lock(TheWorld)
+            lock (TheWorld)
             {
                 StringBuilder wallMessage = new StringBuilder();
                 foreach (Wall w in TheWorld.Walls.Values)
                     wallMessage.Append(JsonConvert.SerializeObject(w) + "\n");
-                Networking.Send(ss.TheSocket, wallMessage.ToString());
+                if(!Networking.Send(ss.TheSocket, wallMessage.ToString()))
+                    Console.WriteLine("Error occured while sending data");
             }
 
 
-            SocketConnections.Add(ss.TheSocket);
+            SocketConnections.Add(ss);
 
 
             Networking.GetData(ss);
@@ -339,9 +364,7 @@ namespace Server
         private static void ReceiveCommandData(SocketState ss)
         {
             if (ss.ErrorOccured == true)
-            {
-
-            }
+                return;
 
             ProcessData(ss);
 
@@ -652,14 +675,14 @@ namespace Server
 
         public static void WrapAround(Tank t)
         {
-            if(Math.Abs(t.Location.GetX()) + Constants.TankSize/2  > TheWorld.worldSize/2)
+            if(Math.Abs(t.Location.GetX()) + Constants.TankSize/2  > UniverseSize/2)
             {
-                TheWorld.TankSetLocation(t.ID, new Vector2D(Math.Sign(t.Location.GetX()) * -TheWorld.worldSize / 2, t.Location.GetY()));
+                TheWorld.TankSetLocation(t.ID, new Vector2D(Math.Sign(t.Location.GetX()) * (-UniverseSize / 2 + Constants.TankSize/2), t.Location.GetY()));
             }
 
-            else if(Math.Abs(t.Location.GetY()) + Constants.TankSize/2 > TheWorld.worldSize/2)
+            else if(Math.Abs(t.Location.GetY()) + Constants.TankSize/2 > UniverseSize/2)
             {
-                TheWorld.TankSetLocation(t.ID, new Vector2D(t.Location.GetX(), Math.Sign(t.Location.GetY()) * -TheWorld.worldSize / 2));
+                TheWorld.TankSetLocation(t.ID, new Vector2D(t.Location.GetX(), Math.Sign(t.Location.GetY()) * (-UniverseSize / 2 + Constants.TankSize / 2)));
             }
         }
     }

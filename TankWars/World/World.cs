@@ -166,6 +166,19 @@ namespace TankWars
         }
 
 
+        public void TankDisconnect(int ID)
+        {
+            Tanks[ID].Disconnected = true;
+        }
+
+
+        public void TankKill(int ID)
+        {
+            Tanks[ID].Died = true;
+            Tanks[ID].HitPoints = 0;
+        }
+
+
 
         public void ProjectileSetLocation(int ID, Vector2D location)
         {
