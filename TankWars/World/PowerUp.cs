@@ -14,6 +14,9 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class PowerUp
     {
+
+        static int NextID = 0;
+
         //ID of the powerup
         [JsonProperty(PropertyName = "power")]
         public int ID { get; internal set; }
@@ -31,6 +34,14 @@ namespace TankWars
         public PowerUp()
         {
 
+        }
+
+        public PowerUp(Vector2D PowerUpLocation)
+        {
+            ID = NextID;
+            NextID++;
+
+            location = PowerUpLocation;
         }
     }
 }

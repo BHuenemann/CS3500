@@ -497,7 +497,7 @@ namespace Server
 
         public static bool CollisionPowerUpTank(PowerUp p, Tank t)
         {
-            return (p.location - t.location).Length() < Constants.TankSize / 2;
+            return (p.location - t.Location).Length() < Constants.TankSize / 2;
         }
 
 
