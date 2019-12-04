@@ -176,6 +176,25 @@ namespace TankWars
 
 
 
+        public void PowerUpSetLocation(int ID, Vector2D location)
+        {
+            PowerUps[ID].location = location;
+        }
+
+
+        public void PowerUpSetDied(int ID)
+        {
+            PowerUps[ID].died = true;
+        }
+
+
+        public void PowerUpRemove(int ID)
+        {
+            PowerUps.Remove(ID);
+        }
+
+
+
         public void ExplosionIncrementFrames(TankExplosion e)
         {
             e.tankFrames++;

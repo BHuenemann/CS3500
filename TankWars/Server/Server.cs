@@ -431,6 +431,36 @@ namespace Server
             return false;
         }
 
+        public static void SpawnPowerUp(PowerUp p)
+        {
+            Random random = new Random();
+
+            do
+            {
+                int xLocation = random.Next(-UniverseSize / 2, UniverseSize / 2);
+                int yLocation = random.Next(-UniverseSize / 2, UniverseSize / 2);
+
+                TheWorld.PowerUpSetLocation(p.ID, new Vector2D(xLocation, yLocation));
+            }
+            while (PowerUpSpawnCollisions(p));
+        }
+
+        public static bool PowerUpSpawnCollisions(PowerUp p)
+        {
+            foreach (Wall w in TheWorld.Walls.Values)
+            {
+                if (CollisionPowerUpWall(p, w))
+                    return true;
+            }
+            foreach (Tank t in TheWorld.Tanks.Values)
+            {
+                if (CollisionPowerUpTank(p, t))
+                    return true;
+            }
+
+            return false;
+        }
+
 
         public static bool CollisionTankWall(Tank t, Wall w)
         {
@@ -462,6 +492,29 @@ namespace Server
         public static bool CollisionProjectileTank(Projectile p, Tank t)
         {
             return (p.location - t.Location).Length() < Constants.TankSize / 2;
+        }
+
+
+        public static bool CollisionPowerUpTank(PowerUp p, Tank t)
+        {
+            return (p.location - t.location).Length() < Constants.TankSize / 2;
+        }
+
+
+        public static bool CollisionPowerUpWall(PowerUp p, Wall w)
+        {
+            double minX = Math.Min(w.endPoint1.GetX(), w.endPoint2.GetX());
+            double minY = Math.Min(w.endPoint1.GetY(), w.endPoint2.GetY());
+            double maxX = Math.Max(w.endPoint1.GetX(), w.endPoint2.GetX());
+            double maxY = Math.Max(w.endPoint1.GetY(), w.endPoint2.GetY());
+            if (p.location.GetX() >= minX - Constants.WallSize / 2 && p.location.GetX() <= maxX + Constants.WallSize / 2)
+            {
+                if (p.location.GetY() >= minY - Constants.WallSize / 2 && p.location.GetY() <= maxY + Constants.WallSize / 2)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
 
