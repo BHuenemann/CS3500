@@ -98,6 +98,7 @@ namespace Server
                 }
 
                 TheWorld.TankSetLocation(t.ID, t.Location + t.Velocity);
+                WrapAround(t);
 
                 foreach (Wall w in TheWorld.Walls.Values)
                 {
