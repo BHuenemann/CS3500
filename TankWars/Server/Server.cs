@@ -41,7 +41,8 @@ namespace Server
             Thread MainThread = new Thread(FrameLoop);
             MainThread.Start();
 
-            Console.Read();
+            //Console.Read();
+            Console.ReadLine();
 
             DatabaseController.SaveGameToDatabase(TheWorld);
         }
