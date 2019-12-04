@@ -49,8 +49,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DatabaseController.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebModels.cs" />
+    <Compile Include="WebViews.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
