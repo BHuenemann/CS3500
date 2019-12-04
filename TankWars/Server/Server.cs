@@ -652,12 +652,12 @@ namespace Server
 
         public static void WrapAround(Tank t)
         {
-            if(Math.Abs(t.Location.GetX()) + Constants.TankSize/2  > TheWorld.worldSize/2)
+            if (Math.Abs(t.Location.GetX()) + Constants.TankSize / 2 > TheWorld.worldSize)
             {
                 TheWorld.TankSetLocation(t.ID, new Vector2D(Math.Sign(t.Location.GetX()) * -TheWorld.worldSize / 2, t.Location.GetY()));
             }
 
-            else if(Math.Abs(t.Location.GetY()) + Constants.TankSize/2 > TheWorld.worldSize/2)
+            else if (Math.Abs(t.Location.GetY()) + Constants.TankSize / 2 > TheWorld.worldSize / 2)
             {
                 TheWorld.TankSetLocation(t.ID, new Vector2D(t.Location.GetX(), Math.Sign(t.Location.GetY()) * -TheWorld.worldSize / 2));
             }
