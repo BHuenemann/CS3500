@@ -55,5 +55,9 @@ namespace TankWars
         public const int ProjectileSize = 30;
         public const int WallSize = 50;
         public const int BeamWidth = 6;
+
+        //Information for powerups
+        public const int MaxPowerUps = 2;
+        public const int MaxPowerUpDelay = 1650;
     }
 }
