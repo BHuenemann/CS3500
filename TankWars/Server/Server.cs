@@ -413,7 +413,7 @@ namespace Server
             return false;
         }
 
-        public static void PowerUpSpawn(PowerUp p)
+        public static void SpawnPowerUp(PowerUp p)
         {
             Random random = new Random();
 
