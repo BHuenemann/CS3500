@@ -552,22 +552,23 @@ namespace Server
             // check the request (GET / ...)
             // reply appropriately
 
-            if (request.Contains("GET /games"))
+            if (request.Contains("GET /games?player="))
             {
-                Networking.SendAndClose(ss.TheSocket, WebViews.GetAllGames(DatabaseController.GetAllGames()));
-            }
-
-            else if (request.Contains("GET /games?player=<name>"))
-            {
-                string name = request.Substring(request.LastIndexOf("<", request.LastIndexOf(">") + 1));
+                int start = request.IndexOf("=") + 1;
+                int length = request.IndexOf(" HTTP/1.1") - start;
+                string name = request.Substring(start, length);
 
                 Dictionary<uint, PlayerModel> playersDictionary = DatabaseController.GetAllPlayerGames(name);
 
                 List<SessionModel> SessionList = new List<SessionModel>();
-                foreach(KeyValuePair<uint, PlayerModel> player in playersDictionary)
+                foreach (KeyValuePair<uint, PlayerModel> player in playersDictionary)
                     SessionList.Add(new SessionModel(player.Key, DatabaseController.GetGameDuration(player.Key), player.Value.Score, player.Value.Accuracy));
 
                 Networking.SendAndClose(ss.TheSocket, WebViews.GetPlayerGames(name, SessionList));
+            }
+            else if (request.Contains("GET /games HTTP"))
+            {
+                Networking.SendAndClose(ss.TheSocket, WebViews.GetAllGames(DatabaseController.GetAllGames()));
             }
             else
             {

@@ -153,6 +153,7 @@ namespace TankWars
         public void TankRestoreHealth(int ID)
         {
             Tanks[ID] = DeadTanks[ID];
+            Players[ID] = DeadTanks[ID];
             DeadTanks.Remove(ID);
 
             Tanks[ID].HitPoints = Constants.MaxHP;

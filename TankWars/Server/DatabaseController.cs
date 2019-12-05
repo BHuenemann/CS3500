@@ -29,7 +29,7 @@ namespace Server
 
                     MySqlCommand command = conn.CreateCommand();
 
-                    command.CommandText = "insert into Games(Duration) values (\"" + TheWorld.Duration.Elapsed + "\");";
+                    command.CommandText = "insert into Games(Duration) values (\"" + TheWorld.Duration.Elapsed.Seconds + "\");";
                     command.ExecuteNonQuery();
 
                     UInt64 gID = 0;
@@ -48,11 +48,11 @@ namespace Server
 
                         int Accuracy;
                         if (t.ShotsFired != 0)
-                            Accuracy = 100 * (t.ShotsHit / t.ShotsFired);
+                            Accuracy = (int)(100 * (((float)t.ShotsHit) / ((float)t.ShotsFired)));
                         else
                             Accuracy = 100;
 
-                        command.CommandText = "insert into GamesPlayed values (\"" + gID + "\", \"" + t.ID + "\", \"" + t.Score + "\", \"" + Accuracy  + "\");";
+                        command.CommandText = "insert into GamesPlayed(gID,Score,Accuracy) values (\"" + gID + "\", \"" + t.Score + "\", \"" + Accuracy  + "\");";
                         command.ExecuteNonQuery();
                     }
 
@@ -86,7 +86,7 @@ namespace Server
                         }
                     }
 
-                    command.CommandText = "Select * from GamesPlayed join Players";
+                    command.CommandText = "Select * from GamesPlayed natural join Players";
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
@@ -116,14 +116,15 @@ namespace Server
                     Dictionary<uint, PlayerModel> Players = new Dictionary<uint, PlayerModel>();
 
                     MySqlCommand command = conn.CreateCommand();
-                    command.CommandText = "Select * from GamesPlayed join Players where Name = \'" + PlayerName + "\';";
+                    command.CommandText = "Select * from GamesPlayed natural join Players where Name = \'" + PlayerName + "\';";
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             PlayerModel player = new PlayerModel((string)reader["Name"], (uint)reader["Score"], (uint)reader["Accuracy"]);
-                            Players.Add((uint)reader["gID"], player);
+                            if(!Players.ContainsKey((uint)reader["gID"]))
+                                Players.Add((uint)reader["gID"], player);
                         }
                     }
                     return Players;
