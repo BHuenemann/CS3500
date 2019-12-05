@@ -33,11 +33,11 @@ namespace Server
                     command.ExecuteNonQuery();
 
                     int gID = 0;
-                    command.CommandText = "select gID from Games;";
+                    command.CommandText = "select LAST_INSERT_ID();";
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
-                        while (reader.Read())
-                            gID = (int)reader["gID"];
+                        reader.Read();
+                        gID = (int)reader["LAST_INSERT_ID()"];
                     }
 
                     foreach (Tank t in TheWorld.Players.Values)
@@ -99,7 +99,7 @@ namespace Server
             }
         }
 
-        public static Dictionary<uint, PlayerModel> GetAllPlayerGames()
+        public static Dictionary<uint, PlayerModel> GetAllPlayerGames(string PlayerName)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
@@ -110,14 +110,14 @@ namespace Server
                     Dictionary<uint, PlayerModel> Players = new Dictionary<uint, PlayerModel>();
 
                     MySqlCommand command = conn.CreateCommand();
-                    command.CommandText = "Select * from GamesPlayed join Players";
+                    command.CommandText = "Select * from GamesPlayed join Players where Name = \'" + PlayerName + "\';";
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             PlayerModel player = new PlayerModel((string)reader["Name"], (uint)reader["Score"], (uint)reader["Accuracy"]);
-                            Players.Add((uint)reader["pID"], player);
+                            Players.Add((uint)reader["gID"], player);
                         }
                     }
                     return Players;
@@ -126,6 +126,32 @@ namespace Server
                 {
                     Console.WriteLine(e.Message);
                     return new Dictionary<uint, PlayerModel>();
+                }
+            }
+        }
+
+
+        public static uint GetGameDuration(uint gID)
+        {
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    MySqlCommand command = conn.CreateCommand();
+                    command.CommandText = "Select Duration from Games where gID = \'" + gID + "\';";
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        reader.Read();
+                        return (uint)reader["Duration"];
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return 0;
                 }
             }
         }
