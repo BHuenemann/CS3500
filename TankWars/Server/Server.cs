@@ -527,17 +527,24 @@ namespace Server
 
             if (request.Contains("GET /games"))
             {
-                Networking.SendAndClose(ss.TheSocket, WebViews.GetAllGames(GetAllGames()));
+                Networking.SendAndClose(ss.TheSocket, WebViews.GetAllGames(DatabaseController.GetAllGames()));
             }
 
             else if (request.Contains("GET /games?player=<name>"))
             {
                 string name = request.Substring(request.LastIndexOf("<", request.LastIndexOf(">") + 1));
-                Networking.SendAndClose(ss.TheSocket, WebViews.GetPlayerGames(name, GetAllPlayerGames()));
+                Dictionary<uint, PlayerModel> playersDictionary = new Dictionary<uint, PlayerModel>();
+                List<SessionModel> playersList = new List<SessionModel>();
+                foreach(PlayerModel player in playersDictionary.Values)
+                {
+                    //playersList.Add(new SessionModel(player.))
+                }
+                //SessionModel player = new SessionModel(players.)
+                //Networking.SendAndClose(ss.TheSocket, WebViews.GetPlayerGames(name, ));
             }
             else
             {
-                Networking.SendAndClose(ss.TheSocket, WebViews.GetHomePage(GetAllPlayerGames.count()));
+                Networking.SendAndClose(ss.TheSocket, WebViews.GetHomePage(DatabaseController.GetAllPlayerGames().Count()));
             }
         }
 
