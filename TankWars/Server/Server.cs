@@ -155,6 +155,8 @@ namespace Server
                         {
                             Beam b = new Beam(t.Location, t.Aiming, t.ID);
                             TheWorld.UpdateBeam(b);
+
+                            TheWorld.TankIncrementShotsFired(t.ID);
                         }
                         break;
                     case "none":
@@ -213,8 +215,15 @@ namespace Server
         {
             foreach(Beam b in TheWorld.Beams.Values.ToList())
             {
+                bool shotHit = false;
                 foreach(Tank t in TheWorld.Tanks.Values)
                 {
+                    if(!shotHit)
+                    {
+                        TheWorld.TankIncrementShotsHit(b.ownerID);
+                        shotHit = true;
+                    }
+
                     if (CollisionBeamTank(b, t))
                         TheWorld.TankBeamDamage(t.ID, b.ID);
                 }
@@ -269,49 +278,56 @@ namespace Server
 
         private static void SendDataToSockets()
         {
-            foreach (SocketState s in SocketConnections.ToList())
+            lock (TheWorld)
             {
-                if (!s.TheSocket.Connected)
+
+                foreach (SocketState s in SocketConnections.ToList())
                 {
-                    int tankID = (int)s.ID;
-
-                    Console.WriteLine("Player(" + tankID + ") " + "\"" + TheWorld.Tanks[(int)s.ID].Name + "\" disconnected");
-
-                    if(TheWorld.Tanks.ContainsKey(tankID))
+                    if (!s.TheSocket.Connected)
                     {
-                        TheWorld.TankDisconnect(tankID);
-                        TheWorld.TankKill(tankID);
+                        int tankID = (int)s.ID;
+
+                        if (TheWorld.Tanks.ContainsKey(tankID))
+                        {
+                            Console.WriteLine("Player(" + tankID + ") " + "\"" + TheWorld.Tanks[(int)s.ID].Name + "\" disconnected");
+
+                            TheWorld.TankDisconnect(tankID);
+                            TheWorld.TankKill(tankID);
+                        }
+
+                        if (TheWorld.DeadTanks.ContainsKey(tankID))
+                        {
+                            Console.WriteLine("Player(" + tankID + ") " + "\"" + TheWorld.DeadTanks[(int)s.ID].Name + "\" disconnected");
+                            TheWorld.TankDeadRemove(tankID);
+                        }
+
+                        SocketConnections.Remove(s);
+                    }
+                }
+
+                foreach (SocketState s in SocketConnections.ToList())
+                {
+                    StringBuilder frameMessage = new StringBuilder();
+
+
+                    lock (TheWorld)
+                    {
+                        foreach (Tank t in TheWorld.Tanks.Values)
+                            frameMessage.Append(JsonConvert.SerializeObject(t) + "\n");
+
+                        foreach (PowerUp p in TheWorld.PowerUps.Values)
+                            frameMessage.Append(JsonConvert.SerializeObject(p) + "\n");
+
+                        foreach (Projectile p in TheWorld.Projectiles.Values)
+                            frameMessage.Append(JsonConvert.SerializeObject(p) + "\n");
+
+                        foreach (Beam b in TheWorld.Beams.Values)
+                            frameMessage.Append(JsonConvert.SerializeObject(b) + "\n");
                     }
 
-                    if (TheWorld.DeadTanks.ContainsKey(tankID))
-                        TheWorld.TankDeadRemove(tankID);
-
-                    SocketConnections.Remove(s);
+                    if (!Networking.Send(s.TheSocket, frameMessage.ToString()))
+                        Console.WriteLine("Error occured while sending data");
                 }
-            }
-
-            foreach (SocketState s in SocketConnections)
-            {
-                StringBuilder frameMessage = new StringBuilder();
-
-
-                lock (TheWorld)
-                {
-                    foreach (Tank t in TheWorld.Tanks.Values)
-                        frameMessage.Append(JsonConvert.SerializeObject(t) + "\n");
-
-                    foreach (PowerUp p in TheWorld.PowerUps.Values)
-                        frameMessage.Append(JsonConvert.SerializeObject(p) + "\n");
-
-                    foreach (Projectile p in TheWorld.Projectiles.Values)
-                        frameMessage.Append(JsonConvert.SerializeObject(p) + "\n");
-
-                    foreach (Beam b in TheWorld.Beams.Values)
-                        frameMessage.Append(JsonConvert.SerializeObject(b) + "\n");
-                }
-
-                if(!Networking.Send(s.TheSocket, frameMessage.ToString()))
-                    Console.WriteLine("Error occured while sending data");
             }
         }
 
