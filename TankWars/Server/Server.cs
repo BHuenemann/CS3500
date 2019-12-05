@@ -20,6 +20,9 @@ namespace Server
         private static World TheWorld = new World();
         private static HashSet<SocketState> SocketConnections = new HashSet<SocketState>();
 
+        private const string httpOkHeader = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n";
+        private const string httpBadHeader = "Http/1.1 404 Not Found\r\nConnection: close\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n";
+
         static private int UniverseSize;
         static private int MSPerFrame;
         static private int FramesPerShot;
@@ -35,6 +38,7 @@ namespace Server
             ReadSettingFile(@"..\\..\\..\\Resources\settings.xml");
 
             Networking.StartServer(ReceivePlayerName, 11000);
+            Networking.StartServer(HandleHttpConnection, 80);
 
             Console.WriteLine("Server is running. Accepting clients.");
 
@@ -492,6 +496,42 @@ namespace Server
 
 
         }
+
+
+
+        public static void HandleHttpConnection(SocketState ss)
+        {
+            ss.OnNetworkAction = ServeHttpRequest;
+
+            Networking.GetData(ss);
+        }
+
+
+        public static void ServeHttpRequest(SocketState ss)
+        {
+            string request = ss.GetData();
+
+            Console.WriteLine(request);
+
+            // check the request (GET / ...)
+            // reply appropriately
+
+            if (request.Contains("GET /games"))
+            {
+                Networking.SendAndClose(ss.TheSocket, WebViews.GetAllGames(GetAllGames()));
+            }
+
+            else if (request.Contains("GET /games?player=<name>"))
+            {
+                string name = request.Substring(request.LastIndexOf("<", request.LastIndexOf(">") + 1));
+                Networking.SendAndClose(ss.TheSocket, WebViews.GetPlayerGames(name, GetAllPlayerGames()));
+            }
+            else
+            {
+                Networking.SendAndClose(ss.TheSocket, WebViews.GetHomePage(GetAllPlayerGames.count()));
+            }
+        }
+
 
 
         public static void SpawnTank(Tank t)
