@@ -8,7 +8,7 @@ namespace TankWars
 {
     public class World
     {
-        Stopwatch Duration = new Stopwatch();
+        public Stopwatch Duration = new Stopwatch();
 
         public Dictionary<int, ControlCommands> PlayerCommands = new Dictionary<int, ControlCommands>();
 
@@ -157,6 +157,12 @@ namespace TankWars
 
             Tanks[ID].HitPoints = Constants.MaxHP;
             Tanks[ID].Died = false;
+        }
+
+
+        public void TankDeadRemove(int ID)
+        {
+            DeadTanks.Remove(ID);
         }
 
 

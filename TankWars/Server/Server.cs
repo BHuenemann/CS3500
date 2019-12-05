@@ -273,10 +273,19 @@ namespace Server
             {
                 if (!s.TheSocket.Connected)
                 {
-                    Console.WriteLine("Player(" + (int)s.ID + ") " + "\"" + TheWorld.Tanks[(int)s.ID].Name + "\" disconnected");
+                    int tankID = (int)s.ID;
 
-                    TheWorld.TankDisconnect((int)s.ID);
-                    TheWorld.TankKill((int)s.ID);
+                    Console.WriteLine("Player(" + tankID + ") " + "\"" + TheWorld.Tanks[(int)s.ID].Name + "\" disconnected");
+
+                    if(TheWorld.Tanks.ContainsKey(tankID))
+                    {
+                        TheWorld.TankDisconnect(tankID);
+                        TheWorld.TankKill(tankID);
+                    }
+
+                    if (TheWorld.DeadTanks.ContainsKey(tankID))
+                        TheWorld.TankDeadRemove(tankID);
+
                     SocketConnections.Remove(s);
                 }
             }

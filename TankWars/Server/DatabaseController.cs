@@ -28,81 +28,106 @@ namespace Server
                     conn.Open();
 
                     MySqlCommand command = conn.CreateCommand();
-                    command.CommandText = "";
 
-                    using(MySqlDataReader reader = command.ExecuteReader())
+                    command.CommandText = "insert into Games(Duration) values (\"" + TheWorld.Duration.Elapsed + "\");";
+                    command.ExecuteNonQuery();
+
+                    int gID = 0;
+                    command.CommandText = "select gID from Games;";
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
-                        while(reader.Read())
-                        {
-                            //Console write line
-                        }
+                        while (reader.Read())
+                            gID = (int)reader["gID"];
                     }
-                }
-                catch
-                {
 
+                    foreach (Tank t in TheWorld.Players.Values)
+                    {
+                        command.CommandText += "insert into Players values (\"" + t.ID + "\", \"" + t.Name + "\");";
+
+                        int Accuracy = 100 * (t.ShotsHit / t.ShotsFired);
+                        command.CommandText += "insert into GamesPlayed values (\"" + gID + "\", \"" + t.ID + "\", \"" + t.Score + "\", \"" + Accuracy  + "\");";
+                    }
+
+                    command.ExecuteNonQuery();
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    Console.ReadLine();
                 }
             }
-                throw new NotImplementedException();
         }
 
-        public static void GetAllGames()
+        public static Dictionary<uint, GameModel> GetAllGames()
         {
-            //Get info from the server for info needed and iterate thru the info in Player games dictionary
-
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
 
+                    Dictionary<uint, GameModel> Games = new Dictionary<uint, GameModel>();
+
                     MySqlCommand command = conn.CreateCommand();
-                    command.CommandText = "";
+                    command.CommandText = "Select * from Games;";
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            //Console write line
+                            GameModel game = new GameModel((uint)reader["gID"], (uint)reader["Duration"]);
+                            Games.Add((uint)reader["gID"], game);
                         }
                     }
-                }
-                catch
-                {
 
+                    command.CommandText = "Select * from GamesPlayed join Players";
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Games[(uint)reader["gID"]].AddPlayer((string)reader["Name"], (uint)reader["Score"], (uint)reader["Accuracy"]);
+                        }
+                    }
+                    return Games;
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return new Dictionary<uint, GameModel>();
                 }
             }
-            throw new NotImplementedException();
-
         }
 
-        public static void GetAllPlayerGames()
+        public static Dictionary<uint, PlayerModel> GetAllPlayerGames()
         {
-            //select all this stuff from table for player info
-
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
 
+                    Dictionary<uint, PlayerModel> Players = new Dictionary<uint, PlayerModel>();
+
                     MySqlCommand command = conn.CreateCommand();
-                    command.CommandText = "";
+                    command.CommandText = "Select * from GamesPlayed join Players";
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            //Console write line
+                            PlayerModel player = new PlayerModel((string)reader["Name"], (uint)reader["Score"], (uint)reader["Accuracy"]);
+                            Players.Add((uint)reader["pID"], player);
                         }
                     }
+                    return Players;
                 }
-                catch
+                catch (Exception e)
                 {
-
+                    Console.WriteLine(e.Message);
+                    return new Dictionary<uint, PlayerModel>();
                 }
             }
-            throw new NotImplementedException();
         }
     }
 }

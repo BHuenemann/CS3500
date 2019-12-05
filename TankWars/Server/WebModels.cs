@@ -30,6 +30,7 @@ namespace TankWars
 
         public GameModel(uint id, uint d)
         {
+            ID = id;
             Duration = d;
             players = new List<PlayerModel>();
         }
