@@ -566,13 +566,14 @@ namespace Server
 
                 Networking.SendAndClose(ss.TheSocket, WebViews.GetPlayerGames(name, SessionList));
             }
-            else if (request.Contains("GET /games HTTP"))
-            {
-                Networking.SendAndClose(ss.TheSocket, WebViews.GetAllGames(DatabaseController.GetAllGames()));
-            }
-            else
+            else if (request.Contains("GET / HTTP/1.1"))
             {
                 Networking.SendAndClose(ss.TheSocket, WebViews.GetHomePage(0));
+            }
+
+            else
+            {
+                Networking.SendAndClose(ss.TheSocket, WebViews.Get404());
             }
         }
 
