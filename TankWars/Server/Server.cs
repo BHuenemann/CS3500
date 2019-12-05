@@ -533,14 +533,16 @@ namespace Server
             else if (request.Contains("GET /games?player=<name>"))
             {
                 string name = request.Substring(request.LastIndexOf("<", request.LastIndexOf(">") + 1));
-                Dictionary<uint, PlayerModel> playersDictionary = new Dictionary<uint, PlayerModel>();
-                List<SessionModel> playersList = new List<SessionModel>();
-                foreach(PlayerModel player in playersDictionary.Values)
+
+                Dictionary<uint, PlayerModel> playersDictionary = DatabaseController.GetAllPlayerGames(name);
+
+
+                List<SessionModel> SessionList = new List<SessionModel>();
+                foreach(KeyValuePair<uint, PlayerModel> player in playersDictionary)
                 {
-                    //playersList.Add(new SessionModel(player.))
+                    SessionList.Add(new SessionModel(player.Key, DatabaseController.GetGameDuration(player.Key), player.Value.Score, player.Value.Accuracy));
                 }
-                //SessionModel player = new SessionModel(players.)
-                //Networking.SendAndClose(ss.TheSocket, WebViews.GetPlayerGames(name, ));
+                Networking.SendAndClose(ss.TheSocket, WebViews.GetPlayerGames(name, SessionList));
             }
             else
             {
