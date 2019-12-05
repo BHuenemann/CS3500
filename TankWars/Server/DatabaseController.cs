@@ -15,8 +15,8 @@ namespace Server
 
 
         public const string connectionString = "server=atr.eng.utah.edu;" +
-            "database=TankWars;" +
-            "uid=u1190338;" +
+            "database=cs3500_u1190338;" +
+            "uid=cs3500_u1190338;" +
             "password=AlanTuring";
 
         public static void SaveGameToDatabase(World TheWorld)
@@ -32,28 +32,34 @@ namespace Server
                     command.CommandText = "insert into Games(Duration) values (\"" + TheWorld.Duration.Elapsed + "\");";
                     command.ExecuteNonQuery();
 
-                    int gID = 0;
+                    UInt64 gID = 0;
                     command.CommandText = "select LAST_INSERT_ID();";
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         reader.Read();
-                        gID = (int)reader["LAST_INSERT_ID()"];
+                        gID = (UInt64)reader["LAST_INSERT_ID()"];
                     }
 
                     foreach (Tank t in TheWorld.Players.Values)
                     {
-                        command.CommandText += "insert into Players values (\"" + t.ID + "\", \"" + t.Name + "\");";
+                        command.CommandText = "insert into Players(Name) values (\"" + t.Name + "\");";
+                        command.ExecuteNonQuery();
 
-                        int Accuracy = 100 * (t.ShotsHit / t.ShotsFired);
-                        command.CommandText += "insert into GamesPlayed values (\"" + gID + "\", \"" + t.ID + "\", \"" + t.Score + "\", \"" + Accuracy  + "\");";
+
+                        int Accuracy;
+                        if (t.ShotsFired != 0)
+                            Accuracy = 100 * (t.ShotsHit / t.ShotsFired);
+                        else
+                            Accuracy = 100;
+
+                        command.CommandText = "insert into GamesPlayed values (\"" + gID + "\", \"" + t.ID + "\", \"" + t.Score + "\", \"" + Accuracy  + "\");";
+                        command.ExecuteNonQuery();
                     }
 
-                    command.ExecuteNonQuery();
                 }
                 catch(Exception e)
                 {
                     Console.WriteLine(e.Message);
-                    Console.ReadLine();
                 }
             }
         }
