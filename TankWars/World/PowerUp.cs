@@ -14,7 +14,7 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class PowerUp
     {
-
+        //Static variable so the IDs of the beams will increment
         static int NextID = 0;
 
         //ID of the powerup
@@ -23,16 +23,17 @@ namespace TankWars
 
         //Location of the powerup
         [JsonProperty(PropertyName = "loc")]
-        public Vector2D location { get; internal set; }
+        public Vector2D Location { get; internal set; }
 
         //Tells whether the powerup has been picked up or not
         [JsonProperty(PropertyName = "died")]
-        public bool died { get; internal set; } = false;
+        public bool Died { get; internal set; } = false;
 
 
-
+        //Default constructor for JSON
         public PowerUp()
         {
+            //Assigns the ID
             ID = NextID;
             NextID++;
         }

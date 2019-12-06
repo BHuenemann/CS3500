@@ -361,7 +361,7 @@ namespace TankWars
                 Projectile proj = JsonConvert.DeserializeObject<Projectile>(serializedObject);
                 TheWorld.Projectiles[proj.ID] = proj;
                 //Removes projectiles when they die
-                if (proj.died)
+                if (proj.Died)
                     TheWorld.Projectiles.Remove(proj.ID);
                 return;
             }
@@ -373,7 +373,7 @@ namespace TankWars
                 PowerUp power = JsonConvert.DeserializeObject<PowerUp>(serializedObject);
                 TheWorld.PowerUps[power.ID] = power;
                 //Removes powerups when they die
-                if (power.died)
+                if (power.Died)
                     TheWorld.PowerUps.Remove(power.ID);
                 return;
             }

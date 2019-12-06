@@ -11,6 +11,7 @@ namespace TankWars
     /// </summary>
     public static class Constants
     {
+        //Constansts for the speeds
         public const double TankSpeed = 2.9;
         public const int ProjectileSpeed = 25;
 

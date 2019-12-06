@@ -15,16 +15,19 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class Tank
     {
+        //Variables for calculating the accuracy at the end of the game to put into the database
         public int ShotsFired { get; internal set; } = 0;
         public int ShotsHit { get; internal set; } = 0;
 
 
+        //Amount of beam shots the tank has
         public int PowerUps { get; internal set; } = 0;
 
+        //Cooldown frames for firing and respawning
         public int CooldownFrames { get; internal set; } = 0;
-
         public int RespawnFrames { get; internal set; } = 0;
 
+        //Velocity for calculating movement
         public Vector2D Velocity { get; internal set; } = new Vector2D(0, 0);
 
         //ID of the tank
@@ -68,12 +71,14 @@ namespace TankWars
         public bool Joined { get; internal set; } = false;
 
 
+        //Default constructor for JSON
         public Tank()
         {
 
         }
 
 
+        //Constructor that sets up the tank with a name and an ID
         public Tank(string name, int ID)
         {
             this.Name = name;

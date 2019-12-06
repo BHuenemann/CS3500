@@ -219,7 +219,7 @@ namespace TankWars
         /// <param name="ProjID"> ID of the beam which is damaging the tank </param>
         public void TankBeamDamage(int tankID, int BeamID)
         {
-            Tanks[Beams[BeamID].ownerID].Score++;
+            Tanks[Beams[BeamID].OwnerID].Score++;
             Tanks[tankID].HitPoints = 0;
             Tanks[tankID].Died = true;
             DeadTanks[tankID] = Tanks[tankID];
@@ -332,7 +332,7 @@ namespace TankWars
         /// <param name="location"> 2D vector location for the projectile to be updated to </param>
         public void ProjectileSetLocation(int ID, Vector2D location)
         {
-            Projectiles[ID].location = location;
+            Projectiles[ID].Location = location;
         }
 
         /// <summary>
@@ -341,7 +341,7 @@ namespace TankWars
         /// <param name="ID"> ID of the projectile to have its specified information updated </param>
         public void ProjectileSetDied(int ID)
         {
-            Projectiles[ID].died = true;
+            Projectiles[ID].Died = true;
         }
 
         /// <summary>
@@ -380,7 +380,7 @@ namespace TankWars
         /// <param name="location"> 2D Vector lcoation for the specified powerup to be set to </param>
         public void PowerUpSetLocation(int ID, Vector2D location)
         {
-            PowerUps[ID].location = location;
+            PowerUps[ID].Location = location;
         }
 
         /// <summary>
@@ -389,7 +389,7 @@ namespace TankWars
         /// <param name="ID"> ID of the specified powerup to have its infromation updated </param>
         public void PowerUpSetDied(int ID)
         {
-            PowerUps[ID].died = true;
+            PowerUps[ID].Died = true;
         }
 
         /// <summary>

@@ -14,8 +14,10 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class Beam
     {
+        //Static variable so the IDs of the beams will increment
         static int NextID = 0;
 
+        //Variable for whether or not the beam data has already been sent to the client
         public bool Spawned { get; internal set; } = false;
 
         //ID of the beam
@@ -24,35 +26,40 @@ namespace TankWars
 
         //Location for the beam to be drawn from
         [JsonProperty(PropertyName = "org")]
-        public Vector2D origin { get; internal set; }
+        public Vector2D Origin { get; internal set; }
 
         //Direction for the beam to be drawn
         [JsonProperty(PropertyName = "dir")]
-        public Vector2D orientation { get; internal set; }
+        public Vector2D Orientation { get; internal set; }
 
         //Owner of the beam
         [JsonProperty(PropertyName = "owner")]
-        public int ownerID { get; internal set; }
+        public int OwnerID { get; internal set; }
 
         //Dictionary containing the particles around the beam and the frames those particles have been out
         public Dictionary<int, Vector2D> beamParticles = new Dictionary<int, Vector2D>();
         public int beamFrames = 0;
 
 
+        //Default constructor for JSON
         Beam()
         {
-
+            //Sets the beam ID
+            ID = NextID;
+            NextID++;
         }
 
 
         public Beam(Vector2D originPoint, Vector2D beamOrientation, int owner)
         {
+            //Sets the beam ID
             ID = NextID;
             NextID++;
 
-            origin = originPoint;
-            orientation = beamOrientation;
-            ownerID = owner;
+            //Sets the data to the data inputted
+            Origin = originPoint;
+            Orientation = beamOrientation;
+            OwnerID = owner;
         }
     }
 
