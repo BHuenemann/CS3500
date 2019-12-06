@@ -136,11 +136,11 @@ namespace TankWars
                 // Draw the walls
                 foreach (Wall wall in TheController.TheWorld.Walls.Values)
                 {
-                    int Width = (int)Math.Abs(wall.endPoint1.GetX() - wall.endPoint2.GetX());
-                    int Height = (int)Math.Abs(wall.endPoint1.GetY() - wall.endPoint2.GetY());
+                    int Width = (int)Math.Abs(wall.EndPoint1.GetX() - wall.EndPoint2.GetX());
+                    int Height = (int)Math.Abs(wall.EndPoint1.GetY() - wall.EndPoint2.GetY());
 
-                    int MinX = (int)Math.Min(wall.endPoint1.GetX(), wall.endPoint2.GetX()) - Constants.WallSize/2;
-                    int MinY = (int)Math.Min(wall.endPoint1.GetY(), wall.endPoint2.GetY()) - Constants.WallSize/2;
+                    int MinX = (int)Math.Min(wall.EndPoint1.GetX(), wall.EndPoint2.GetX()) - Constants.WallSize/2;
+                    int MinY = (int)Math.Min(wall.EndPoint1.GetY(), wall.EndPoint2.GetY()) - Constants.WallSize/2;
 
                     //Call DrawObjectWithTransform on each individual portion of the wall
                     for (int i = 0; i <= Width; i += Constants.WallSize)
@@ -170,20 +170,20 @@ namespace TankWars
                 // Draw the powerups
                 foreach (PowerUp pow in TheController.TheWorld.PowerUps.Values)
                 {
-                    DrawObjectWithTransform(e, pow, TheController.TheWorld.worldSize, pow.location.GetX(), pow.location.GetY(), 0, PowerUpDrawer);
+                    DrawObjectWithTransform(e, pow, TheController.TheWorld.worldSize, pow.Location.GetX(), pow.Location.GetY(), 0, PowerUpDrawer);
                 }
 
                 // Draw the beams
                 foreach (Beam beam in TheController.TheWorld.Beams.Values)
                 {
-                    DrawObjectWithTransform(e, beam, TheController.TheWorld.worldSize, beam.origin.GetX(), beam.origin.GetY(), beam.orientation.ToAngle(), BeamDrawer);
+                    DrawObjectWithTransform(e, beam, TheController.TheWorld.worldSize, beam.Origin.GetX(), beam.Origin.GetY(), beam.Orientation.ToAngle(), BeamDrawer);
                 }
 
                 // Draw the projectiles
                 foreach (Projectile proj in TheController.TheWorld.Projectiles.Values)
                 {
-                    proj.orientation.Normalize();
-                    DrawObjectWithTransform(e, proj, TheController.TheWorld.worldSize, proj.location.GetX(), proj.location.GetY(), proj.orientation.ToAngle(), ProjectileDrawer);
+                    proj.Orientation.Normalize();
+                    DrawObjectWithTransform(e, proj, TheController.TheWorld.worldSize, proj.Location.GetX(), proj.Location.GetY(), proj.Orientation.ToAngle(), ProjectileDrawer);
                 }
                 
                 // If the there are any beams that have been out for too long it removes them
@@ -427,7 +427,7 @@ namespace TankWars
             int height = Constants.ProjectileSize;
 
             //Gets color ID of the projectile
-            int colorID = TheController.GetColor(p.ownerID);
+            int colorID = TheController.GetColor(p.OwnerID);
 
             //Determines color of the projectile based on the color ID
             switch (colorID)

@@ -5,7 +5,7 @@ using System.Text;
 namespace TankWars
 {
     /// <summary>
-    /// Class that represents an explosion that's spawned when a tank dies
+    /// Class that represents an explosion that's spawned when a tank dies. This is only used for the client
     /// </summary>
     public class TankExplosion
     {

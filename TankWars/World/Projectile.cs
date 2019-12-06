@@ -14,9 +14,11 @@ namespace TankWars
     [JsonObject(MemberSerialization.OptIn)]
     public class Projectile
     {
+        //Static variable so the IDs of the beams will increment
         static int NextID = 0;
 
-        public Vector2D velocity { get; private set; }
+        //Vector to keep track of the velocity of the projectile
+        public Vector2D Velocity { get; private set; }
 
         //Projectile ID
         [JsonProperty(PropertyName = "proj")]
@@ -24,41 +26,46 @@ namespace TankWars
 
         //Location of Projectile
         [JsonProperty(PropertyName = "loc")]
-        public Vector2D location { get; internal set; }
+        public Vector2D Location { get; internal set; }
 
         //Direction of the Projectile
         [JsonProperty(PropertyName = "dir")]
-        public Vector2D orientation { get; internal set; }
+        public Vector2D Orientation { get; internal set; }
 
         //Tells whether the Projectile has collied with something or not
         [JsonProperty(PropertyName = "died")]
-        public bool died { get; internal set; } = false;
+        public bool Died { get; internal set; } = false;
 
         //Owner tank ID of the Projectile
         [JsonProperty(PropertyName = "owner")]
-        public int ownerID { get; internal set; }
+        public int OwnerID { get; internal set; }
 
 
 
+        //Default constructor for JSON
         public Projectile()
         {
-
+            //Sets the ID
+            ID = NextID;
+            NextID++;
         }
 
 
         public Projectile(Vector2D currentLocation, Vector2D direction, int owner)
         {
+            //Sets the ID
             ID = NextID;
             NextID++;
 
-            location = currentLocation;
+            //Sets the location, orientation, and owner. Also normalizes the orientation and calculates the velocity
+            Location = currentLocation;
 
-            orientation = direction;
-            orientation.Normalize();
+            Orientation = direction;
+            Orientation.Normalize();
 
-            velocity = orientation * Constants.ProjectileSpeed;
+            Velocity = Orientation * Constants.ProjectileSpeed;
 
-            ownerID = owner;
+            OwnerID = owner;
 
         }
     }

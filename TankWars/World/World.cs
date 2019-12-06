@@ -133,7 +133,7 @@ namespace TankWars
                 Tanks[tankID].HitPoints--;
             else
             {
-                Tanks[Projectiles[ProjID].ownerID].Score++;
+                Tanks[Projectiles[ProjID].OwnerID].Score++;
                 Tanks[tankID].HitPoints = 0;
                 Tanks[tankID].Died = true;
                 DeadTanks[tankID] = Tanks[tankID];
@@ -143,7 +143,7 @@ namespace TankWars
 
         public void TankBeamDamage(int tankID, int BeamID)
         {
-            Tanks[Beams[BeamID].ownerID].Score++;
+            Tanks[Beams[BeamID].OwnerID].Score++;
             Tanks[tankID].HitPoints = 0;
             Tanks[tankID].Died = true;
             DeadTanks[tankID] = Tanks[tankID];
@@ -220,13 +220,13 @@ namespace TankWars
 
         public void ProjectileSetLocation(int ID, Vector2D location)
         {
-            Projectiles[ID].location = location;
+            Projectiles[ID].Location = location;
         }
 
 
         public void ProjectileSetDied(int ID)
         {
-            Projectiles[ID].died = true;
+            Projectiles[ID].Died = true;
         }
 
 
@@ -252,13 +252,13 @@ namespace TankWars
 
         public void PowerUpSetLocation(int ID, Vector2D location)
         {
-            PowerUps[ID].location = location;
+            PowerUps[ID].Location = location;
         }
 
 
         public void PowerUpSetDied(int ID)
         {
-            PowerUps[ID].died = true;
+            PowerUps[ID].Died = true;
         }
 
 
