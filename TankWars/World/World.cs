@@ -196,14 +196,14 @@ namespace TankWars
             // of the projectile given has its score increased by 1.
             else
             {
-                if(Tanks.ContainsKey(Projectiles[ProjID].ownerID))
+                if(Tanks.ContainsKey(Projectiles[ProjID].OwnerID))
                 {
-                    Tanks[Projectiles[ProjID].ownerID].Score++;
+                    Tanks[Projectiles[ProjID].OwnerID].Score++;
 
                 }
                 else if(DeadTanks.ContainsKey(ProjID))
                 {
-                    DeadTanks[Projectiles[ProjID].ownerID].Score++;
+                    DeadTanks[Projectiles[ProjID].OwnerID].Score++;
                 }
                 Tanks[tankID].HitPoints = 0;
                 Tanks[tankID].Died = true;
