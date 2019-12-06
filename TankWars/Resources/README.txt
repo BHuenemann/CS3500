@@ -31,10 +31,11 @@ Version: 1.5
 The client now also creates a server and highschore html webpage the the Tanks Wars game. 
 The first thing the server does when starting the server is read the setting xml file 
 withing the code to obtain information about the game. Such as MSPerFrame, Universe Size, 
-Respawn Rate, Frames Per shot, and the location of walls. The client starts a server at 
-the given port number 11000, which is hard coded. As well as a http connection at port 80.
-This then starts the main event loop for the server where it updates the server every 
-MSPerFrame, which is obtained from the xml setting file read earlier. 
+Respawn Rate, Frames Per shot, Tank Speed, Max Powerups, Max Powerup Delay, and the location
+of walls. The client starts a server at the given port number 11000, which is hard coded.
+As well as a http connection at port 80. This then starts the main event loop for the server
+where it updates the server every MSPerFrame, which is obtained from the xml setting file read
+earlier. 
 
 Inside this main event loop, which is on a seperate thread, it updates all information in
 the game every frame. Which includes the tanks, turret direction, powerups, projectiles, 
