@@ -49,6 +49,7 @@ namespace Server
             Console.ReadLine();
 
             DatabaseController.SaveGameToDatabase(TheWorld);
+            Console.WriteLine("Saved game to database");
         }
 
 
@@ -566,6 +567,12 @@ namespace Server
 
                 Networking.SendAndClose(ss.TheSocket, WebViews.GetPlayerGames(name, SessionList));
             }
+            else if(request.Contains("GET /games HTTP/1.1"))
+            {
+                Networking.SendAndClose(ss.TheSocket, WebViews.GetAllGames(DatabaseController.GetAllGames()));
+
+            }
+
             else if (request.Contains("GET / HTTP/1.1"))
             {
                 Networking.SendAndClose(ss.TheSocket, WebViews.GetHomePage(0));
