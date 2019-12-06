@@ -2,8 +2,11 @@
   <UniverseSize>1200</UniverseSize>
   <MSPerFrame>17</MSPerFrame>
   <FramesPerShot>80</FramesPerShot>
-  <RespawnRate>300</RespawnRate> 
-  
+  <RespawnRate>300</RespawnRate>
+  <TankSpeed>2.9</TankSpeed>
+  <MaxPowerupDelay>1650</MaxPowerupDelay>
+  <MaxPowerups>2</MaxPowerups>
+
   <!-- top border -->
   <Wall>
     <p1><x>-575</x><y>-575</y></p1>

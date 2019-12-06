@@ -30,6 +30,9 @@ namespace Server
         static private int MSPerFrame;
         static private int FramesPerShot;
         static private int RespawnRate;
+        static private int MaxPowerups;
+        static private int MaxPowerupDelay;
+        static private float TankSpeed;
 
         //The rate that powerups spawn at
         static private int PowerUpRespawnRate = 0;
@@ -70,7 +73,7 @@ namespace Server
             watch.Start();
 
             Random r = new Random();
-            PowerUpRespawnRate = r.Next(1, Constants.MaxPowerUpDelay);
+            PowerUpRespawnRate = r.Next(1, MaxPowerupDelay);
 
             while (true)
             {
@@ -127,19 +130,19 @@ namespace Server
                     //Updates the orientation and velocity depending on the movement keys
                     case "left":
                         TheWorld.TankSetOrientation(t.ID, new Vector2D(-1, 0));
-                        TheWorld.TankSetVelocity(t.ID, t.Orientation * Constants.TankSpeed);
+                        TheWorld.TankSetVelocity(t.ID, t.Orientation * TankSpeed);
                         break;
                     case "right":
                         TheWorld.TankSetOrientation(t.ID, new Vector2D(1, 0));
-                        TheWorld.TankSetVelocity(t.ID, t.Orientation * Constants.TankSpeed);
+                        TheWorld.TankSetVelocity(t.ID, t.Orientation * TankSpeed);
                         break;
                     case "up":
                         TheWorld.TankSetOrientation(t.ID, new Vector2D(0, -1));
-                        TheWorld.TankSetVelocity(t.ID, t.Orientation * Constants.TankSpeed);
+                        TheWorld.TankSetVelocity(t.ID, t.Orientation * TankSpeed);
                         break;
                     case "down":
                         TheWorld.TankSetOrientation(t.ID, new Vector2D(0, 1));
-                        TheWorld.TankSetVelocity(t.ID, t.Orientation * Constants.TankSpeed);
+                        TheWorld.TankSetVelocity(t.ID, t.Orientation * TankSpeed);
                         break;
                     case "none":
                         TheWorld.TankSetVelocity(t.ID, new Vector2D(0, 0));
@@ -310,7 +313,7 @@ namespace Server
             }
 
             //Only incremeent the frames if there are less than two powerups
-            if (TheWorld.PowerUps.Count < 2)
+            if (TheWorld.PowerUps.Count < MaxPowerups)
                 TheWorld.powerUpFrames++;
 
             //Go through each powerup and remove it if it collides with a tank
@@ -332,7 +335,7 @@ namespace Server
                         TheWorld.TankIncrementPowerUps(t.ID);
 
                         //Assign a random frame to spawn the next powerup
-                        PowerUpRespawnRate = r.Next(1, Constants.MaxPowerUpDelay);
+                        PowerUpRespawnRate = r.Next(1, MaxPowerupDelay);
                     }
                 }
             }
@@ -579,6 +582,21 @@ namespace Server
                                 case "RespawnRate":
                                     reader.Read();
                                     RespawnRate = Int32.Parse(reader.Value);
+                                    break;
+
+                                case "TankSpeed":
+                                    reader.Read();
+                                    TankSpeed = float.Parse(reader.Value);
+                                    break;
+
+                                case "MaxPowerups":
+                                    reader.Read();
+                                    MaxPowerups = Int32.Parse(reader.Value);
+                                    break;
+
+                                case "MaxPowerupDelay":
+                                    reader.Read();
+                                    MaxPowerupDelay = Int32.Parse(reader.Value);
                                     break;
 
                                 case "Wall":
