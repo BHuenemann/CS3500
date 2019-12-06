@@ -200,9 +200,9 @@ namespace Server
                 {
                     if(CollisionProjectileTank(p, t) && p.ownerID != t.ID)
                     {
-                        if (TheWorld.Tanks.ContainsKey(p.ID))
+                        if (TheWorld.Tanks.ContainsKey(p.ownerID))
                             TheWorld.TankIncrementShotsHit(p.ownerID);
-                        else
+                        else if(TheWorld.DeadTanks.ContainsKey(p.ownerID))
                             TheWorld.TankDeadIncrementShotsHit(p.ownerID);
 
                         TheWorld.ProjectileSetDied(p.ID);
@@ -257,7 +257,7 @@ namespace Server
                 TheWorld.powerUpFrames = 0;
             }
 
-            if (TheWorld.PowerUps.Count < 2)
+            if (TheWorld.PowerUps.Count < Constants.MaxPowerUps)
                 TheWorld.powerUpFrames++;
 
             foreach(PowerUp p in TheWorld.PowerUps.Values.ToList())
