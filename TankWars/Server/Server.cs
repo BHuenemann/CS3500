@@ -17,39 +17,42 @@ namespace Server
 {
     public class Server
     {
+        //Each server has a world and a list of sockets states that are connected
         private static World TheWorld = new World();
         private static HashSet<SocketState> SocketConnections = new HashSet<SocketState>();
 
-        private const string httpOkHeader = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n";
-        private const string httpBadHeader = "Http/1.1 404 Not Found\r\nConnection: close\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n";
-
+        //Settings imported from the settings xml file
         static private int UniverseSize;
         static private int MSPerFrame;
         static private int FramesPerShot;
         static private int RespawnRate;
 
+        //The rate that powerups spawn at
         static private int PowerUpRespawnRate = 0;
 
-        Stopwatch FireRateStopWatch = new Stopwatch();
 
 
         public static void Main(string[] args)
         {
+            //Read settings from file
             ReadSettingFile(@"..\\..\\..\\Resources\settings.xml");
 
+            //Start the server and web server
             Networking.StartServer(ReceivePlayerName, 11000);
             Networking.StartServer(HandleHttpConnection, 80);
 
             Console.WriteLine("Server is running. Accepting clients.");
 
+            //Start the main loop
             Thread MainThread = new Thread(FrameLoop);
             MainThread.Start();
 
-            //Console.Read();
+            //Saves the game to the database and waits for an input
             Console.ReadLine();
-
+            MainThread.Abort();
             DatabaseController.SaveGameToDatabase(TheWorld);
             Console.WriteLine("Saved game to database");
+            Console.ReadLine();
         }
 
 
@@ -197,7 +200,10 @@ namespace Server
                 {
                     if(CollisionProjectileTank(p, t) && p.ownerID != t.ID)
                     {
-                        TheWorld.TankIncrementShotsHit(p.ownerID);
+                        if (TheWorld.Tanks.ContainsKey(p.ID))
+                            TheWorld.TankIncrementShotsHit(p.ownerID);
+                        else
+                            TheWorld.TankDeadIncrementShotsHit(p.ownerID);
 
                         TheWorld.ProjectileSetDied(p.ID);
                         TheWorld.TankProjectileDamage(t.ID, p.ID);

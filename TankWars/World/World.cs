@@ -211,6 +211,12 @@ namespace TankWars
         }
 
 
+        public void TankDeadIncrementShotsHit(int ID)
+        {
+            DeadTanks[ID].ShotsHit++;
+        }
+
+
 
         public void ProjectileSetLocation(int ID, Vector2D location)
         {
