@@ -244,9 +244,9 @@ namespace Server
                 {
                     if(CollisionProjectileTank(p, t) && p.OwnerID != t.ID)
                     {
-                        if (TheWorld.Tanks.ContainsKey(p.ID))
+                        if (TheWorld.Tanks.ContainsKey(p.OwnerID))
                             TheWorld.TankIncrementShotsHit(p.OwnerID);
-                        else
+                        else if(TheWorld.DeadTanks.ContainsKey(p.OwnerID))
                             TheWorld.TankDeadIncrementShotsHit(p.OwnerID);
 
                         TheWorld.ProjectileSetDied(p.ID);
