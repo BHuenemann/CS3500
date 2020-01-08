@@ -57,7 +57,11 @@ namespace TankWars
             // Invalidate this form and all its children
             // This will cause the form to redraw as soon as it can
             MethodInvoker m = new MethodInvoker(() => Invalidate(true));
-            Invoke(m);
+            try
+            {
+                Invoke(m);
+            }
+            catch { }
         }
 
 

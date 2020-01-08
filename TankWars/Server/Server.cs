@@ -39,7 +39,7 @@ namespace Server
 
 
 
-        public static void Main(string[] args)
+        public static void Main()
         {
             //Read settings from file
             ReadSettingFile(@"..\\..\\..\\Resources\settings.xml");
